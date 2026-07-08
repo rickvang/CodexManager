@@ -27,6 +27,7 @@ node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
 node ./bin/codex-prep.js graph --json
 node ./bin/codex-prep.js graph-export --format obsidian
+node ./bin/codex-prep.js graph-export --format obsidian --include-symbols
 node ./bin/codex-prep.js graph-query --file src/index.ts
 node ./bin/codex-prep.js lint
 node ./bin/codex-prep.js refresh-graph
@@ -52,6 +53,7 @@ From this repo, run:
 .\codex-prep.cmd eval --repo D:\path\to\repo
 .\codex-prep.cmd graph --repo D:\path\to\repo --json
 .\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
+.\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian --include-symbols
 .\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
 .\codex-prep.cmd refresh-graph --repo D:\path\to\repo
 .\codex-prep.cmd lint --repo D:\path\to\repo
@@ -192,14 +194,33 @@ The graph records files, languages, roles, local import edges, exported/top-leve
 D:\codexmanager\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
 ```
 
-The export writes to `docs/obsidian-codegraph/`:
+The default export writes a workflow-first graph to `docs/obsidian-codegraph/`:
 
 - `Index.md`
-- `Files/*.md`
-- `Tests/*.md`
-- `Symbols/*.md`
+- `Workflow.md`
+- `Workflow/*.md`
+- `Validations.md`
+- `Troubleshooting.md`
+- `Modules.md`
+- `Modules/*.md`
+- `Entrypoints.md`
+- `Source Files.md`
+- `Tests.md`
+- `Import Graph.md`
+- `Files/**/*.md`
+- `Tests/**/*.md`
 
-Open the target repository folder as an Obsidian vault, then use Graph View to inspect the generated `[[wikilinks]]` between files, tests, imports, dependents, and symbols. Obsidian output is an adapter artifact; `.codex-prep/codegraph.json` remains the source of truth.
+Open `Index.md`, then follow `Workflow.md` before drilling into modules or files. Workflow notes show traversal phases, expected validations, and evidence-backed state. Unknown state is labeled as unknown instead of guessed. `Troubleshooting.md` collects missing or stale workflow pieces that can be inferred from generated repo evidence.
+
+Symbol notes are omitted by default because they can overwhelm Obsidian's graph view. Use `--include-symbols` when you want the detailed symbol layer:
+
+```powershell
+D:\codexmanager\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian --include-symbols
+```
+
+With `--include-symbols`, the export also writes `Symbols.md` and `Symbols/*.md`.
+
+Open the target repository folder as an Obsidian vault, then use Local Graph from `Index.md` or `Workflow.md`. Use module and file notes as drill-down detail for imports, dependents, symbols, and related tests. Obsidian output is an adapter artifact; `.codex-prep/codegraph.json`, `.codex-prep/manifest.json`, and saved plans remain the evidence sources.
 
 ## Generated Bundle
 

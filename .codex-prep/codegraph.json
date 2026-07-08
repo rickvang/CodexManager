@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T17:56:10.139Z",
-  "fingerprint": "9faf11f5ad8a2c85158fa72fe3d27e82c99711626c823fa202c9d4d1ee6fa065",
+  "generatedAt": "2026-07-08T18:54:45.755Z",
+  "fingerprint": "738fbe9174251dd2f020e91dfc90fcd810708a9daeaef574a3787e6388629db3",
   "repo": {
     "root": ".",
     "name": "codexmanager"
@@ -9,7 +9,7 @@
   "summary": {
     "fileCount": 22,
     "edgeCount": 50,
-    "symbolCount": 276,
+    "symbolCount": 317,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 15260,
+      "size": 15694,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -446,7 +446,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 44175,
+      "size": 44652,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1484,7 +1484,7 @@
     {
       "path": "src/obsidian-export.js",
       "language": "JavaScript",
-      "size": 9462,
+      "size": 34175,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1501,6 +1501,12 @@
           "confidence": "medium"
         },
         {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
           "specifier": "node:path",
           "resolved": null,
           "kind": "external",
@@ -1510,6 +1516,12 @@
       "symbols": [
         {
           "name": "buildDependentsByFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildModuleIndex",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1533,7 +1545,31 @@
           "confidence": "medium"
         },
         {
+          "name": "buildTroubleshootingItems",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildWorkflowMap",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "collectMarkdownFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "escapeWikiLabel",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "evidenceLine",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1551,7 +1587,25 @@
           "confidence": "medium"
         },
         {
+          "name": "fileTags",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatInlineList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "frontmatter",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1559,6 +1613,24 @@
         {
           "name": "GENERATED_MARKER",
           "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "groupImportEdgesByModule",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hash8",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hubLink",
+          "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
@@ -1587,7 +1659,49 @@
           "confidence": "medium"
         },
         {
+          "name": "moduleKey",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "moduleLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "moduleRole",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "modulesForFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "modulesForPaths",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "moduleTitle",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "notePath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "noteTargetFromPath",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1599,7 +1713,43 @@
           "confidence": "high"
         },
         {
+          "name": "pruneEmptyDirectories",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "removeStaleGeneratedNotes",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderEntrypointsHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "renderFileNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderFilesHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderImportHub",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1611,13 +1761,67 @@
           "confidence": "medium"
         },
         {
+          "name": "renderModuleNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderModulesHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "renderSymbolNote",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
         {
+          "name": "renderSymbolsHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "renderTestNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderTestsHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderTroubleshootingNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderValidationsNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderWorkflowHub",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderWorkflowPhaseNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "safePathSegment",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1641,6 +1845,12 @@
           "confidence": "medium"
         },
         {
+          "name": "summarizeWorkflowStatus",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "symbolKey",
           "kind": "function",
           "exported": false,
@@ -1653,13 +1863,43 @@
           "confidence": "medium"
         },
         {
+          "name": "tagSafe",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "uniqueSorted",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
         {
+          "name": "uniqueTarget",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "wikiLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "workflowPhase",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "workflowPhaseLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "yamlValue",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -2088,7 +2328,7 @@
     {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 1658,
+      "size": 1875,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2438,7 +2678,7 @@
     {
       "path": "test/obsidian-export.test.js",
       "language": "JavaScript",
-      "size": 3499,
+      "size": 8777,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2487,7 +2727,19 @@
       ],
       "symbols": [
         {
+          "name": "obsidianActivePlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "obsidianGraphFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "obsidianManifest",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -4290,6 +4542,13 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "buildModuleIndex",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "buildNoteIndex",
       "kind": "function",
       "exported": false,
@@ -4311,7 +4570,35 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "buildTroubleshootingItems",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "buildWorkflowMap",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "collectMarkdownFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "escapeWikiLabel",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "evidenceLine",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4332,7 +4619,28 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "fileTags",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "formatInlineList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "formatSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "frontmatter",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4341,6 +4649,27 @@
     {
       "name": "GENERATED_MARKER",
       "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "groupImportEdgesByModule",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "hash8",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "hubLink",
+      "kind": "function",
       "exported": false,
       "confidence": "medium",
       "file": "src/obsidian-export.js"
@@ -4374,7 +4703,56 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "moduleKey",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "moduleLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "moduleRole",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "modulesForFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "modulesForPaths",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "moduleTitle",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "notePath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "noteTargetFromPath",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4388,7 +4766,49 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "pruneEmptyDirectories",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "removeStaleGeneratedNotes",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderEntrypointsHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "renderFileNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderFilesHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderImportHub",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4402,6 +4822,20 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "renderModuleNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderModulesHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "renderSymbolNote",
       "kind": "function",
       "exported": false,
@@ -4409,7 +4843,56 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "renderSymbolsHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "renderTestNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderTestsHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderTroubleshootingNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderValidationsNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderWorkflowHub",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderWorkflowPhaseNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "safePathSegment",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4437,6 +4920,13 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "summarizeWorkflowStatus",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "symbolKey",
       "kind": "function",
       "exported": false,
@@ -4451,6 +4941,13 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "tagSafe",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "uniqueSorted",
       "kind": "function",
       "exported": false,
@@ -4458,7 +4955,35 @@
       "file": "src/obsidian-export.js"
     },
     {
+      "name": "uniqueTarget",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "wikiLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "workflowPhase",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "workflowPhaseLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "yamlValue",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4913,7 +5438,21 @@
       "file": "test/helpers.js"
     },
     {
+      "name": "obsidianActivePlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/obsidian-export.test.js"
+    },
+    {
       "name": "obsidianGraphFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/obsidian-export.test.js"
+    },
+    {
+      "name": "obsidianManifest",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5172,7 +5711,7 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 276 symbols",
+      "fact": "Detected 317 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

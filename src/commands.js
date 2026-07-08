@@ -380,13 +380,15 @@ export async function graphQueryCommand({ root, json, file, symbol }) {
   return result;
 }
 
-export async function graphExportCommand({ root, json, format = "obsidian" }) {
+export async function graphExportCommand({ root, json, format = "obsidian", includeSymbols = false }) {
   if (format !== "obsidian") {
     throw new Error("graph-export currently supports --format obsidian");
   }
 
   const { graph, source } = await loadOrBuildCodeGraph(root);
-  const exportResult = await exportObsidianGraph(root, graph);
+  const manifest = (await readJsonIfExists(path.join(root, '.codex-prep', 'manifest.json'))) ?? await scanRepo(root);
+  const activePlan = await readJsonIfExists(path.join(root, ACTIVE_PLAN_PATH));
+  const exportResult = await exportObsidianGraph(root, graph, { includeSymbols, manifest, activePlan });
   const result = {
     repo: graph.repo,
     source,
@@ -1132,9 +1134,10 @@ function formatGraphExport(result) {
     `Format: ${result.format}`,
     `Source: ${result.source}`,
     `Output: ${result.outputDir}`,
-    `Notes: ${result.notes.total} (${result.notes.files} files, ${result.notes.tests} tests, ${result.notes.symbols} symbols)`,
+    `Symbols: ${result.includeSymbols ? "included" : "omitted by default"}`,
+    `Notes: ${result.notes.total} (${result.notes.workflows ?? 0} workflow, ${result.notes.hubs} hubs, ${result.notes.modules ?? 0} modules, ${result.notes.files} files, ${result.notes.tests} tests, ${result.notes.symbols} symbols)`,
     "Writes:",
-    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+    ...result.writes.map((write) => `- ${write.removed ? "removed" : write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
   ].join("\n");
 }
 
