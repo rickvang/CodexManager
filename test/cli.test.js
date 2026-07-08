@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import { runCli } from "../src/cli.js";
 
@@ -48,5 +48,12 @@ test("graph-query validates query options", async () => {
   await assert.rejects(
     () => runCli(["graph-query", "--file", "src/index.ts", "--symbol", "answer"]),
     /graph-query accepts either --file or --symbol, not both/
+  );
+});
+
+test("graph-export-only options are rejected elsewhere", async () => {
+  await assert.rejects(
+    () => runCli(["scan", "--include-symbols"]),
+    /--include-symbols is only supported for graph-export/
   );
 });

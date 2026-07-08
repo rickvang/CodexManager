@@ -119,7 +119,7 @@ export async function runCli(argv) {
   } else if (command === "graph") {
     await graphCommand(common);
   } else if (command === "graph-export") {
-    await graphExportCommand({ ...common, format: options.format });
+    await graphExportCommand({ ...common, format: options.format, includeSymbols: options.includeSymbols });
   } else if (command === "graph-query") {
     await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol });
   } else if (command === "lint") {
@@ -157,7 +157,8 @@ function parseArgs(argv) {
     branch: undefined,
     base: undefined,
     syncBase: false,
-    format: undefined
+    format: undefined,
+    includeSymbols: false
   };
   let command;
 
@@ -179,6 +180,8 @@ function parseArgs(argv) {
       options.help = true;
     } else if (value === "--sync-base") {
       options.syncBase = true;
+    } else if (value === "--include-symbols") {
+      options.includeSymbols = true;
     } else if (value === "--repo") {
       options.repo = readOptionValue(argv, i, value);
       i += 1;
@@ -314,6 +317,9 @@ function validateOptions(command, options) {
   if (options.format && command !== "graph-export") {
     throw new Error("--format is only supported for graph-export");
   }
+  if (options.includeSymbols && command !== "graph-export") {
+    throw new Error("--include-symbols is only supported for graph-export");
+  }
   if (command === "graph-export" && options.format && options.format !== "obsidian") {
     throw new Error("graph-export currently supports --format obsidian");
   }
@@ -355,7 +361,7 @@ Usage:
   codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
   codex-prep graph [--repo <path>] [--json]
-  codex-prep graph-export [--repo <path>] --format obsidian [--json]
+  codex-prep graph-export [--repo <path>] --format obsidian [--include-symbols] [--json]
   codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--json]
   codex-prep refresh-graph [--repo <path>] [--json]
 
@@ -402,6 +408,8 @@ Planning options:
                   Set target agent: codex, cursor, claude-code, or generic.
   --symbol TEXT   Symbol name for graph-query.
   --format TEXT   Export format for graph-export. Currently: obsidian.
+  --include-symbols
+                  With graph-export, include symbol notes. Omitted by default for a cleaner graph.
   --branch TEXT   Branch name for plan-start.
   --base TEXT     Base branch for plan-start. Defaults to main.
   --sync-base     With plan-start, fetch and fast-forward pull the base first.
