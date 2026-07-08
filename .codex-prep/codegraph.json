@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T17:40:44.400Z",
-  "fingerprint": "096e9287406953cdb824ba26aed4a2aabca230ecd7f58f451be92e9e00e8ec23",
+  "generatedAt": "2026-07-08T17:43:54.744Z",
+  "fingerprint": "e85b206b37c9f109a893786aafcbc8cb2f90655b09bfddb608f336fc0d1d7dd6",
   "repo": {
     "root": ".",
     "name": "codexmanager"
@@ -446,7 +446,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 44180,
+      "size": 44175,
       "role": "source",
       "confidence": "medium",
       "imports": [
