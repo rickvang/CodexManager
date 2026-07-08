@@ -36,6 +36,15 @@ Keep commit and push as separate explicit approvals.
 - Test roots: `test`
 - Entrypoints: `bin/codex-prep.js`
 
+## Local Code Graph
+
+- Graph file: `.codex-prep/codegraph.json`
+- Indexed files: 20
+- Import edges: 43
+- Symbols: 245
+
+Before broad searching, inspect `.codex-prep/codegraph.json` or run `codex-prep graph-query` to find imports, dependents, symbols, and likely related tests.
+
 ## Validation Commands
 
 - `npm run lint` (package.json)

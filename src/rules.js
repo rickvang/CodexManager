@@ -155,7 +155,24 @@ export const RULES = {
     description: "A new workspace package appeared since the last apply.",
     fix: "Review the package and run codex-prep apply if it should be documented."
   },
-  "plan-missing": {
+  "missing-codegraph": {
+    id: "CP111",
+    defaultLevel: "error",
+    description: "The codex-prep code graph is missing.",
+    fix: "Run codex-prep refresh-graph or codex-prep apply to generate .codex-prep/codegraph.json."
+  },
+  "invalid-codegraph-json": {
+    id: "CP112",
+    defaultLevel: "error",
+    description: "The code graph is not valid JSON.",
+    fix: "Fix the JSON syntax or regenerate the graph with codex-prep refresh-graph."
+  },
+  "codegraph-stale": {
+    id: "CP113",
+    defaultLevel: "error",
+    description: "The code graph no longer matches the repo files/imports.",
+    fix: "Run codex-prep refresh-graph or codex-prep apply, then review the graph changes."
+  },  "plan-missing": {
     id: "CP201",
     defaultLevel: "error",
     description: "No active saved plan exists.",

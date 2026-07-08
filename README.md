@@ -25,7 +25,10 @@ node ./bin/codex-prep.js plan-close --status implemented
 node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
+node ./bin/codex-prep.js graph --json
+node ./bin/codex-prep.js graph-query --file src/index.ts
 node ./bin/codex-prep.js lint
+node ./bin/codex-prep.js refresh-graph
 node ./bin/codex-prep.js refresh-map
 ```
 
@@ -46,6 +49,9 @@ From this repo, run:
 .\codex-prep.cmd apply --repo D:\path\to\repo
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
+.\codex-prep.cmd graph --repo D:\path\to\repo --json
+.\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
+.\codex-prep.cmd refresh-graph --repo D:\path\to\repo
 .\codex-prep.cmd lint --repo D:\path\to\repo
 ```
 
@@ -152,6 +158,30 @@ It fails plans that are missing a goal or intent, success criteria, validation, 
 
 If Playwright is already present, `plan-lint` suggests the detected Playwright command. It does not install Playwright or add dependencies.
 
+## Code Graph
+
+`graph` builds a read-only live preview of the local code graph:
+
+```powershell
+D:\codexmanager\codex-prep.cmd graph --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd graph --repo D:\path\to\repo --json
+```
+
+`refresh-graph` writes `.codex-prep/codegraph.json`:
+
+```powershell
+D:\codexmanager\codex-prep.cmd refresh-graph --repo D:\path\to\repo
+```
+
+`graph-query` answers focused orientation questions without broad searching:
+
+```powershell
+D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
+D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --symbol createApp
+```
+
+The graph records files, languages, roles, local import edges, exported/top-level symbols, entrypoints, likely test relationships, and confidence labels. JavaScript, TypeScript, and Python get import/symbol extraction. Other supported languages are indexed at file level only.
+
 ## Generated Bundle
 
 `apply` writes or refreshes:
@@ -160,6 +190,7 @@ If Playwright is already present, `plan-lint` suggests the detected Playwright c
 - `docs/CODEBASE_MAP.md`
 - `docs/CODEX_FEEDBACK.md`
 - `.codex-prep/manifest.json`
+- `.codex-prep/codegraph.json`
 - `.agents/skills/repo-onboarding/SKILL.md`
 - `.agents/skills/code-review/SKILL.md`
 
@@ -171,4 +202,4 @@ Existing files are preserved outside managed `codex-prep` sections. `apply` also
 
 ## MVP Boundary
 
-This first pass is deterministic and inspectable. It avoids embeddings, vector databases, cloud indexing, and network calls. A richer code graph, local query API, MCP server, and editor-specific adapters can be added after the basic onboarding loop proves useful.
+This pass is deterministic and inspectable. It includes a local file-backed code graph, but still avoids embeddings, vector databases, cloud indexing, and network calls. A richer AST graph, local query API, MCP server, and editor-specific adapters can be added after the graph loop proves useful.
