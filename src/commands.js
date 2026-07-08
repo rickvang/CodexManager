@@ -13,6 +13,7 @@ import {
   writeJsonIfChanged
 } from "./fs-utils.js";
 import { lintRepo } from "./lint.js";
+import { exportObsidianGraph } from "./obsidian-export.js";
 import { lintPlan } from "./plan-lint.js";
 import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
@@ -378,6 +379,29 @@ export async function graphQueryCommand({ root, json, file, symbol }) {
   console.log(formatGraphQuery(result));
   return result;
 }
+
+export async function graphExportCommand({ root, json, format = "obsidian" }) {
+  if (format !== "obsidian") {
+    throw new Error("graph-export currently supports --format obsidian");
+  }
+
+  const { graph, source } = await loadOrBuildCodeGraph(root);
+  const exportResult = await exportObsidianGraph(root, graph);
+  const result = {
+    repo: graph.repo,
+    source,
+    ...exportResult
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatGraphExport(result));
+  return result;
+}
+
 function buildPlanProposal(manifest, bundle, metadata = {}) {
   return {
     repo: manifest.repo,
@@ -1100,6 +1124,20 @@ function formatGraphQuery(result) {
     ...formatList(result.matches.map((item) => `${item.name} (${item.kind}) in ${item.file} [${item.confidence}]`))
   ].join("\n");
 }
+
+function formatGraphExport(result) {
+  return [
+    `codex-prep graph-export: ${result.repo.name}`,
+    "",
+    `Format: ${result.format}`,
+    `Source: ${result.source}`,
+    `Output: ${result.outputDir}`,
+    `Notes: ${result.notes.total} (${result.notes.files} files, ${result.notes.tests} tests, ${result.notes.symbols} symbols)`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
+
 function formatScan(manifest) {
   const lines = [
     `codex-prep scan: ${manifest.repo.name}`,

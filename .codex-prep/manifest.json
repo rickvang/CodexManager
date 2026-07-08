@@ -12,6 +12,7 @@
     "topLevel": [
       ".gitattributes",
       ".github",
+      ".obsidian",
       "README.md",
       "bin",
       "codex-prep.cmd",
