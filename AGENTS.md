@@ -29,6 +29,7 @@ Committing and pushing require separate explicit authorization.
 - `npm run lint` (package.json)
 - `npm run start` (package.json)
 - `npm run test` (package.json)
+- `npm run verify` (package.json)
 
 ## Done Criteria
 

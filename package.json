@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "node ./bin/codex-prep.js lint --repo .",
     "test": "node --test",
+    "verify": "npm run test && npm run lint && node ./bin/codex-prep.js check --repo . && node ./bin/codex-prep.js eval --repo .",
     "start": "node ./bin/codex-prep.js"
   },
   "engines": {

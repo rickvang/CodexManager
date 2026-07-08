@@ -1,17 +1,18 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T14:15:52.795Z",
-  "fingerprint": "a5c6b3b8a3627a30afd2bf5f1c57f16ed80e72b0281df9abfb9a7827226547a4",
+  "generatedAt": "2026-07-08T14:32:27.530Z",
+  "fingerprint": "6c7f4b19c7da06fc1d34aefced6b77ffa538d58aa1a7aa2d41babd6390ddf386",
   "repo": {
     "root": "D:\\codexmanager",
     "name": "codexmanager",
     "hasGit": true
   },
-  "summary": "Detected JavaScript repo with 3 command(s); source roots: src.",
+  "summary": "Detected JavaScript repo with 4 command(s); source roots: src.",
   "discovery": {
     "topLevel": [
       "README.md",
       "bin",
+      "codex-prep.cmd",
       "package.json",
       "src",
       "test"
@@ -41,6 +42,12 @@
         "command": "npm run test",
         "source": "package.json",
         "script": "node --test"
+      },
+      {
+        "name": "verify",
+        "command": "npm run verify",
+        "source": "package.json",
+        "script": "npm run test && npm run lint && node ./bin/codex-prep.js check --repo . && node ./bin/codex-prep.js eval --repo ."
       }
     ],
     "sourceRoots": [
@@ -70,8 +77,8 @@
       "confidence": "High"
     },
     {
-      "fact": "3 runnable script(s) detected",
-      "source": "package.json, package.json, package.json",
+      "fact": "4 runnable script(s) detected",
+      "source": "package.json, package.json, package.json, package.json",
       "confidence": "High"
     },
     {

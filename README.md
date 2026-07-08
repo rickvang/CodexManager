@@ -50,6 +50,16 @@ npm.cmd link
 codex-prep scan --repo D:\path\to\repo
 ```
 
+## Development Loop
+
+Before committing local changes, run the finite verification gate:
+
+```powershell
+npm.cmd run verify
+```
+
+It runs unit tests, managed-file lint, drift detection, and the eval harness.
+
 ## Generated Bundle
 
 `apply` writes or refreshes:
