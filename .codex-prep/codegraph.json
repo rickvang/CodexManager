@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T20:13:58.786Z",
-  "fingerprint": "24e473b5d4c227203f1a216ae18e58c36476dda20b41dee48f0fd6d5f8509e0e",
+  "generatedAt": "2026-07-08T20:17:58.144Z",
+  "fingerprint": "01cfda11b467af1492be4fb6e3af42f25981ccb1272f02676828d0e1eabbae16",
   "repo": {
     "root": ".",
     "name": "codexmanager"
   },
   "summary": {
-    "fileCount": 23,
-    "edgeCount": 56,
-    "symbolCount": 353,
+    "fileCount": 24,
+    "edgeCount": 57,
+    "symbolCount": 356,
     "languages": [
       "JavaScript"
     ],
     "entrypointCount": 1,
-    "testRelationshipCount": 28
+    "testRelationshipCount": 30
   },
   "files": [
     {
@@ -2430,7 +2430,7 @@
     {
       "path": "src/state.js",
       "language": "JavaScript",
-      "size": 12222,
+      "size": 12683,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2527,6 +2527,12 @@
           "confidence": "medium"
         },
         {
+          "name": "isTerminalPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "LATEST_PLAN_PATH",
           "kind": "variable",
           "exported": true,
@@ -2599,13 +2605,25 @@
           "confidence": "medium"
         },
         {
+          "name": "TERMINAL_PLAN_STATUSES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "VALIDATION_RESULTS_PATH",
           "kind": "variable",
           "exported": true,
           "confidence": "high"
         }
       ],
-      "relatedTests": []
+      "relatedTests": [
+        {
+          "path": "test/state.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
     },
     {
       "path": "test/cli.test.js",
@@ -3207,6 +3225,42 @@
       ],
       "symbols": [],
       "relatedTests": []
+    },
+    {
+      "path": "test/state.test.js",
+      "language": "JavaScript",
+      "size": 1754,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/state.js",
+          "resolved": "src/state.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "completeState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": []
     }
   ],
   "edges": [
@@ -3600,6 +3654,13 @@
       "to": "test/helpers.js",
       "kind": "imports",
       "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/state.test.js",
+      "to": "src/state.js",
+      "kind": "imports",
+      "specifier": "../src/state.js",
       "confidence": "high"
     }
   ],
@@ -5852,6 +5913,13 @@
       "file": "src/state.js"
     },
     {
+      "name": "isTerminalPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
       "name": "LATEST_PLAN_PATH",
       "kind": "variable",
       "exported": true,
@@ -5931,6 +5999,13 @@
     {
       "name": "statusLinePath",
       "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "TERMINAL_PLAN_STATUSES",
+      "kind": "variable",
       "exported": false,
       "confidence": "medium",
       "file": "src/state.js"
@@ -6074,6 +6149,13 @@
       "exported": false,
       "confidence": "medium",
       "file": "test/plan-workflow.test.js"
+    },
+    {
+      "name": "completeState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/state.test.js"
     }
   ],
   "relationships": [
@@ -6278,22 +6360,36 @@
       "test": "test/scan.test.js",
       "confidence": "medium",
       "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/state.js",
+      "test": "test/state.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/state.js",
+      "test": "test/state.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
     }
   ],
   "evidence": [
     {
       "confidence": "high",
-      "fact": "Indexed 23 code files",
+      "fact": "Indexed 24 code files",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 56 local import edges",
+      "fact": "Detected 57 local import edges",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 353 symbols",
+      "fact": "Detected 356 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

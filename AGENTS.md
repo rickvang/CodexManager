@@ -39,9 +39,9 @@ Keep commit and push as separate explicit approvals.
 ## Local Code Graph
 
 - Graph file: `.codex-prep/codegraph.json`
-- Indexed files: 23
-- Import edges: 56
-- Symbols: 353
+- Indexed files: 24
+- Import edges: 57
+- Symbols: 356
 
 Before broad searching, inspect `.codex-prep/codegraph.json` or run `codex-prep graph-query` to find imports, dependents, symbols, and likely related tests.
 

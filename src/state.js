@@ -17,6 +17,7 @@ export const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
 
 const MANIFEST_PATH = ".codex-prep/manifest.json";
 const OBSIDIAN_INDEX_PATH = `${OBSIDIAN_EXPORT_DIR}/Index.md`;
+const TERMINAL_PLAN_STATUSES = new Set(["implemented", "superseded", "rejected"]);
 
 export async function buildControlState(root, options = {}) {
   const savedManifest = options.savedManifest ?? await readJsonIfExists(path.join(root, MANIFEST_PATH));
@@ -142,13 +143,15 @@ export function buildDoctorResult(state) {
   const findings = [];
   const add = (level, code, message, fix, file = "") => findings.push({ level, code, message, fix, file });
 
+  const terminalPlan = state.plan.exists && isTerminalPlan(state.plan.plan);
+
   if (!state.plan.exists) {
     add("warn", "CM001", "No active saved plan was found.", "Run codex-prep plan before implementation work.", ACTIVE_PLAN_PATH);
   }
-  if (state.plan.exists && state.plan.plan?.status === "approved" && state.plan.plan?.build?.status !== "in_progress") {
+  if (!terminalPlan && state.plan.exists && state.plan.plan?.status === "approved" && state.plan.plan?.build?.status !== "in_progress") {
     add("warn", "CM002", "Plan is approved but implementation has not been started.", "Run codex-prep plan-start --branch <name> or plan-attach after explicit approval.", ACTIVE_PLAN_PATH);
   }
-  if (state.plan.exists && state.plan.plan?.build?.branchName && state.git.isGitRepo && state.git.branchName && state.plan.plan.build.branchName !== state.git.branchName) {
+  if (!terminalPlan && state.plan.exists && state.plan.plan?.build?.branchName && state.git.isGitRepo && state.git.branchName && state.plan.plan.build.branchName !== state.git.branchName) {
     add("error", "CM003", "Current branch does not match the active plan branch.", `Switch to ${state.plan.plan.build.branchName} or attach the plan to the current branch deliberately.`, ACTIVE_PLAN_PATH);
   }
   if (state.git.dirtyFiles.length > 0) {
@@ -198,11 +201,15 @@ export function selectNextAction(state) {
   if (!state.plan.exists) {
     return "Create a saved plan with codex-prep plan.";
   }
-  if (state.plan.plan?.build?.status === "approved") {
+
+  const plan = state.plan.plan;
+  const terminalPlan = isTerminalPlan(plan);
+
+  if (!terminalPlan && plan?.build?.status === "approved") {
     return "Start the implementation branch with codex-prep plan-start --branch <name>.";
   }
-  if (state.plan.plan?.build?.branchName && state.git.branchName && state.plan.plan.build.branchName !== state.git.branchName) {
-    return `Switch to ${state.plan.plan.build.branchName} or run codex-prep plan-attach intentionally.`;
+  if (!terminalPlan && plan?.build?.branchName && state.git.branchName && plan.build.branchName !== state.git.branchName) {
+    return `Switch to ${plan.build.branchName} or run codex-prep plan-attach intentionally.`;
   }
   if (!state.graph.exists || state.graph.stale) {
     return "Refresh the local code graph with codex-prep refresh-graph.";
@@ -216,7 +223,14 @@ export function selectNextAction(state) {
   if (state.validation.latest.result === "fail") {
     return "Fix the failed validation and record a passing validation result.";
   }
+  if (terminalPlan) {
+    return "No active implementation work remains; create a new plan for new work.";
+  }
   return "Continue the approved scope, then run validation and close the plan when done.";
+}
+
+function isTerminalPlan(plan) {
+  return TERMINAL_PLAN_STATUSES.has(plan?.status);
 }
 
 async function readActivePlanState(root) {
