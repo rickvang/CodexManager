@@ -4,6 +4,7 @@ import {
   checkCommand,
   evalCommand,
   graphCommand,
+  graphExportCommand,
   graphQueryCommand,
   lintCommand,
   planApproveCommand,
@@ -33,6 +34,7 @@ const COMMANDS = new Set([
   "check",
   "eval",
   "graph",
+  "graph-export",
   "graph-query",
   "lint",
   "refresh-graph",
@@ -116,6 +118,8 @@ export async function runCli(argv) {
     await evalCommand(common);
   } else if (command === "graph") {
     await graphCommand(common);
+  } else if (command === "graph-export") {
+    await graphExportCommand({ ...common, format: options.format });
   } else if (command === "graph-query") {
     await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol });
   } else if (command === "lint") {
@@ -152,7 +156,8 @@ function parseArgs(argv) {
     symbol: undefined,
     branch: undefined,
     base: undefined,
-    syncBase: false
+    syncBase: false,
+    format: undefined
   };
   let command;
 
@@ -224,6 +229,9 @@ function parseArgs(argv) {
       i += 1;
     } else if (value === "--symbol") {
       options.symbol = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--format") {
+      options.format = readOptionValue(argv, i, value);
       i += 1;
     } else if (value === "--branch") {
       options.branch = readOptionValue(argv, i, value);
@@ -303,6 +311,12 @@ function validateOptions(command, options) {
   if (options.symbol && command !== "graph-query") {
     throw new Error("--symbol is only supported for graph-query");
   }
+  if (options.format && command !== "graph-export") {
+    throw new Error("--format is only supported for graph-export");
+  }
+  if (command === "graph-export" && options.format && options.format !== "obsidian") {
+    throw new Error("graph-export currently supports --format obsidian");
+  }
   if (command === "graph-query" && options.files.length === 0 && !options.symbol) {
     throw new Error("graph-query requires --file <path> or --symbol <name>");
   }
@@ -341,6 +355,7 @@ Usage:
   codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
   codex-prep graph [--repo <path>] [--json]
+  codex-prep graph-export [--repo <path>] --format obsidian [--json]
   codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--json]
   codex-prep refresh-graph [--repo <path>] [--json]
 
@@ -358,6 +373,7 @@ Commands:
   check        Detect stale generated guidance and obvious repo drift.
   eval         Run fixed scenarios against the generated guidance.
   graph        Preview the local code graph without writing files.
+  graph-export Export the local code graph to adapter formats such as Obsidian Markdown.
   graph-query  Query graph imports, dependents, symbols, and likely tests.
   lint         Lint codex-prep managed files without editing them.
   refresh-graph Write or refresh .codex-prep/codegraph.json.
@@ -385,6 +401,7 @@ Planning options:
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, or generic.
   --symbol TEXT   Symbol name for graph-query.
+  --format TEXT   Export format for graph-export. Currently: obsidian.
   --branch TEXT   Branch name for plan-start.
   --base TEXT     Base branch for plan-start. Defaults to main.
   --sync-base     With plan-start, fetch and fast-forward pull the base first.

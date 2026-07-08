@@ -26,6 +26,7 @@ node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
 node ./bin/codex-prep.js graph --json
+node ./bin/codex-prep.js graph-export --format obsidian
 node ./bin/codex-prep.js graph-query --file src/index.ts
 node ./bin/codex-prep.js lint
 node ./bin/codex-prep.js refresh-graph
@@ -50,6 +51,7 @@ From this repo, run:
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
 .\codex-prep.cmd graph --repo D:\path\to\repo --json
+.\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
 .\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
 .\codex-prep.cmd refresh-graph --repo D:\path\to\repo
 .\codex-prep.cmd lint --repo D:\path\to\repo
@@ -181,6 +183,23 @@ D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --symbol creat
 ```
 
 The graph records files, languages, roles, local import edges, exported/top-level symbols, entrypoints, likely test relationships, and confidence labels. JavaScript, TypeScript, and Python get import/symbol extraction. Other supported languages are indexed at file level only.
+
+## Obsidian Graph Export
+
+`graph-export --format obsidian` renders `.codex-prep/codegraph.json` into Obsidian-readable Markdown notes:
+
+```powershell
+D:\codexmanager\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
+```
+
+The export writes to `.codex-prep/obsidian/`:
+
+- `Index.md`
+- `Files/*.md`
+- `Tests/*.md`
+- `Symbols/*.md`
+
+Open the target repository folder as an Obsidian vault, then use Graph View to inspect the generated `[[wikilinks]]` between files, tests, imports, dependents, and symbols. Obsidian output is an adapter artifact; `.codex-prep/codegraph.json` remains the source of truth.
 
 ## Generated Bundle
 

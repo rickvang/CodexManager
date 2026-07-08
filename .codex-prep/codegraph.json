@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T17:02:42.825Z",
-  "fingerprint": "4b405916f5e954521683a57ec026bb56dd8084bbe89452c9c8eeb95f8f24255e",
+  "generatedAt": "2026-07-08T17:40:44.400Z",
+  "fingerprint": "096e9287406953cdb824ba26aed4a2aabca230ecd7f58f451be92e9e00e8ec23",
   "repo": {
     "root": ".",
     "name": "codexmanager"
   },
   "summary": {
-    "fileCount": 20,
-    "edgeCount": 43,
-    "symbolCount": 245,
+    "fileCount": 22,
+    "edgeCount": 50,
+    "symbolCount": 274,
     "languages": [
       "JavaScript"
     ],
     "entrypointCount": 1,
-    "testRelationshipCount": 23
+    "testRelationshipCount": 28
   },
   "files": [
     {
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 14456,
+      "size": 15260,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -106,6 +106,11 @@
         },
         {
           "path": "test/codegraph.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/obsidian-export.test.js",
           "confidence": "high",
           "reason": "Test file imports source file."
         },
@@ -430,13 +435,18 @@
           "path": "test/codegraph.test.js",
           "confidence": "high",
           "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/obsidian-export.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
         }
       ]
     },
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 43115,
+      "size": 44180,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -467,6 +477,12 @@
         {
           "specifier": "./lint.js",
           "resolved": "src/lint.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./obsidian-export.js",
+          "resolved": "src/obsidian-export.js",
           "kind": "local",
           "confidence": "high"
         },
@@ -683,6 +699,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatGraphExport",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatGraphQuery",
           "kind": "function",
           "exported": false,
@@ -750,6 +772,12 @@
         },
         {
           "name": "graphCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "graphExportCommand",
           "kind": "function",
           "exported": true,
           "confidence": "high"
@@ -1032,6 +1060,11 @@
         },
         {
           "path": "test/lint.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/obsidian-export.test.js",
           "confidence": "high",
           "reason": "Test file imports source file."
         },
@@ -1445,6 +1478,198 @@
           "path": "test/plan-lint.test.js",
           "confidence": "medium",
           "reason": "Source and test file names match."
+        }
+      ]
+    },
+    {
+      "path": "src/obsidian-export.js",
+      "language": "JavaScript",
+      "size": 9459,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:crypto",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "buildDependentsByFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildNoteIndex",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildObsidianNotes",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildTestSources",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "escapeWikiLabel",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "exportObsidianGraph",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "fileLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatInlineList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "GENERATED_MARKER",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "importLine",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "indexLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "inlineCode",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "listOrNone",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "notePath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "OBSIDIAN_EXPORT_DIR",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "renderFileNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderIndexNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderSymbolNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "renderTestNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "slashPath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "stableSlug",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "summarizeNotes",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "symbolKey",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "symbolLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "uniqueSorted",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "wikiLink",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/obsidian-export.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
         }
       ]
     },
@@ -2199,6 +2424,66 @@
       "relatedTests": []
     },
     {
+      "path": "test/obsidian-export.test.js",
+      "language": "JavaScript",
+      "size": 3499,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/codegraph.js",
+          "resolved": "src/codegraph.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/obsidian-export.js",
+          "resolved": "src/obsidian-export.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "obsidianGraphFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
       "path": "test/plan-lint.test.js",
       "language": "JavaScript",
       "size": 9345,
@@ -2438,6 +2723,13 @@
     },
     {
       "from": "src/commands.js",
+      "to": "src/obsidian-export.js",
+      "kind": "imports",
+      "specifier": "./obsidian-export.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
       "to": "src/plan-lint.js",
       "kind": "imports",
       "specifier": "./plan-lint.js",
@@ -2497,6 +2789,13 @@
       "to": "src/rules.js",
       "kind": "imports",
       "specifier": "./rules.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/obsidian-export.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
       "confidence": "high"
     },
     {
@@ -2613,6 +2912,41 @@
     },
     {
       "from": "test/lint.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/obsidian-export.test.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/obsidian-export.test.js",
+      "to": "src/codegraph.js",
+      "kind": "imports",
+      "specifier": "../src/codegraph.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/obsidian-export.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/obsidian-export.test.js",
+      "to": "src/obsidian-export.js",
+      "kind": "imports",
+      "specifier": "../src/obsidian-export.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/obsidian-export.test.js",
       "to": "test/helpers.js",
       "kind": "imports",
       "specifier": "./helpers.js",
@@ -3230,6 +3564,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatGraphExport",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatGraphQuery",
       "kind": "function",
       "exported": false,
@@ -3308,6 +3649,13 @@
     },
     {
       "name": "graphCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "graphExportCommand",
       "kind": "function",
       "exported": true,
       "confidence": "high",
@@ -3923,6 +4271,188 @@
       "file": "src/lint.js"
     },
     {
+      "name": "buildDependentsByFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "buildNoteIndex",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "buildObsidianNotes",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "buildTestSources",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "escapeWikiLabel",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "exportObsidianGraph",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "fileLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "formatInlineList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "GENERATED_MARKER",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "importLine",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "indexLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "inlineCode",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "listOrNone",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "notePath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "OBSIDIAN_EXPORT_DIR",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderFileNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderIndexNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderSymbolNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "renderTestNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "slashPath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "stableSlug",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "summarizeNotes",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "symbolKey",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "symbolLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "uniqueSorted",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "wikiLink",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
       "name": "BROWSER_VALIDATION_PATTERN",
       "kind": "variable",
       "exported": false,
@@ -4357,6 +4887,13 @@
       "file": "test/helpers.js"
     },
     {
+      "name": "obsidianGraphFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/obsidian-export.test.js"
+    },
+    {
       "name": "completePlan",
       "kind": "function",
       "exported": false,
@@ -4423,6 +4960,13 @@
     {
       "kind": "tested-by",
       "source": "src/cli.js",
+      "test": "test/obsidian-export.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
       "test": "test/plan-lint.test.js",
       "confidence": "high",
       "reason": "Test file imports source file."
@@ -4450,6 +4994,13 @@
     },
     {
       "kind": "tested-by",
+      "source": "src/codegraph.js",
+      "test": "test/obsidian-export.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
       "source": "src/commands.js",
       "test": "test/codegraph.test.js",
       "confidence": "high",
@@ -4473,6 +5024,13 @@
       "kind": "tested-by",
       "source": "src/commands.js",
       "test": "test/lint.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/obsidian-export.test.js",
       "confidence": "high",
       "reason": "Test file imports source file."
     },
@@ -4534,6 +5092,20 @@
     },
     {
       "kind": "tested-by",
+      "source": "src/obsidian-export.js",
+      "test": "test/obsidian-export.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/obsidian-export.js",
+      "test": "test/obsidian-export.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
       "source": "src/plan-lint.js",
       "test": "test/plan-lint.test.js",
       "confidence": "medium",
@@ -4564,17 +5136,17 @@
   "evidence": [
     {
       "confidence": "high",
-      "fact": "Indexed 20 code files",
+      "fact": "Indexed 22 code files",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 43 local import edges",
+      "fact": "Detected 50 local import edges",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 245 symbols",
+      "fact": "Detected 274 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],
