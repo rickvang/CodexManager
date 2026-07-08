@@ -17,6 +17,7 @@ node ./bin/codex-prep.js plan
 node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
+node ./bin/codex-prep.js lint
 node ./bin/codex-prep.js refresh-map
 ```
 
@@ -34,6 +35,10 @@ Use `--repo <path>` to target another repository and `--json` for machine-readab
 - `.agents/skills/code-review/SKILL.md`
 
 Existing files are preserved outside managed `codex-prep` sections.
+
+## Lint
+
+`lint` checks the generated/managed repo files without editing them. It verifies managed markers, skill frontmatter, manifest shape, stale `D:\Codex` path references, and obvious secret-looking content.
 
 ## MVP Boundary
 

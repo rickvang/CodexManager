@@ -3,12 +3,13 @@ import {
   applyCommand,
   checkCommand,
   evalCommand,
+  lintCommand,
   planCommand,
   refreshMapCommand,
   scanCommand
 } from "./commands.js";
 
-const COMMANDS = new Set(["scan", "plan", "apply", "check", "eval", "refresh-map"]);
+const COMMANDS = new Set(["scan", "plan", "apply", "check", "eval", "lint", "refresh-map"]);
 
 export async function runCli(argv) {
   const { command, options } = parseArgs(argv);
@@ -35,6 +36,8 @@ export async function runCli(argv) {
     await checkCommand(common);
   } else if (command === "eval") {
     await evalCommand(common);
+  } else if (command === "lint") {
+    await lintCommand(common);
   } else if (command === "refresh-map") {
     await refreshMapCommand(common);
   }
@@ -83,11 +86,12 @@ Commands:
   apply        Write or refresh the Codex onboarding bundle.
   check        Detect stale generated guidance and obvious repo drift.
   eval         Run fixed scenarios against the generated guidance.
+  lint         Lint codex-prep managed files without editing them.
   refresh-map  Refresh docs/CODEBASE_MAP.md and the manifest.
 
 Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access.
-  scan, plan, check, and eval do not edit repo-tracked files.
+  scan, plan, check, eval, and lint do not edit repo-tracked files.
 `);
 }

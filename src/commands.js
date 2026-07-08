@@ -8,6 +8,7 @@ import {
   writeManagedFile,
   writeJsonIfChanged
 } from "./fs-utils.js";
+import { lintRepo } from "./lint.js";
 import { scanRepo } from "./scan.js";
 
 export async function scanCommand({ root, json }) {
@@ -126,6 +127,20 @@ export async function evalCommand({ root, json }) {
     printJson(result);
   } else {
     console.log(formatEval(result));
+  }
+
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+}
+
+export async function lintCommand({ root, json }) {
+  const result = await lintRepo(root);
+
+  if (json) {
+    printJson(result);
+  } else {
+    console.log(formatLint(result));
   }
 
   if (!result.ok) {
@@ -325,6 +340,17 @@ function formatEval(result) {
     `codex-prep eval: ${result.ok ? "pass" : "fail"}`,
     "",
     ...result.scenarios.map((item) => `- ${item.pass ? "PASS" : "FAIL"} ${item.name}: ${item.evidence}`)
+  ].join("\n");
+}
+
+function formatLint(result) {
+  if (result.findings.length === 0) {
+    return "codex-prep lint: ok\n\nNo managed-file lint findings.";
+  }
+  return [
+    "codex-prep lint: " + (result.ok ? "ok with warnings" : "failed"),
+    "",
+    ...result.findings.map((item) => "- [" + item.level + "] " + item.file + ": " + item.message + " (" + item.code + ")")
   ].join("\n");
 }
 

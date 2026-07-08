@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T13:53:37.700Z",
-  "fingerprint": "2a7f0dbfec8cd8f40d9ad55d40da43e7823ed5018bd254193447b412c4885935",
+  "generatedAt": "2026-07-08T14:15:52.795Z",
+  "fingerprint": "a5c6b3b8a3627a30afd2bf5f1c57f16ed80e72b0281df9abfb9a7827226547a4",
   "repo": {
     "root": "D:\\codexmanager",
     "name": "codexmanager",
     "hasGit": true
   },
-  "summary": "Detected JavaScript repo with 2 command(s); source roots: src.",
+  "summary": "Detected JavaScript repo with 3 command(s); source roots: src.",
   "discovery": {
     "topLevel": [
       "README.md",
@@ -24,6 +24,12 @@
     ],
     "frameworks": [],
     "commands": [
+      {
+        "name": "lint",
+        "command": "npm run lint",
+        "source": "package.json",
+        "script": "node ./bin/codex-prep.js lint --repo ."
+      },
       {
         "name": "start",
         "command": "npm run start",
@@ -64,8 +70,8 @@
       "confidence": "High"
     },
     {
-      "fact": "2 runnable script(s) detected",
-      "source": "package.json, package.json",
+      "fact": "3 runnable script(s) detected",
+      "source": "package.json, package.json, package.json",
       "confidence": "High"
     },
     {

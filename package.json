@@ -7,6 +7,7 @@
     "codex-prep": "./bin/codex-prep.js"
   },
   "scripts": {
+    "lint": "node ./bin/codex-prep.js lint --repo .",
     "test": "node --test",
     "start": "node ./bin/codex-prep.js"
   },
