@@ -23,6 +23,33 @@ node ./bin/codex-prep.js refresh-map
 
 Use `--repo <path>` to target another repository and `--json` for machine-readable output on commands that support it.
 
+## Windows Usage
+
+From this repo, run:
+
+```powershell
+.\codex-prep.cmd scan --repo D:\path\to\repo
+.\codex-prep.cmd plan --repo D:\path\to\repo
+.\codex-prep.cmd apply --repo D:\path\to\repo
+.\codex-prep.cmd check --repo D:\path\to\repo
+.\codex-prep.cmd eval --repo D:\path\to\repo
+.\codex-prep.cmd lint --repo D:\path\to\repo
+```
+
+From anywhere, use the full shim path:
+
+```powershell
+D:\codexmanager\codex-prep.cmd scan --repo D:\path\to\repo
+```
+
+If you want the shorter `codex-prep` command globally, install the local package link:
+
+```powershell
+cd D:\codexmanager
+npm.cmd link
+codex-prep scan --repo D:\path\to\repo
+```
+
 ## Generated Bundle
 
 `apply` writes or refreshes:
