@@ -192,7 +192,7 @@ The graph records files, languages, roles, local import edges, exported/top-leve
 D:\codexmanager\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
 ```
 
-The export writes to `.codex-prep/obsidian/`:
+The export writes to `docs/obsidian-codegraph/`:
 
 - `Index.md`
 - `Files/*.md`

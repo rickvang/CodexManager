@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { writeFileIfChanged } from "./fs-utils.js";
 
-export const OBSIDIAN_EXPORT_DIR = ".codex-prep/obsidian";
+export const OBSIDIAN_EXPORT_DIR = "docs/obsidian-codegraph";
 
 const GENERATED_MARKER = "<!-- codex-prep:obsidian-export -->";
 

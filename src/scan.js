@@ -29,6 +29,10 @@ const GENERATED_FILE_PATHS = new Set([
   "docs/CODEX_FEEDBACK.md"
 ]);
 
+const GENERATED_DIR_PREFIXES = [
+  "docs/obsidian-codegraph/"
+];
+
 const SECRET_FILE_NAMES = new Set([
   ".env",
   ".env.local",
@@ -99,7 +103,7 @@ async function collectFiles(root) {
       }
       const absolutePath = path.join(directory, entry.name);
       const relative = slashPath(path.relative(root, absolutePath));
-      if (GENERATED_FILE_PATHS.has(relative)) {
+      if (isGeneratedPath(relative)) {
         continue;
       }
       if (entry.isDirectory()) {
@@ -112,6 +116,12 @@ async function collectFiles(root) {
 
   await walk(root);
   return results.sort();
+}
+
+function isGeneratedPath(relativePath) {
+  return GENERATED_FILE_PATHS.has(relativePath) || GENERATED_DIR_PREFIXES.some((prefix) =>
+    relativePath === prefix.replace(/\/$/, "") || relativePath.startsWith(prefix)
+  );
 }
 
 async function safeReadDir(directory) {
