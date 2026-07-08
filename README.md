@@ -58,7 +58,7 @@ Before committing local changes, run the finite verification gate:
 npm.cmd run verify
 ```
 
-It runs unit tests, managed-file lint, drift detection, and the eval harness.
+It runs unit tests, managed-file lint, drift detection, and the eval harness. GitHub Actions runs the same gate on pushes to `main` and pull requests.
 
 ## Generated Bundle
 

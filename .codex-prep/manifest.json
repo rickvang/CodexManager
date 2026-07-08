@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T14:32:27.530Z",
-  "fingerprint": "6c7f4b19c7da06fc1d34aefced6b77ffa538d58aa1a7aa2d41babd6390ddf386",
+  "generatedAt": "2026-07-08T14:36:36.384Z",
+  "fingerprint": "7aa48b4a3fe231a680cfed0955a9640e7d8c4202604046c44d80398926ba404b",
   "repo": {
     "root": ".",
     "name": "codexmanager",
@@ -10,6 +10,7 @@
   "summary": "Detected JavaScript repo with 4 command(s); source roots: src.",
   "discovery": {
     "topLevel": [
+      ".github",
       "README.md",
       "bin",
       "codex-prep.cmd",
@@ -62,7 +63,9 @@
     "docs": [
       "README.md"
     ],
-    "ci": [],
+    "ci": [
+      ".github/workflows/verify.yml"
+    ],
     "workspacePackages": [],
     "architectureDocs": [],
     "importantFiles": [
