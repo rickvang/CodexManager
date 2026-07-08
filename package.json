@@ -1,0 +1,17 @@
+{
+  "name": "codex-prep",
+  "version": "0.1.0",
+  "description": "Local-first Codex onboarding and codebase intelligence kit.",
+  "type": "module",
+  "bin": {
+    "codex-prep": "./bin/codex-prep.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node ./bin/codex-prep.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

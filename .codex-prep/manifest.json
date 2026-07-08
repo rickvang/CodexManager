@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-08T13:53:37.700Z",
+  "fingerprint": "2a7f0dbfec8cd8f40d9ad55d40da43e7823ed5018bd254193447b412c4885935",
+  "repo": {
+    "root": "D:\\codexmanager",
+    "name": "codexmanager",
+    "hasGit": true
+  },
+  "summary": "Detected JavaScript repo with 2 command(s); source roots: src.",
+  "discovery": {
+    "topLevel": [
+      "README.md",
+      "bin",
+      "package.json",
+      "src",
+      "test"
+    ],
+    "packageManagers": [
+      "npm"
+    ],
+    "languages": [
+      "JavaScript"
+    ],
+    "frameworks": [],
+    "commands": [
+      {
+        "name": "start",
+        "command": "npm run start",
+        "source": "package.json",
+        "script": "node ./bin/codex-prep.js"
+      },
+      {
+        "name": "test",
+        "command": "npm run test",
+        "source": "package.json",
+        "script": "node --test"
+      }
+    ],
+    "sourceRoots": [
+      "src"
+    ],
+    "testRoots": [
+      "test"
+    ],
+    "entrypoints": [
+      "bin/codex-prep.js"
+    ],
+    "docs": [
+      "README.md"
+    ],
+    "ci": [],
+    "workspacePackages": [],
+    "architectureDocs": [],
+    "importantFiles": [
+      "README.md",
+      "package.json"
+    ]
+  },
+  "evidence": [
+    {
+      "fact": "package.json found",
+      "source": "package.json",
+      "confidence": "High"
+    },
+    {
+      "fact": "2 runnable script(s) detected",
+      "source": "package.json, package.json",
+      "confidence": "High"
+    },
+    {
+      "fact": "source root(s): src",
+      "source": "filesystem",
+      "confidence": "High"
+    },
+    {
+      "fact": "test root(s): test",
+      "source": "filesystem",
+      "confidence": "High"
+    },
+    {
+      "fact": "entrypoint(s): bin/codex-prep.js",
+      "source": "package metadata and filesystem",
+      "confidence": "Medium"
+    }
+  ],
+  "assumptions": [],
+  "generatedFiles": [
+    {
+      "path": "AGENTS.md",
+      "managed": true
+    },
+    {
+      "path": "docs/CODEBASE_MAP.md",
+      "managed": true
+    },
+    {
+      "path": "docs/CODEX_FEEDBACK.md",
+      "managed": true
+    },
+    {
+      "path": ".agents/skills/repo-onboarding/SKILL.md",
+      "managed": true
+    },
+    {
+      "path": ".agents/skills/code-review/SKILL.md",
+      "managed": true
+    }
+  ]
+}
