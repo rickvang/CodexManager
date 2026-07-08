@@ -53,6 +53,8 @@ test("scan ignores codex-prep generated artifacts and secret files", async () =>
     "tests/index.test.js": "import test from 'node:test';\n",
     "AGENTS.md": "generated\n",
     "docs/CODEBASE_MAP.md": "generated\n",
+    "docs/obsidian-codegraph/Index.md": "generated\n",
+    "docs/obsidian-codegraph/Files/src_index_js.md": "generated\n",
     ".codex-prep/manifest.json": "{}\n",
     ".agents/skills/code-review/SKILL.md": "generated\n",
     ".env": "SECRET_TOKEN=do-not-copy\n"
@@ -61,5 +63,6 @@ test("scan ignores codex-prep generated artifacts and secret files", async () =>
 
   assert.equal(manifest.discovery.importantFiles.includes("AGENTS.md"), false);
   assert.equal(manifest.discovery.docs.includes("docs/CODEBASE_MAP.md"), false);
+  assert.equal(manifest.discovery.docs.some((file) => file.startsWith("docs/obsidian-codegraph/")), false);
   assert.equal(JSON.stringify(manifest).includes("SECRET_TOKEN"), false);
 });

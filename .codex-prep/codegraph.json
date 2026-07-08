@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T17:43:54.744Z",
-  "fingerprint": "e85b206b37c9f109a893786aafcbc8cb2f90655b09bfddb608f336fc0d1d7dd6",
+  "generatedAt": "2026-07-08T17:52:51.688Z",
+  "fingerprint": "9e4f400bc11ba2e277e3ac87fe8f6be5fcc440e07a15d94e0004d3ab0b031276",
   "repo": {
     "root": ".",
     "name": "codexmanager"
@@ -9,7 +9,7 @@
   "summary": {
     "fileCount": 22,
     "edgeCount": 50,
-    "symbolCount": 274,
+    "symbolCount": 276,
     "languages": [
       "JavaScript"
     ],
@@ -1484,7 +1484,7 @@
     {
       "path": "src/obsidian-export.js",
       "language": "JavaScript",
-      "size": 9459,
+      "size": 9462,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1861,7 +1861,7 @@
     {
       "path": "src/scan.js",
       "language": "JavaScript",
-      "size": 12510,
+      "size": 12793,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1994,6 +1994,12 @@
           "confidence": "medium"
         },
         {
+          "name": "GENERATED_DIR_PREFIXES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "GENERATED_FILE_PATHS",
           "kind": "variable",
           "exported": false,
@@ -2010,6 +2016,12 @@
           "kind": "variable",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "isGeneratedPath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "readPackageJson",
@@ -2624,7 +2636,7 @@
     {
       "path": "test/scan.test.js",
       "language": "JavaScript",
-      "size": 3030,
+      "size": 3261,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -4740,6 +4752,13 @@
       "file": "src/scan.js"
     },
     {
+      "name": "GENERATED_DIR_PREFIXES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
       "name": "GENERATED_FILE_PATHS",
       "kind": "variable",
       "exported": false,
@@ -4758,6 +4777,13 @@
       "kind": "variable",
       "exported": true,
       "confidence": "high",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "isGeneratedPath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/scan.js"
     },
     {
@@ -5146,7 +5172,7 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 274 symbols",
+      "fact": "Detected 276 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],
