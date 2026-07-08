@@ -5,12 +5,15 @@ import test from "node:test";
 import {
   applyCommand,
   checkCommand,
+  doctorCommand,
   evalCommand,
   planCloseCommand,
   planCommand,
   planStatusCommand,
   planUpdateCommand,
-  scanCommand
+  scanCommand,
+  statusCommand,
+  validationRecordCommand
 } from "../src/commands.js";
 import { createTempRepo, jsRepoFiles, readTree, withMutedConsole } from "./helpers.js";
 
@@ -148,6 +151,55 @@ test("plan-status reads the active plan without editing", async () => {
   assert.deepEqual(after, before);
 });
 
+test("status reads latest validation memory without editing", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  const recordedAt = new Date("2026-07-08T14:15:16.789Z");
+
+  await withMutedConsole(async () => {
+    await applyCommand({ root, json: true });
+    await validationRecordCommand({
+      root,
+      json: true,
+      now: recordedAt,
+      validationCommand: "npm run verify",
+      validationResult: "pass",
+      summary: "verify passed"
+    });
+  });
+  const before = await readTree(root);
+
+  const result = await withMutedConsole(() => statusCommand({ root, json: true }));
+  const after = await readTree(root);
+
+  assert.deepEqual(after, before);
+  assert.equal(result.validation.latest.result, "pass");
+  assert.equal(result.validation.latest.command, "npm run verify");
+  assert.equal(result.validation.count, 1);
+});
+
+test("doctor is read-only and reports stable workflow finding codes", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  const before = await readTree(root);
+
+  const result = await withMutedConsole(() => doctorCommand({ root, json: true }));
+  const after = await readTree(root);
+
+  assert.deepEqual(after, before);
+  assert.equal(result.ok, true);
+  assert.equal(result.findings.some((finding) => finding.code === "CM005"), true);
+  assert.equal(result.findings.some((finding) => finding.code === "CM007"), true);
+  assert.equal(result.findings.some((finding) => finding.code === "CM011"), true);
+});
+
+test("validation-record rejects unknown validation outcomes", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+
+  await assert.rejects(
+    () => validationRecordCommand({ root, json: true, validationCommand: "npm run verify", validationResult: "maybe" }),
+    /must be pass or fail/
+  );
+});
+
 test("plan-close marks active plan terminal", async () => {
   const root = await createTempRepo(jsRepoFiles());
   const created = new Date("2026-07-08T10:11:12.345Z");
@@ -186,6 +238,7 @@ test("apply writes the onboarding bundle idempotently", async () => {
   assert.equal(Boolean(first["AGENTS.md"]), true);
   assert.equal(Boolean(first["docs/CODEBASE_MAP.md"]), true);
   assert.equal(Boolean(first["docs/CODEX_FEEDBACK.md"]), true);
+  assert.equal(Boolean(first["docs/codexmanager-dashboard.md"]), true);
   assert.equal(Boolean(first[".codex-prep/config.json"]), true);
   assert.equal(Boolean(first[".codex-prep/manifest.json"]), true);
   assert.equal(Boolean(first[".codex-prep/codegraph.json"]), true);
@@ -195,6 +248,7 @@ test("apply writes the onboarding bundle idempotently", async () => {
   const manifest = JSON.parse(first[".codex-prep/manifest.json"]);
   assert.equal(manifest.repo.root, ".");
   assert.equal(manifest.generatedFiles.some((file) => file.path === ".codex-prep/codegraph.json"), true);
+  assert.equal(manifest.generatedFiles.some((file) => file.path === "docs/codexmanager-dashboard.md"), true);
   assert.equal(first["docs/CODEBASE_MAP.md"].includes(root), false);
   assert.equal(first["docs/CODEBASE_MAP.md"].includes("- Root: `.`"), true);
 });

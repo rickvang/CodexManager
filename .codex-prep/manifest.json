@@ -12,7 +12,6 @@
     "topLevel": [
       ".gitattributes",
       ".github",
-      ".obsidian",
       "README.md",
       "bin",
       "codex-prep.cmd",
@@ -114,6 +113,10 @@
     },
     {
       "path": "docs/CODEX_FEEDBACK.md",
+      "managed": true
+    },
+    {
+      "path": "docs/codexmanager-dashboard.md",
       "managed": true
     },
     {

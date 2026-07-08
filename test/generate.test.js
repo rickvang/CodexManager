@@ -18,14 +18,17 @@ test("generated bundle contains the durable repo learning loop files", async () 
     ".agents/skills/repo-onboarding/SKILL.md",
     "AGENTS.md",
     "docs/CODEBASE_MAP.md",
-    "docs/CODEX_FEEDBACK.md"
+    "docs/CODEX_FEEDBACK.md",
+    "docs/codexmanager-dashboard.md"
   ]);
   const agents = bundle.files.find((file) => file.path === "AGENTS.md").content;
   assert.equal(agents.includes("Explore / Review"), true);
   assert.equal(agents.includes("## Planning Decision Gate"), true);
   assert.equal(agents.includes("## Local Code Graph"), true);
+  assert.equal(agents.includes("codex-prep status"), true);
   assert.equal(agents.includes("approve build and start a dedicated branch"), true);
   assert.equal(bundle.files.find((file) => file.path === "docs/CODEBASE_MAP.md").content.includes("## Code Graph Summary"), true);
+  assert.equal(bundle.files.find((file) => file.path === "docs/codexmanager-dashboard.md").content.includes("## Current State"), true);
 });
 
 test("managed writes preserve human content outside codex-prep markers", async () => {

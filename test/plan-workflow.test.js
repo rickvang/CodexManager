@@ -6,6 +6,7 @@ import { runCli } from "../src/cli.js";
 import {
   internals,
   planApproveCommand,
+  planAttachCommand,
   planCommand,
   planReviewCommand,
   planStartCommand
@@ -38,7 +39,11 @@ test("normalizePlan backfills build metadata for legacy plans", () => {
     baseCommit: "",
     startedAt: "",
     approvedAt: "",
-    approvalNote: ""
+    approvalNote: "",
+    startMode: "",
+    attachedAt: "",
+    dirtyAtStart: false,
+    worktreeStatus: ""
   });
 });
 
@@ -171,7 +176,39 @@ test("plan-start creates the requested branch and records base metadata without 
   assert.equal(activePlan.build.baseBranch, "main");
   assert.equal(activePlan.build.baseCommit, baseCommit);
   assert.equal(activePlan.build.startedAt, startedAt.toISOString());
+  assert.equal(activePlan.build.startMode, "plan-start");
+  assert.equal(activePlan.build.dirtyAtStart, false);
   assert.equal(afterCommits, beforeCommits);
+});
+
+test("plan-attach records current branch and dirty state after approval", async () => {
+  const root = await createGitRepo(jsRepoFiles());
+  const attachedAt = new Date("2026-07-08T13:14:15.678Z");
+
+  await createCompletePlan(root);
+  await withMutedConsole(async () => {
+    await planApproveCommand({ root, json: true, note: "Ready to build" });
+  });
+  await git(root, ["switch", "-c", "codex/outside-start"]);
+  await fs.writeFile(path.join(root, "src", "index.ts"), "export const answer = 44;\n", "utf8");
+
+  const result = await withMutedConsole(() => planAttachCommand({
+    root,
+    json: true,
+    note: "Work started before plan-start.",
+    now: attachedAt
+  }));
+
+  const tree = await readTree(root);
+  const activePlan = JSON.parse(tree[".codex-prep/plans/active-plan.json"]);
+
+  assert.equal(result.branch.name, "codex/outside-start");
+  assert.equal(activePlan.build.status, "in_progress");
+  assert.equal(activePlan.build.branchName, "codex/outside-start");
+  assert.equal(activePlan.build.startMode, "attached");
+  assert.equal(activePlan.build.attachedAt, attachedAt.toISOString());
+  assert.equal(activePlan.build.dirtyAtStart, true);
+  assert.match(activePlan.build.worktreeStatus, /src[\\/]index\.ts/);
 });
 
 async function createCompletePlan(root) {

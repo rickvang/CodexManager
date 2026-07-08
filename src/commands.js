@@ -15,6 +15,15 @@ import {
 import { lintRepo } from "./lint.js";
 import { exportObsidianGraph } from "./obsidian-export.js";
 import { lintPlan } from "./plan-lint.js";
+import {
+  VALIDATION_RESULTS_PATH,
+  appendValidationResult,
+  buildControlState,
+  buildDoctorResult,
+  readGitState,
+  readValidationMemory,
+  selectNextAction
+} from "./state.js";
 import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
 
@@ -167,6 +176,120 @@ export async function planStatusCommand({ root, json }) {
   console.log(formatPlanStatus(result));
 }
 
+export async function statusCommand({ root, json }) {
+  const state = await buildControlState(root);
+  const result = buildStatusResult(state);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatStatus(result));
+  return result;
+}
+
+export async function doctorCommand({ root, json }) {
+  const state = await buildControlState(root);
+  const result = {
+    repo: state.repo,
+    ok: state.doctor.ok,
+    findings: state.doctor.findings,
+    nextAction: state.nextAction
+  };
+
+  if (json) {
+    printJson(result);
+  } else {
+    console.log(formatDoctor(result));
+  }
+
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+
+  return result;
+}
+
+export async function validationRecordCommand({ root, json, validationCommand, validationResult, summary, phase, now }) {
+  if (!validationCommand) {
+    throw new Error("validation-record requires --validation-command <command>");
+  }
+  const resultValue = String(validationResult || "").trim().toLowerCase();
+  if (!["pass", "fail"].includes(resultValue)) {
+    throw new Error("validation-record --result must be pass or fail");
+  }
+
+  const entry = {
+    schemaVersion: 1,
+    recordedAt: (now ?? new Date()).toISOString(),
+    command: validationCommand,
+    result: resultValue,
+    phase: phase || "validation",
+    summary: summary || `${validationCommand} ${resultValue}`
+  };
+  const write = await appendValidationResult(root, entry);
+  const memory = await readValidationMemory(root);
+  const result = { entry, latest: memory.latest, writes: [write] };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatValidationRecord(result));
+  return result;
+}
+
+export async function planAttachCommand({ root, json, note, now }) {
+  if (!note) {
+    throw new Error("plan-attach requires --note <text>");
+  }
+
+  const current = await readActiveOrLatestPlan(root);
+  if (!current) {
+    throw new Error("no active plan found. Run codex-prep plan first.");
+  }
+
+  if (!["approved", "in_progress"].includes(current.plan.build.status)) {
+    throw new Error("plan-attach requires an approved or in-progress plan. Run codex-prep plan-approve first.");
+  }
+
+  const git = await readGitState(root);
+  if (!git.isGitRepo || !git.branchName) {
+    throw new Error("plan-attach requires a git repo with a checked-out branch.");
+  }
+
+  const attachedAt = (now ?? new Date()).toISOString();
+  const attached = updatePlanDocument(current.plan, {
+    note,
+    now: now ?? new Date(attachedAt),
+    event: "attached",
+    build: {
+      ...current.plan.build,
+      status: "in_progress",
+      branchName: git.branchName,
+      baseBranch: current.plan.build.baseBranch || DEFAULT_BASE_BRANCH,
+      baseCommit: current.plan.build.baseCommit || git.headCommit,
+      startedAt: current.plan.build.startedAt || attachedAt,
+      attachedAt,
+      startMode: "attached",
+      dirtyAtStart: git.dirtyFiles.length > 0,
+      worktreeStatus: git.rawStatus || "clean"
+    }
+  });
+  const writes = await writePlanState(root, attached, { includeHistory: true });
+  const result = { plan: attached, branch: { name: git.branchName, headCommit: git.headCommit }, writes };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPlanAttach(result));
+  return result;
+}
+
 export async function planLintCommand({ root, json }) {
   const config = await loadConfig(root);
   const current = await readActiveOrLatestPlan(root);
@@ -280,7 +403,11 @@ export async function planStartCommand({ root, json, branch, base = DEFAULT_BASE
       branchName: branch,
       baseBranch: base,
       baseCommit,
-      startedAt
+      startedAt,
+      startMode: "plan-start",
+      attachedAt: "",
+      dirtyAtStart: false,
+      worktreeStatus: "clean"
     }
   });
   const writes = await writePlanState(root, started, { includeHistory: true });
@@ -388,7 +515,8 @@ export async function graphExportCommand({ root, json, format = "obsidian", incl
   const { graph, source } = await loadOrBuildCodeGraph(root);
   const manifest = (await readJsonIfExists(path.join(root, '.codex-prep', 'manifest.json'))) ?? await scanRepo(root);
   const activePlan = await readJsonIfExists(path.join(root, ACTIVE_PLAN_PATH));
-  const exportResult = await exportObsidianGraph(root, graph, { includeSymbols, manifest, activePlan });
+  const validationState = await readValidationMemory(root);
+  const exportResult = await exportObsidianGraph(root, graph, { includeSymbols, manifest, activePlan, validationState });
   const result = {
     repo: graph.repo,
     source,
@@ -651,7 +779,11 @@ function defaultPlanBuild() {
     baseCommit: "",
     startedAt: "",
     approvedAt: "",
-    approvalNote: ""
+    approvalNote: "",
+    startMode: "",
+    attachedAt: "",
+    dirtyAtStart: false,
+    worktreeStatus: ""
   };
 }
 
@@ -665,7 +797,11 @@ function normalizePlanBuild(build = {}) {
     baseCommit: stringOrEmpty(build?.baseCommit),
     startedAt: stringOrEmpty(build?.startedAt),
     approvedAt: stringOrEmpty(build?.approvedAt),
-    approvalNote: stringOrEmpty(build?.approvalNote)
+    approvalNote: stringOrEmpty(build?.approvalNote),
+    startMode: stringOrEmpty(build?.startMode),
+    attachedAt: stringOrEmpty(build?.attachedAt),
+    dirtyAtStart: Boolean(build?.dirtyAtStart),
+    worktreeStatus: stringOrEmpty(build?.worktreeStatus)
   };
 }
 
@@ -762,7 +898,7 @@ async function assertCleanWorktree(root) {
 
 function isPlanStateStatusLine(line) {
   const file = line.slice(3).replace(/\\/g, "/");
-  return file.startsWith(".codex-prep/plans/");
+  return file.startsWith(".codex-prep/plans/") || file === VALIDATION_RESULTS_PATH;
 }
 
 async function runGit(root, args) {
@@ -784,7 +920,8 @@ export async function applyCommand({ root, json }) {
   const previousGraph = await readPreviousCodeGraph(root);
   const manifest = await scanRepo(root, { previousManifest });
   const graph = await buildCodeGraph(root, { manifest });
-  const bundle = buildBundle(manifest, { graph });
+  const state = assumePostApplyState(await buildControlState(root, { manifest, graph }));
+  const bundle = buildBundle(manifest, { graph, state });
   const writes = [];
 
   for (const file of bundle.files) {
@@ -925,6 +1062,19 @@ export async function refreshMapCommand({ root, json }) {
   }
 
   console.log(formatApply(result));
+}
+
+function assumePostApplyState(state) {
+  state.manifest.exists = true;
+  state.manifest.stale = false;
+  state.graph.exists = true;
+  state.graph.stale = false;
+  state.graph.invalid = false;
+  state.generated.files = state.generated.files.map((file) => ({ ...file, exists: true }));
+  state.generated.dashboard.exists = true;
+  state.doctor = buildDoctorResult(state);
+  state.nextAction = selectNextAction(state);
+  return state;
 }
 
 function finalizeManifest(manifest, previousManifest, writes) {
@@ -1198,6 +1348,101 @@ function formatPlanMutation(title, result) {
   ].join("\n");
 }
 
+function buildStatusResult(state) {
+  const plan = state.plan.plan;
+  return {
+    repo: state.repo,
+    plan: state.plan.exists ? {
+      exists: true,
+      source: state.plan.source,
+      status: plan.status,
+      goal: plan.goal || "",
+      buildStatus: plan.build?.status || "not_started",
+      branchName: plan.build?.branchName || ""
+    } : { exists: false },
+    git: {
+      isGitRepo: state.git.isGitRepo,
+      branchName: state.git.branchName,
+      headCommit: state.git.headCommit,
+      dirtyFiles: state.git.dirtyFiles,
+      localStateFiles: state.git.localStateFiles
+    },
+    graph: {
+      exists: state.graph.exists,
+      stale: state.graph.stale,
+      fingerprint: state.graph.fingerprint,
+      savedFingerprint: state.graph.savedFingerprint,
+      summary: state.graph.summary
+    },
+    generated: {
+      dashboard: state.generated.dashboard,
+      obsidian: state.generated.obsidian
+    },
+    validation: {
+      exists: state.validation.exists,
+      path: state.validation.path,
+      count: state.validation.entries.length,
+      latest: state.validation.latest
+    },
+    doctor: state.doctor,
+    nextAction: state.nextAction
+  };
+}
+
+function formatStatus(result) {
+  return [
+    `codex-prep status: ${result.repo.name}`,
+    "",
+    `Branch: ${result.git.branchName || "none"}`,
+    `Plan: ${result.plan.exists ? `${result.plan.status} / ${result.plan.buildStatus}` : "none"}`,
+    `Plan branch: ${result.plan.branchName || "none"}`,
+    `Dirty files: ${result.git.dirtyFiles.length}`,
+    `Local state files: ${result.git.localStateFiles.length}`,
+    `Graph: ${result.graph.exists ? (result.graph.stale ? "stale" : "fresh") : "missing"}`,
+    `Dashboard: ${result.generated.dashboard.exists ? "present" : "missing"}`,
+    `Obsidian index: ${result.generated.obsidian.exists ? (result.generated.obsidian.stale ? "stale" : "present") : "missing"}`,
+    `Latest validation: ${result.validation.latest ? `${result.validation.latest.result} ${result.validation.latest.command}` : "none recorded"}`,
+    `Doctor: ${result.doctor.ok ? "ok" : "needs attention"} (${result.doctor.findings.length} findings)`,
+    "",
+    `Next action: ${result.nextAction}`
+  ].join("\n");
+}
+
+function formatDoctor(result) {
+  return [
+    `codex-prep doctor: ${result.ok ? "ok" : "needs attention"}`,
+    "",
+    "Findings:",
+    ...formatFindings(result.findings),
+    "",
+    `Next action: ${result.nextAction}`
+  ].join("\n");
+}
+
+function formatValidationRecord(result) {
+  return [
+    `codex-prep validation-record: ${result.entry.result}`,
+    "",
+    `Command: ${result.entry.command}`,
+    `Phase: ${result.entry.phase}`,
+    `Recorded: ${result.entry.recordedAt}`,
+    `Summary: ${result.entry.summary}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
+
+function formatPlanAttach(result) {
+  return [
+    "codex-prep plan-attach: in_progress",
+    "",
+    `Branch: ${result.branch.name}`,
+    `Head: ${result.branch.headCommit.slice(0, 12)}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
+
 function formatPlanStatus(result) {
   if (!result.exists) {
     return "codex-prep plan-status: none\n\nNo active plan found. Run codex-prep plan to create one.";
@@ -1345,6 +1590,7 @@ function printJson(value) {
 
 export const internals = {
   buildPlanProposal,
+  buildStatusResult,
   buildPlanReviewResult,
   finalizeManifest,
   normalizePlan,

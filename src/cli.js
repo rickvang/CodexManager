@@ -2,12 +2,14 @@ import path from "node:path";
 import {
   applyCommand,
   checkCommand,
+  doctorCommand,
   evalCommand,
   graphCommand,
   graphExportCommand,
   graphQueryCommand,
   lintCommand,
   planApproveCommand,
+  planAttachCommand,
   planCloseCommand,
   planCommand,
   planLintCommand,
@@ -17,7 +19,9 @@ import {
   planUpdateCommand,
   refreshGraphCommand,
   refreshMapCommand,
-  scanCommand
+  scanCommand,
+  statusCommand,
+  validationRecordCommand
 } from "./commands.js";
 
 const COMMANDS = new Set([
@@ -25,6 +29,10 @@ const COMMANDS = new Set([
   "plan",
   "plan-update",
   "plan-status",
+  "status",
+  "doctor",
+  "validation-record",
+  "plan-attach",
   "plan-review",
   "plan-lint",
   "plan-approve",
@@ -100,6 +108,20 @@ export async function runCli(argv) {
     });
   } else if (command === "plan-status") {
     await planStatusCommand(common);
+  } else if (command === "status") {
+    await statusCommand(common);
+  } else if (command === "doctor") {
+    await doctorCommand(common);
+  } else if (command === "validation-record") {
+    await validationRecordCommand({
+      ...common,
+      validationCommand: options.validationCommand,
+      validationResult: options.validationResult,
+      summary: options.summary,
+      phase: options.phase
+    });
+  } else if (command === "plan-attach") {
+    await planAttachCommand({ ...common, note: options.note });
   } else if (command === "plan-review") {
     await planReviewCommand(common);
   } else if (command === "plan-lint") {
@@ -144,6 +166,10 @@ function parseArgs(argv) {
     scope: [],
     files: [],
     validation: [],
+    validationCommand: undefined,
+    validationResult: undefined,
+    summary: undefined,
+    phase: undefined,
     questions: [],
     goal: undefined,
     successCriteria: [],
@@ -202,6 +228,18 @@ function parseArgs(argv) {
       i += 1;
     } else if (value === "--validation") {
       options.validation.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--validation-command") {
+      options.validationCommand = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--result") {
+      options.validationResult = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--summary") {
+      options.summary = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--phase") {
+      options.phase = readOptionValue(argv, i, value);
       i += 1;
     } else if (value === "--question") {
       options.questions.push(readOptionValue(argv, i, value));
@@ -269,8 +307,8 @@ function validateOptions(command, options) {
   if (options.intent && !planningCommands.includes(command)) {
     throw new Error("--intent is only supported for plan and plan-update");
   }
-  if (options.note && !["plan", "plan-update", "plan-approve", "plan-close"].includes(command)) {
-    throw new Error("--note is only supported for plan, plan-update, plan-approve, and plan-close");
+  if (options.note && !["plan", "plan-update", "plan-approve", "plan-close", "plan-attach"].includes(command)) {
+    throw new Error("--note is only supported for plan, plan-update, plan-approve, plan-close, and plan-attach");
   }
   if (options.status && !["plan-update", "plan-close"].includes(command)) {
     throw new Error("--status is only supported for plan-update and plan-close");
@@ -283,6 +321,18 @@ function validateOptions(command, options) {
   }
   if (hasAny(options.validation) && !planningCommands.includes(command)) {
     throw new Error("--validation is only supported for plan and plan-update");
+  }
+  if (options.validationCommand && command !== "validation-record") {
+    throw new Error("--validation-command is only supported for validation-record");
+  }
+  if (options.validationResult && command !== "validation-record") {
+    throw new Error("--result is only supported for validation-record");
+  }
+  if (options.summary && command !== "validation-record") {
+    throw new Error("--summary is only supported for validation-record");
+  }
+  if (options.phase && command !== "validation-record") {
+    throw new Error("--phase is only supported for validation-record");
   }
   if (hasAny(options.questions) && !planningCommands.includes(command)) {
     throw new Error("--question is only supported for plan and plan-update");
@@ -355,6 +405,10 @@ Usage:
   codex-prep plan [--repo <path>] [--json] [--no-save]
   codex-prep plan-update [--repo <path>] [--note <text>] [--status <status>]
   codex-prep plan-status [--repo <path>] [--json]
+  codex-prep status [--repo <path>] [--json]
+  codex-prep doctor [--repo <path>] [--json]
+  codex-prep validation-record [--repo <path>] --validation-command <command> --result <pass|fail> [--summary <text>] [--phase <name>] [--json]
+  codex-prep plan-attach [--repo <path>] --note <text> [--json]
   codex-prep plan-review [--repo <path>] [--json]
   codex-prep plan-lint [--repo <path>] [--json]
   codex-prep plan-approve [--repo <path>] --note <text>
@@ -370,6 +424,11 @@ Commands:
   plan         Preview and autosave the onboarding plan draft.
   plan-update  Update the active saved plan before implementation approval.
   plan-status  Show the active saved plan.
+  status       Show plan, branch, graph, dashboard, and validation state.
+  doctor       Diagnose missing or stale workflow artifacts.
+  validation-record
+               Record an explicit validation result in local JSONL memory.
+  plan-attach  Attach the active plan to the current branch when work started outside plan-start.
   plan-review  Show keep-planning vs approve-build next actions.
   plan-lint    Check whether the active saved plan is ready to implement.
   plan-approve Mark a lint-clean active plan approved for implementation.
@@ -393,6 +452,11 @@ Planning options:
   --file PATH     Append a likely touched file, or query one graph file.
   --validation TEXT
                   Append a validation step.
+  --validation-command TEXT
+                  Validation command whose result should be recorded.
+  --result TEXT  Validation outcome for validation-record: pass or fail.
+  --summary TEXT Short validation result summary.
+  --phase TEXT   Workflow phase for validation-record.
   --question TEXT Append an open question.
   --goal TEXT     Set the plan goal.
   --success TEXT  Append a success criterion.

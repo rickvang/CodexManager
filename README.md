@@ -17,6 +17,10 @@ node ./bin/codex-prep.js plan
 node ./bin/codex-prep.js plan --no-save
 node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
+node ./bin/codex-prep.js status
+node ./bin/codex-prep.js doctor
+node ./bin/codex-prep.js validation-record --validation-command "npm run verify" --result pass --summary "verify passed"
+node ./bin/codex-prep.js plan-attach --note "Attached current branch to active plan"
 node ./bin/codex-prep.js plan-review
 node ./bin/codex-prep.js plan-lint
 node ./bin/codex-prep.js plan-approve --note "Ready to build"
@@ -44,6 +48,10 @@ From this repo, run:
 .\codex-prep.cmd scan --repo D:\path\to\repo
 .\codex-prep.cmd plan --repo D:\path\to\repo
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
+.\codex-prep.cmd status --repo D:\path\to\repo
+.\codex-prep.cmd doctor --repo D:\path\to\repo
+.\codex-prep.cmd validation-record --repo D:\path\to\repo --validation-command "npm run verify" --result pass --summary "verify passed"
+.\codex-prep.cmd plan-attach --repo D:\path\to\repo --note "Attached current branch to active plan"
 .\codex-prep.cmd plan-review --repo D:\path\to\repo
 .\codex-prep.cmd plan-lint --repo D:\path\to\repo
 .\codex-prep.cmd plan-approve --repo D:\path\to\repo --note "Ready to build"
@@ -133,6 +141,12 @@ D:\codexmanager\codex-prep.cmd plan-start --repo D:\path\to\repo --branch codex/
 
 `plan-start` creates the implementation branch and records branch metadata. It requires an approved active plan and a clean non-plan worktree; `.codex-prep/plans/` is allowed because it is the plan state this workflow owns. It does not commit, push, merge, or implement code.
 
+If work already started on a branch after approval, attach the active plan to the current branch deliberately:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-attach --repo D:\path\to\repo --note "Work started before plan-start"
+```
+
 Use `--sync-base` only when you explicitly want network-backed base refresh before branch creation:
 
 ```powershell
@@ -148,6 +162,29 @@ D:\codexmanager\codex-prep.cmd plan-close --repo D:\path\to\repo --status implem
 ```
 
 A saved plan is memory, not approval to edit. Plan approval, branch creation, file edits, commits, and pushes are separate decisions.
+
+## Workflow Status And Doctor
+
+`status` is a read-only snapshot of the active plan, current branch, dirty files, graph freshness, dashboard/Obsidian state, and latest recorded validation:
+
+```powershell
+D:\codexmanager\codex-prep.cmd status --repo D:\path\to\repo
+```
+
+`doctor` is a read-only troubleshooting pass with stable finding codes such as `CM005` for a missing manifest or `CM009` for a stale code graph:
+
+```powershell
+D:\codexmanager\codex-prep.cmd doctor --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd doctor --repo D:\path\to\repo --json
+```
+
+After you run validation, record the outcome explicitly so later status, doctor, dashboard, and Obsidian exports can show the current validation state:
+
+```powershell
+D:\codexmanager\codex-prep.cmd validation-record --repo D:\path\to\repo --validation-command "npm run verify" --result pass --summary "verify passed"
+```
+
+Validation memory is stored locally in `.codex-prep/validation-results.jsonl`. It is evidence that a validation command was run; it is not a substitute for rerunning validation after new changes.
 
 ## Plan Lint
 
@@ -229,6 +266,7 @@ Open the target repository folder as an Obsidian vault, then use Local Graph fro
 - `AGENTS.md`
 - `docs/CODEBASE_MAP.md`
 - `docs/CODEX_FEEDBACK.md`
+- `docs/codexmanager-dashboard.md`
 - `.codex-prep/manifest.json`
 - `.codex-prep/codegraph.json`
 - `.agents/skills/repo-onboarding/SKILL.md`

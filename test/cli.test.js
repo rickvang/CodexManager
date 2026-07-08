@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import test from "node:test";
 import { runCli } from "../src/cli.js";
 
@@ -55,5 +55,24 @@ test("graph-export-only options are rejected elsewhere", async () => {
   await assert.rejects(
     () => runCli(["scan", "--include-symbols"]),
     /--include-symbols is only supported for graph-export/
+  );
+});
+
+test("validation-record options are only accepted for validation-record", async () => {
+  await assert.rejects(
+    () => runCli(["scan", "--validation-command", "npm run verify"]),
+    /--validation-command is only supported for validation-record/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--result", "pass"]),
+    /--result is only supported for validation-record/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--summary", "passed"]),
+    /--summary is only supported for validation-record/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--phase", "validation"]),
+    /--phase is only supported for validation-record/
   );
 });

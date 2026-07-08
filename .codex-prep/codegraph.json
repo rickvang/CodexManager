@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T18:54:45.755Z",
-  "fingerprint": "738fbe9174251dd2f020e91dfc90fcd810708a9daeaef574a3787e6388629db3",
+  "generatedAt": "2026-07-08T20:04:57.424Z",
+  "fingerprint": "ba13e8ac952a4839517b9373df12ee1b536350f90e935b79d9fbd5d800b4cfd2",
   "repo": {
     "root": ".",
     "name": "codexmanager"
   },
   "summary": {
-    "fileCount": 22,
-    "edgeCount": 50,
-    "symbolCount": 317,
+    "fileCount": 23,
+    "edgeCount": 56,
+    "symbolCount": 353,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 15694,
+      "size": 18445,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -446,7 +446,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 44652,
+      "size": 52391,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -501,6 +501,12 @@
         {
           "specifier": "./scan.js",
           "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./state.js",
+          "resolved": "src/state.js",
           "kind": "local",
           "confidence": "high"
         },
@@ -561,6 +567,12 @@
           "confidence": "medium"
         },
         {
+          "name": "assumePostApplyState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "buildPlanNextActions",
           "kind": "function",
           "exported": false,
@@ -574,6 +586,12 @@
         },
         {
           "name": "buildPlanReviewResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildStatusResult",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -645,6 +663,12 @@
           "confidence": "medium"
         },
         {
+          "name": "doctorCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "evalCommand",
           "kind": "function",
           "exported": true,
@@ -676,6 +700,12 @@
         },
         {
           "name": "formatCheck",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatDoctor",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -735,6 +765,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatPlanAttach",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatPlanLint",
           "kind": "function",
           "exported": false,
@@ -766,6 +802,18 @@
         },
         {
           "name": "formatScan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatStatus",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatValidationRecord",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -868,6 +916,12 @@
         },
         {
           "name": "planApproveCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planAttachCommand",
           "kind": "function",
           "exported": true,
           "confidence": "high"
@@ -993,6 +1047,12 @@
           "confidence": "medium"
         },
         {
+          "name": "statusCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "stringOrEmpty",
           "kind": "function",
           "exported": false,
@@ -1039,6 +1099,12 @@
           "kind": "function",
           "exported": false,
           "confidence": "medium"
+        },
+        {
+          "name": "validationRecordCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
         },
         {
           "name": "writePlanState",
@@ -1263,7 +1329,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 9281,
+      "size": 12710,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1300,6 +1366,12 @@
           "confidence": "medium"
         },
         {
+          "name": "buildDashboard",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "buildFeedback",
           "kind": "function",
           "exported": false,
@@ -1318,6 +1390,24 @@
           "confidence": "medium"
         },
         {
+          "name": "DASHBOARD_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "findingSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "inlineValue",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "listOrNone",
           "kind": "function",
           "exported": false,
@@ -1328,6 +1418,12 @@
           "kind": "variable",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "validationSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         }
       ],
       "relatedTests": [
@@ -1484,7 +1580,7 @@
     {
       "path": "src/obsidian-export.js",
       "language": "JavaScript",
-      "size": 34175,
+      "size": 35405,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1648,6 +1744,12 @@
         },
         {
           "name": "inlineCode",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "latestValidationLines",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -2101,7 +2203,7 @@
     {
       "path": "src/scan.js",
       "language": "JavaScript",
-      "size": 12789,
+      "size": 12840,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2326,9 +2428,189 @@
       ]
     },
     {
+      "path": "src/state.js",
+      "language": "JavaScript",
+      "size": 12222,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./codegraph.js",
+          "resolved": "src/codegraph.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./generate.js",
+          "resolved": "src/generate.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./obsidian-export.js",
+          "resolved": "src/obsidian-export.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./scan.js",
+          "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:child_process",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:util",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "ACTIVE_PLAN_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "appendValidationResult",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildControlState",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildDoctorResult",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "execFileAsync",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "isLocalStateStatusLine",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "LATEST_PLAN_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "MANIFEST_PATH",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "OBSIDIAN_INDEX_PATH",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_HISTORY_DIR",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "readActivePlanState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readGeneratedState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readGitState",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "readSavedGraphState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readValidationMemory",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "runGit",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "selectNextAction",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "statusLinePath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "VALIDATION_RESULTS_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 1875,
+      "size": 2534,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2429,7 +2711,7 @@
     {
       "path": "test/commands.test.js",
       "language": "JavaScript",
-      "size": 9203,
+      "size": 11232,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2476,7 +2758,7 @@
     {
       "path": "test/generate.test.js",
       "language": "JavaScript",
-      "size": 1816,
+      "size": 2050,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2678,7 +2960,7 @@
     {
       "path": "test/obsidian-export.test.js",
       "language": "JavaScript",
-      "size": 8777,
+      "size": 9448,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2740,6 +3022,12 @@
         },
         {
           "name": "obsidianManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "obsidianValidationState",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -2828,7 +3116,7 @@
     {
       "path": "test/plan-workflow.test.js",
       "language": "JavaScript",
-      "size": 6678,
+      "size": 8129,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3014,6 +3302,13 @@
       "confidence": "high"
     },
     {
+      "from": "src/commands.js",
+      "to": "src/state.js",
+      "kind": "imports",
+      "specifier": "./state.js",
+      "confidence": "high"
+    },
+    {
       "from": "src/config.js",
       "to": "src/fs-utils.js",
       "kind": "imports",
@@ -3081,6 +3376,41 @@
       "to": "src/fs-utils.js",
       "kind": "imports",
       "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
+      "to": "src/codegraph.js",
+      "kind": "imports",
+      "specifier": "./codegraph.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
+      "to": "src/generate.js",
+      "kind": "imports",
+      "specifier": "./generate.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
+      "to": "src/obsidian-export.js",
+      "kind": "imports",
+      "specifier": "./obsidian-export.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
+      "to": "src/scan.js",
+      "kind": "imports",
+      "specifier": "./scan.js",
       "confidence": "high"
     },
     {
@@ -3667,6 +3997,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "assumePostApplyState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "buildPlanNextActions",
       "kind": "function",
       "exported": false,
@@ -3682,6 +4019,13 @@
     },
     {
       "name": "buildPlanReviewResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildStatusResult",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3765,6 +4109,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "doctorCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
       "name": "evalCommand",
       "kind": "function",
       "exported": true,
@@ -3801,6 +4152,13 @@
     },
     {
       "name": "formatCheck",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatDoctor",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3870,6 +4228,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatPlanAttach",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatPlanLint",
       "kind": "function",
       "exported": false,
@@ -3906,6 +4271,20 @@
     },
     {
       "name": "formatScan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatStatus",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatValidationRecord",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4025,6 +4404,13 @@
     },
     {
       "name": "planApproveCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planAttachCommand",
       "kind": "function",
       "exported": true,
       "confidence": "high",
@@ -4171,6 +4557,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "statusCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
       "name": "stringOrEmpty",
       "kind": "function",
       "exported": false,
@@ -4224,6 +4617,13 @@
       "kind": "function",
       "exported": false,
       "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "validationRecordCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
       "file": "src/commands.js"
     },
     {
@@ -4402,6 +4802,13 @@
       "file": "src/generate.js"
     },
     {
+      "name": "buildDashboard",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
       "name": "buildFeedback",
       "kind": "function",
       "exported": false,
@@ -4423,6 +4830,27 @@
       "file": "src/generate.js"
     },
     {
+      "name": "DASHBOARD_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "findingSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "inlineValue",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
       "name": "listOrNone",
       "kind": "function",
       "exported": false,
@@ -4434,6 +4862,13 @@
       "kind": "variable",
       "exported": true,
       "confidence": "high",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "validationSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/generate.js"
     },
     {
@@ -4690,6 +5125,13 @@
     },
     {
       "name": "inlineCode",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/obsidian-export.js"
+    },
+    {
+      "name": "latestValidationLines",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5368,6 +5810,139 @@
       "file": "src/scan.js"
     },
     {
+      "name": "ACTIVE_PLAN_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "appendValidationResult",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "buildControlState",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "buildDoctorResult",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "execFileAsync",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "isLocalStateStatusLine",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "LATEST_PLAN_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "MANIFEST_PATH",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "OBSIDIAN_INDEX_PATH",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "PLAN_HISTORY_DIR",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readActivePlanState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readGeneratedState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readGitState",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readSavedGraphState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readValidationMemory",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "runGit",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "selectNextAction",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "statusLinePath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "VALIDATION_RESULTS_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
       "name": "jsGraphFiles",
       "kind": "function",
       "exported": false,
@@ -5453,6 +6028,13 @@
     },
     {
       "name": "obsidianManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/obsidian-export.test.js"
+    },
+    {
+      "name": "obsidianValidationState",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5701,17 +6283,17 @@
   "evidence": [
     {
       "confidence": "high",
-      "fact": "Indexed 22 code files",
+      "fact": "Indexed 23 code files",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 50 local import edges",
+      "fact": "Detected 56 local import edges",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 317 symbols",
+      "fact": "Detected 353 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

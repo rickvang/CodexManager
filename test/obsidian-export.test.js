@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import test from "node:test";
 import { runCli } from "../src/cli.js";
 import { buildCodeGraph } from "../src/codegraph.js";
@@ -12,13 +12,15 @@ test("Obsidian export builds a workflow-first graph by default", async () => {
 
   const notes = buildObsidianNotes(graph, {
     manifest: obsidianManifest(),
-    activePlan: obsidianActivePlan()
+    activePlan: obsidianActivePlan(),
+    validationState: obsidianValidationState()
   });
   const index = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Index.md`);
   const workflow = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Workflow.md`);
   const validations = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Validations.md`);
   const troubleshooting = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Troubleshooting.md`);
   const approvalPhase = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Workflow/03 Approval.md`);
+  const validationPhase = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Workflow/06 Validation.md`);
   const modulesHub = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Modules.md`);
   const filesHub = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Source Files.md`);
   const testsHub = notes.find((note) => note.path === `${OBSIDIAN_EXPORT_DIR}/Tests.md`);
@@ -33,6 +35,7 @@ test("Obsidian export builds a workflow-first graph by default", async () => {
   assert.ok(validations);
   assert.ok(troubleshooting);
   assert.ok(approvalPhase);
+  assert.ok(validationPhase);
   assert.ok(modulesHub);
   assert.ok(filesHub);
   assert.ok(testsHub);
@@ -47,6 +50,9 @@ test("Obsidian export builds a workflow-first graph by default", async () => {
   assert.match(index.content, /\[\[Modules\|Modules\]\]/);
   assert.match(workflow.content, /\[\[Workflow\/03 Approval\|03 Approval\]\] \(approved\)/);
   assert.match(validations.content, /`npm run verify`/);
+  assert.match(validations.content, /Result: pass/);
+  assert.match(validationPhase.content, /Status: validated/);
+  assert.match(validationPhase.content, /Last validation: pass npm run verify at 2026-07-08T15:00:00.000Z/);
   assert.match(approvalPhase.content, /Approved at: 2026-07-08T10:00:00.000Z/);
   assert.match(filesHub.content, /\[\[Modules\/src\|src\]\]/);
   assert.doesNotMatch(filesHub.content, /\[\[Files\/src\/math\.ts\|src\/math\.ts\]\]/);
@@ -171,6 +177,19 @@ function obsidianManifest() {
       { path: "docs/CODEBASE_MAP.md" },
       { path: "docs/CODEX_FEEDBACK.md" }
     ]
+  };
+}
+
+function obsidianValidationState() {
+  return {
+    latest: {
+      schemaVersion: 1,
+      recordedAt: "2026-07-08T15:00:00.000Z",
+      command: "npm run verify",
+      result: "pass",
+      phase: "validation",
+      summary: "verify passed"
+    }
   };
 }
 

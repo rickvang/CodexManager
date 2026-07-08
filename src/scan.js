@@ -6,6 +6,7 @@ import { fileExists, slashPath } from "./fs-utils.js";
 const IGNORED_DIRS = new Set([
   ".git",
   ".agents",
+  ".obsidian",
   ".codex-prep",
   ".hg",
   ".svn",
@@ -26,7 +27,8 @@ const IGNORED_DIRS = new Set([
 const GENERATED_FILE_PATHS = new Set([
   "AGENTS.md",
   "docs/CODEBASE_MAP.md",
-  "docs/CODEX_FEEDBACK.md"
+  "docs/CODEX_FEEDBACK.md",
+  "docs/codexmanager-dashboard.md"
 ]);
 
 const GENERATED_DIR_PREFIXES = [

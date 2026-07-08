@@ -10,7 +10,13 @@ const GENERATED_MARKER = "<!-- codex-prep:obsidian-export -->";
 export async function exportObsidianGraph(root, graph, options = {}) {
   const outputDir = options.outputDir ?? OBSIDIAN_EXPORT_DIR;
   const includeSymbols = options.includeSymbols === true;
-  const notes = buildObsidianNotes(graph, { outputDir, includeSymbols, manifest: options.manifest, activePlan: options.activePlan });
+  const notes = buildObsidianNotes(graph, {
+    outputDir,
+    includeSymbols,
+    manifest: options.manifest,
+    activePlan: options.activePlan,
+    validationState: options.validationState
+  });
   const writes = [];
 
   for (const note of notes) {
@@ -36,7 +42,7 @@ export async function exportObsidianGraph(root, graph, options = {}) {
 export function buildObsidianNotes(graph, options = {}) {
   const outputDir = options.outputDir ?? OBSIDIAN_EXPORT_DIR;
   const includeSymbols = options.includeSymbols === true;
-  const workflow = buildWorkflowMap(graph, options.manifest, options.activePlan);
+  const workflow = buildWorkflowMap(graph, options.manifest, options.activePlan, options.validationState);
   const moduleIndex = buildModuleIndex(graph);
   const index = buildNoteIndex(graph, { includeSymbols, moduleIndex });
   const dependentsByFile = buildDependentsByFile(graph);
@@ -254,11 +260,15 @@ function renderIndexNote(graph, index, workflow, includeSymbols) {
 }
 
 
-function buildWorkflowMap(graph, manifest, activePlan) {
+function buildWorkflowMap(graph, manifest, activePlan, validationState) {
   const commands = manifest?.discovery?.commands ?? [];
   const generatedFiles = new Set((manifest?.generatedFiles ?? []).map((item) => item.path));
   const hasCommand = (name) => commands.some((command) => command.name === name || command.command.includes(name));
   const statusFromPlan = activePlan?.build?.status || activePlan?.status || "unknown";
+  const latestValidation = validationState?.latest;
+  const validationStatus = latestValidation
+    ? latestValidation.result === "pass" ? "validated" : "failed"
+    : commands.length > 0 ? "configured" : "unknown";
   const phases = [
     workflowPhase("01 Orientation", "orientation", "configured", "Start by reading AGENTS.md, CODEBASE_MAP.md, and the generated code graph before broad searching.", [
       evidenceLine(generatedFiles.has("AGENTS.md"), "AGENTS.md generated guidance is present", "AGENTS.md generated guidance is not listed in manifest"),
@@ -281,9 +291,10 @@ function buildWorkflowMap(graph, manifest, activePlan) {
       graph?.generatedAt ? `Code graph generated at: ${graph.generatedAt}` : "Code graph generated timestamp: unknown",
       graph?.fingerprint ? `Code graph fingerprint: ${graph.fingerprint}` : "Code graph fingerprint: unknown"
     ], ["codex-prep refresh-graph", "codex-prep graph-export --format obsidian"]),
-    workflowPhase("06 Validation", "validation", commands.length > 0 ? "configured" : "unknown", "Run the repo validation commands and CodexManager checks before marking work done.", [
+    workflowPhase("06 Validation", "validation", validationStatus, "Run the repo validation commands and CodexManager checks before marking work done.", [
       commands.length > 0 ? `Detected commands: ${commands.map((command) => command.command).join(", ")}` : "Detected commands: unknown",
-      hasCommand("verify") ? "Verify command is detected" : "Verify command is missing or unknown"
+      hasCommand("verify") ? "Verify command is detected" : "Verify command is missing or unknown",
+      latestValidation ? `Last validation: ${latestValidation.result} ${latestValidation.command} at ${latestValidation.recordedAt}` : "Last validation: unknown"
     ], commands.map((command) => command.command)),
     workflowPhase("07 Feedback", "feedback", generatedFiles.has("docs/CODEX_FEEDBACK.md") ? "configured" : "unknown", "Capture repeated mistakes, stale guidance, and follow-up improvements instead of expanding the current pass forever.", [
       evidenceLine(generatedFiles.has("docs/CODEX_FEEDBACK.md"), "CODEX_FEEDBACK.md is present", "CODEX_FEEDBACK.md is not listed in manifest"),
@@ -295,10 +306,11 @@ function buildWorkflowMap(graph, manifest, activePlan) {
     summary: {
       status: summarizeWorkflowStatus(phases),
       commands,
-      generatedFiles: [...generatedFiles].sort()
+      generatedFiles: [...generatedFiles].sort(),
+      validationLatest: latestValidation
     },
     phases,
-    troubleshooting: buildTroubleshootingItems(phases, commands, generatedFiles, graph)
+    troubleshooting: buildTroubleshootingItems(phases, commands, generatedFiles, graph, latestValidation)
   };
 }
 
@@ -386,6 +398,10 @@ function renderValidationsNote(workflow) {
     "",
     "Validation commands grouped by workflow phase. Commands marked unknown require repo inspection before use.",
     "",
+    "## Latest Result",
+    "",
+    ...latestValidationLines(workflow.summary.validationLatest),
+    "",
     ...workflow.phases.flatMap((phase) => [
       `## ${phase.title}`,
       "",
@@ -414,6 +430,18 @@ function renderTroubleshootingNote(workflow) {
   ].join("\n") + "\n";
 }
 
+function latestValidationLines(latestValidation) {
+  if (!latestValidation) {
+    return ["- none recorded"];
+  }
+  return [
+    `- Result: ${latestValidation.result}`,
+    `- Command: ${inlineCode(latestValidation.command || "unknown")}`,
+    `- Recorded: ${latestValidation.recordedAt || "unknown"}`,
+    `- Summary: ${latestValidation.summary || "none"}`
+  ];
+}
+
 function summarizeWorkflowStatus(phases) {
   if (phases.some((phase) => phase.status === "unknown")) {
     return "partially-known";
@@ -424,7 +452,7 @@ function summarizeWorkflowStatus(phases) {
   return "configured";
 }
 
-function buildTroubleshootingItems(phases, commands, generatedFiles, graph) {
+function buildTroubleshootingItems(phases, commands, generatedFiles, graph, latestValidation) {
   const items = [];
   for (const phase of phases) {
     if (phase.status === "unknown") {
@@ -439,6 +467,9 @@ function buildTroubleshootingItems(phases, commands, generatedFiles, graph) {
   }
   if (!graph?.fingerprint) {
     items.push({ status: "unknown", message: "Code graph fingerprint is unavailable", fix: "Run codex-prep refresh-graph" });
+  }
+  if (latestValidation?.result === "fail") {
+    items.push({ status: "failed", message: `Latest validation failed: ${latestValidation.command}`, fix: "Fix the failure, rerun validation, and record the passing result" });
   }
   if (items.length === 0) {
     items.push({ status: "ok", message: "No obvious workflow map gaps detected", fix: "Continue normal validation" });
