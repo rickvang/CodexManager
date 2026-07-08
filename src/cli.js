@@ -4,9 +4,12 @@ import {
   checkCommand,
   evalCommand,
   lintCommand,
+  planApproveCommand,
   planCloseCommand,
   planCommand,
   planLintCommand,
+  planReviewCommand,
+  planStartCommand,
   planStatusCommand,
   planUpdateCommand,
   refreshMapCommand,
@@ -18,7 +21,10 @@ const COMMANDS = new Set([
   "plan",
   "plan-update",
   "plan-status",
+  "plan-review",
   "plan-lint",
+  "plan-approve",
+  "plan-start",
   "plan-close",
   "apply",
   "check",
@@ -86,8 +92,14 @@ export async function runCli(argv) {
     });
   } else if (command === "plan-status") {
     await planStatusCommand(common);
+  } else if (command === "plan-review") {
+    await planReviewCommand(common);
   } else if (command === "plan-lint") {
     await planLintCommand(common);
+  } else if (command === "plan-approve") {
+    await planApproveCommand({ ...common, note: options.note });
+  } else if (command === "plan-start") {
+    await planStartCommand({ ...common, branch: options.branch, base: options.base, syncBase: options.syncBase });
   } else if (command === "plan-close") {
     await planCloseCommand({ ...common, status: options.status, note: options.note });
   } else if (command === "apply") {
@@ -124,7 +136,10 @@ function parseArgs(argv) {
     forbiddenActions: [],
     approvalBoundaries: [],
     riskLevel: undefined,
-    targetAgent: undefined
+    targetAgent: undefined,
+    branch: undefined,
+    base: undefined,
+    syncBase: false
   };
   let command;
 
@@ -144,6 +159,8 @@ function parseArgs(argv) {
       options.noSave = true;
     } else if (value === "--help" || value === "-h") {
       options.help = true;
+    } else if (value === "--sync-base") {
+      options.syncBase = true;
     } else if (value === "--repo") {
       options.repo = readOptionValue(argv, i, value);
       i += 1;
@@ -192,6 +209,12 @@ function parseArgs(argv) {
     } else if (value === "--target-agent") {
       options.targetAgent = readOptionValue(argv, i, value);
       i += 1;
+    } else if (value === "--branch") {
+      options.branch = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--base") {
+      options.base = readOptionValue(argv, i, value);
+      i += 1;
     } else {
       throw new Error(`unknown option "${value}"`);
     }
@@ -219,8 +242,8 @@ function validateOptions(command, options) {
   if (options.intent && !planningCommands.includes(command)) {
     throw new Error("--intent is only supported for plan and plan-update");
   }
-  if (options.note && !["plan", "plan-update", "plan-close"].includes(command)) {
-    throw new Error("--note is only supported for plan, plan-update, and plan-close");
+  if (options.note && !["plan", "plan-update", "plan-approve", "plan-close"].includes(command)) {
+    throw new Error("--note is only supported for plan, plan-update, plan-approve, and plan-close");
   }
   if (options.status && !["plan-update", "plan-close"].includes(command)) {
     throw new Error("--status is only supported for plan-update and plan-close");
@@ -261,6 +284,15 @@ function validateOptions(command, options) {
   if (options.targetAgent && !planningCommands.includes(command)) {
     throw new Error("--target-agent is only supported for plan and plan-update");
   }
+  if (options.branch && command !== "plan-start") {
+    throw new Error("--branch is only supported for plan-start");
+  }
+  if (options.base && command !== "plan-start") {
+    throw new Error("--base is only supported for plan-start");
+  }
+  if (options.syncBase && command !== "plan-start") {
+    throw new Error("--sync-base is only supported for plan-start");
+  }
 }
 
 function hasAny(values) {
@@ -275,7 +307,10 @@ Usage:
   codex-prep plan [--repo <path>] [--json] [--no-save]
   codex-prep plan-update [--repo <path>] [--note <text>] [--status <status>]
   codex-prep plan-status [--repo <path>] [--json]
+  codex-prep plan-review [--repo <path>] [--json]
   codex-prep plan-lint [--repo <path>] [--json]
+  codex-prep plan-approve [--repo <path>] --note <text>
+  codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
 
 Commands:
@@ -283,7 +318,10 @@ Commands:
   plan         Preview and autosave the onboarding plan draft.
   plan-update  Update the active saved plan before implementation approval.
   plan-status  Show the active saved plan.
+  plan-review  Show keep-planning vs approve-build next actions.
   plan-lint    Check whether the active saved plan is ready to implement.
+  plan-approve Mark a lint-clean active plan approved for implementation.
+  plan-start   Create the approved plan implementation branch.
   plan-close   Mark the active saved plan as implemented, superseded, or rejected.
   apply        Write or refresh the Codex onboarding bundle.
   check        Detect stale generated guidance and obvious repo drift.
@@ -294,7 +332,7 @@ Commands:
 Planning options:
   --no-save       With plan only, preview without writing plan history.
   --intent TEXT   Set or replace the active plan intent.
-  --note TEXT     Append a decision-log note.
+  --note TEXT     Append a decision-log note or approve a plan.
   --scope TEXT    Append a proposed scope item.
   --file PATH     Append a likely touched file or path.
   --validation TEXT
@@ -312,12 +350,15 @@ Planning options:
   --risk TEXT     Set plan risk: low, medium, or high.
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, or generic.
+  --branch TEXT   Branch name for plan-start.
+  --base TEXT     Base branch for plan-start. Defaults to main.
+  --sync-base     With plan-start, fetch and fast-forward pull the base first.
   --status TEXT   Set plan status with plan-update or plan-close.
 
 Defaults:
   The current working directory is used when --repo is omitted.
-  No command uses network access.
-  scan, check, eval, lint, and plan-lint do not edit repo-tracked files.
+  No command uses network access unless plan-start --sync-base is used.
+  scan, check, eval, lint, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);
 }

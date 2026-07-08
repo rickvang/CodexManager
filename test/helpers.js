@@ -1,6 +1,10 @@
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 export async function createTempRepo(files) {
   const root = await fs.mkdtemp(path.join(os.tmpdir(), "codex-prep-"));
@@ -10,6 +14,31 @@ export async function createTempRepo(files) {
     await fs.writeFile(absolutePath, content, "utf8");
   }
   return root;
+}
+
+export async function createGitRepo(files) {
+  const root = await createTempRepo(files);
+  await git(root, ["init"]);
+  await git(root, ["switch", "-c", "main"]);
+  await git(root, ["config", "user.email", "codex-prep@example.test"]);
+  await git(root, ["config", "user.name", "Codex Prep Tests"]);
+  await git(root, ["add", "."]);
+  await git(root, ["commit", "-m", "initial"]);
+  return root;
+}
+
+export async function git(root, args) {
+  try {
+    const { stdout, stderr } = await execFileAsync("git", args, {
+      cwd: root,
+      windowsHide: true,
+      maxBuffer: 1024 * 1024
+    });
+    return { stdout, stderr };
+  } catch (error) {
+    const detail = (error.stderr || error.message || "").trim();
+    throw new Error(`git ${args.join(" ")} failed${detail ? `: ${detail}` : ""}`);
+  }
 }
 
 export async function readTree(root) {

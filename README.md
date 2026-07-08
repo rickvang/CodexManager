@@ -17,7 +17,10 @@ node ./bin/codex-prep.js plan
 node ./bin/codex-prep.js plan --no-save
 node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
+node ./bin/codex-prep.js plan-review
 node ./bin/codex-prep.js plan-lint
+node ./bin/codex-prep.js plan-approve --note "Ready to build"
+node ./bin/codex-prep.js plan-start --branch codex/my-plan
 node ./bin/codex-prep.js plan-close --status implemented
 node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
@@ -36,7 +39,10 @@ From this repo, run:
 .\codex-prep.cmd scan --repo D:\path\to\repo
 .\codex-prep.cmd plan --repo D:\path\to\repo
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
+.\codex-prep.cmd plan-review --repo D:\path\to\repo
 .\codex-prep.cmd plan-lint --repo D:\path\to\repo
+.\codex-prep.cmd plan-approve --repo D:\path\to\repo --note "Ready to build"
+.\codex-prep.cmd plan-start --repo D:\path\to\repo --branch codex/my-plan
 .\codex-prep.cmd apply --repo D:\path\to\repo
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
@@ -92,15 +98,38 @@ Update the active plan as the conversation clarifies:
 ```powershell
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --note "User prefers a small first pass"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --goal "Add the planning quality gate"
-D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --success "plan-lint passes"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --success "plan-review shows build options"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --non-goal "No new dependencies"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --scope "Add CLI command" --file src/cli.js
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --validation "npm.cmd run verify"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --stop-rule "Stop after verify passes and capture follow-ups"
-D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --status approved
 ```
 
-Inspect or close the active plan:
+Review the active plan before build approval:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-review --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd plan-review --repo D:\path\to\repo --json
+```
+
+If `plan-review` reports errors, keep planning with `plan-update`. If it is lint-clean, choose either to keep planning or approve build:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-approve --repo D:\path\to\repo --note "Ready to build"
+D:\codexmanager\codex-prep.cmd plan-start --repo D:\path\to\repo --branch codex/my-plan
+```
+
+`plan-approve` records approval metadata only. It does not edit code, create branches, commit, or push.
+
+`plan-start` creates the implementation branch and records branch metadata. It requires an approved active plan and a clean non-plan worktree; `.codex-prep/plans/` is allowed because it is the plan state this workflow owns. It does not commit, push, merge, or implement code.
+
+Use `--sync-base` only when you explicitly want network-backed base refresh before branch creation:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-start --repo D:\path\to\repo --branch codex/my-plan --base main --sync-base
+```
+
+Inspect, lint, or close the active plan:
 
 ```powershell
 D:\codexmanager\codex-prep.cmd plan-status --repo D:\path\to\repo
@@ -108,7 +137,7 @@ D:\codexmanager\codex-prep.cmd plan-lint --repo D:\path\to\repo
 D:\codexmanager\codex-prep.cmd plan-close --repo D:\path\to\repo --status implemented --note "Built and verified"
 ```
 
-A saved plan is memory, not approval to edit. Editing still requires explicit user authorization.
+A saved plan is memory, not approval to edit. Plan approval, branch creation, file edits, commits, and pushes are separate decisions.
 
 ## Plan Lint
 

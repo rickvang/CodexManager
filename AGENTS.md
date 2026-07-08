@@ -14,6 +14,18 @@ File changes are allowed only when the user explicitly says "Apply this change",
 
 Committing and pushing require separate explicit authorization.
 
+## Planning Decision Gate
+
+A complete saved plan is not permission to edit files.
+
+After presenting a complete plan, offer the user two paths: keep planning, or approve build and start a dedicated branch.
+
+Treat "implement this plan" as build approval only when the active plan is lint-clean and the user explicitly authorizes implementation.
+
+Start approved implementation work on a dedicated branch, usually `codex/<short-plan-slug>`.
+
+Keep commit and push as separate explicit approvals.
+
 ## Repo Snapshot
 
 - Repo: codexmanager

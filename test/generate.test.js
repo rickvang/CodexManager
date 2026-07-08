@@ -20,7 +20,10 @@ test("generated bundle contains the durable repo learning loop files", async () 
     "docs/CODEBASE_MAP.md",
     "docs/CODEX_FEEDBACK.md"
   ]);
-  assert.equal(bundle.files.find((file) => file.path === "AGENTS.md").content.includes("Explore / Review"), true);
+  const agents = bundle.files.find((file) => file.path === "AGENTS.md").content;
+  assert.equal(agents.includes("Explore / Review"), true);
+  assert.equal(agents.includes("## Planning Decision Gate"), true);
+  assert.equal(agents.includes("approve build and start a dedicated branch"), true);
   assert.equal(bundle.files.find((file) => file.path === "docs/CODEBASE_MAP.md").content.includes("## V2 Ideas"), true);
 });
 

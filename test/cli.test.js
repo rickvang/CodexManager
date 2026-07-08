@@ -22,3 +22,17 @@ test("plan-close status must be terminal", async () => {
     /plan-close status must be implemented, superseded, or rejected/
   );
 });
+test("plan-start options are only accepted for plan-start", async () => {
+  await assert.rejects(
+    () => runCli(["plan-review", "--branch", "codex/work"]),
+    /--branch is only supported for plan-start/
+  );
+  await assert.rejects(
+    () => runCli(["plan-review", "--base", "main"]),
+    /--base is only supported for plan-start/
+  );
+  await assert.rejects(
+    () => runCli(["plan-review", "--sync-base"]),
+    /--sync-base is only supported for plan-start/
+  );
+});
