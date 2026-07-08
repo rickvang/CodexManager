@@ -63,6 +63,21 @@ test("lint reports missing skill frontmatter fields", async () => {
   assert.equal(result.findings.some((item) => item.rule === "skill-frontmatter-missing-field" && item.code === "CP011"), true);
 });
 
+test("lint accepts portable manifest roots", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  await withMutedConsole(async () => {
+    await applyCommand({ root, json: true });
+  });
+
+  const manifestPath = path.join(root, ".codex-prep", "manifest.json");
+  const manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
+
+  assert.equal(manifest.repo.root, ".");
+
+  const result = await lintRepo(root);
+  assert.equal(result.findings.some((item) => item.rule === "manifest-root-mismatch"), false);
+});
+
 test("lint treats Windows manifest path casing as equivalent", async (context) => {
   if (process.platform !== "win32") {
     context.skip("Windows-only path casing behavior");

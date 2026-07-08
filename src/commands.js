@@ -193,6 +193,10 @@ function finalizeManifest(manifest, previousManifest, writes) {
   return {
     ...manifest,
     generatedAt: now,
+    repo: {
+      ...manifest.repo,
+      root: "."
+    },
     generatedFiles: writes.map((write) => ({
       path: write.path,
       managed: true

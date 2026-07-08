@@ -3,7 +3,7 @@
   "generatedAt": "2026-07-08T14:32:27.530Z",
   "fingerprint": "6c7f4b19c7da06fc1d34aefced6b77ffa538d58aa1a7aa2d41babd6390ddf386",
   "repo": {
-    "root": "D:\\codexmanager",
+    "root": ".",
     "name": "codexmanager",
     "hasGit": true
   },

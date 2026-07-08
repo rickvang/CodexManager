@@ -97,7 +97,7 @@ async function lintManifest(root, findings, config, stalePathPatterns, secretPat
     }
   }
 
-  if (manifest.repo?.root && !samePath(manifest.repo.root, root)) {
+  if (manifest.repo?.root && !manifestRootMatches(manifest.repo.root, root)) {
     pushFinding(findings, config, "manifest-root-mismatch", {
       file: filePath,
       message: "manifest repo root " + manifest.repo.root + " does not match lint target " + root
@@ -183,6 +183,11 @@ function lintContentSafety(filePath, content, findings, config, stalePathPattern
   }
 }
 
+function manifestRootMatches(manifestRoot, root) {
+  const expectedRoot = path.isAbsolute(manifestRoot) ? manifestRoot : path.resolve(root, manifestRoot);
+  return samePath(expectedRoot, root);
+}
+
 function samePath(left, right) {
   const resolvedLeft = path.resolve(left);
   const resolvedRight = path.resolve(right);
@@ -231,5 +236,6 @@ export const internals = {
   extractFrontmatter,
   extractManagedContent,
   lintContentSafety,
+  manifestRootMatches,
   samePath
 };

@@ -39,6 +39,11 @@ test("apply writes the onboarding bundle idempotently", async () => {
   assert.equal(Boolean(first[".codex-prep/manifest.json"]), true);
   assert.equal(Boolean(first[".agents/skills/repo-onboarding/SKILL.md"]), true);
   assert.equal(Boolean(first[".agents/skills/code-review/SKILL.md"]), true);
+
+  const manifest = JSON.parse(first[".codex-prep/manifest.json"]);
+  assert.equal(manifest.repo.root, ".");
+  assert.equal(first["docs/CODEBASE_MAP.md"].includes(root), false);
+  assert.equal(first["docs/CODEBASE_MAP.md"].includes("- Root: `.`"), true);
 });
 
 test("check catches command drift after apply", async () => {
