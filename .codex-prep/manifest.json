@@ -10,6 +10,7 @@
   "summary": "Detected JavaScript repo with 4 command(s); source roots: src.",
   "discovery": {
     "topLevel": [
+      ".gitattributes",
       ".github",
       "README.md",
       "bin",
