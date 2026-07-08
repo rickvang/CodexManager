@@ -1,5 +1,7 @@
+import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { promisify } from "node:util";
 import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
 import {
@@ -14,6 +16,7 @@ import { lintPlan } from "./plan-lint.js";
 import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
 
+const execFileAsync = promisify(execFile);
 const PLAN_HISTORY_DIR = ".codex-prep/plans";
 const LATEST_PLAN_PATH = `${PLAN_HISTORY_DIR}/latest-plan.json`;
 const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
@@ -21,6 +24,8 @@ const PLAN_STATUSES = new Set(["draft", "approved", "implemented", "superseded",
 const TERMINAL_PLAN_STATUSES = new Set(["implemented", "superseded", "rejected"]);
 const PLAN_RISK_LEVELS = new Set(["low", "medium", "high"]);
 const PLAN_TARGET_AGENTS = new Set(["codex", "cursor", "claude-code", "generic"]);
+const PLAN_BUILD_STATUSES = new Set(["not_started", "approved", "in_progress"]);
+const DEFAULT_BASE_BRANCH = "main";
 const DEFAULT_STOP_RULES = [
   "Stop when the requested scope is implemented, listed validation passes, and remaining improvements are captured as follow-up work."
 ];
@@ -179,6 +184,124 @@ export async function planLintCommand({ root, json }) {
   return result;
 }
 
+export async function planReviewCommand({ root, json }) {
+  const current = await readActiveOrLatestPlan(root);
+  const lintResult = await runPlanLint(root, current);
+  const result = buildPlanReviewResult(lintResult);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPlanReview(result));
+  return result;
+}
+
+export async function planApproveCommand({ root, json, note, now }) {
+  if (!note) {
+    throw new Error("plan-approve requires --note <text>");
+  }
+
+  const current = await readActiveOrLatestPlan(root);
+  if (!current) {
+    throw new Error("no active plan found. Run codex-prep plan first.");
+  }
+
+  const lintResult = await runPlanLint(root, current);
+  if (!lintResult.ok) {
+    throw new Error("plan-approve requires a plan-lint pass. Run codex-prep plan-review and fix blocking findings first.");
+  }
+
+  const approvedAt = (now ?? new Date()).toISOString();
+  const approved = updatePlanDocument(current.plan, {
+    status: "approved",
+    note,
+    now: now ?? new Date(approvedAt),
+    event: "approved",
+    build: {
+      ...current.plan.build,
+      status: "approved",
+      approvedAt,
+      approvalNote: note
+    }
+  });
+  const writes = await writePlanState(root, approved, { includeHistory: true });
+  const result = { plan: approved, writes };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPlanMutation("codex-prep plan-approve", result));
+  return result;
+}
+
+export async function planStartCommand({ root, json, branch, base = DEFAULT_BASE_BRANCH, syncBase = false, now }) {
+  if (!branch) {
+    throw new Error("plan-start requires --branch <name>");
+  }
+
+  const current = await readActiveOrLatestPlan(root);
+  if (!current) {
+    throw new Error("no active plan found. Run codex-prep plan first.");
+  }
+  if (current.plan.build.status !== "approved") {
+    throw new Error("plan-start requires an approved plan. Run codex-prep plan-approve first.");
+  }
+
+  const lintResult = await runPlanLint(root, current);
+  if (!lintResult.ok) {
+    throw new Error("plan-start requires a plan-lint pass. Run codex-prep plan-review and fix blocking findings first.");
+  }
+
+  await assertCleanWorktree(root);
+
+  if (syncBase) {
+    await runGit(root, ["fetch", "origin", base]);
+    await runGit(root, ["switch", base]);
+    await runGit(root, ["pull", "--ff-only", "origin", base]);
+  }
+
+  const baseCommit = (await runGit(root, ["rev-parse", base])).stdout.trim();
+  await runGit(root, ["switch", "-c", branch, base]);
+
+  const startedAt = (now ?? new Date()).toISOString();
+  const started = updatePlanDocument(current.plan, {
+    note: `Started implementation branch ${branch} from ${base}@${baseCommit.slice(0, 12)}.`,
+    now: now ?? new Date(startedAt),
+    event: "started",
+    build: {
+      ...current.plan.build,
+      status: "in_progress",
+      branchName: branch,
+      baseBranch: base,
+      baseCommit,
+      startedAt
+    }
+  });
+  const writes = await writePlanState(root, started, { includeHistory: true });
+  const result = {
+    plan: started,
+    branch: {
+      name: branch,
+      baseBranch: base,
+      baseCommit,
+      syncBase
+    },
+    writes
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPlanStart(result));
+  return result;
+}
+
 export async function planCloseCommand({ root, json, status, note, now }) {
   if (!status) {
     throw new Error("plan-close requires --status implemented, superseded, or rejected");
@@ -237,6 +360,7 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
     ]),
     riskLevel: validatePlanRiskLevel(metadata.riskLevel ?? "medium"),
     targetAgent: validatePlanTargetAgent(metadata.targetAgent ?? "codex"),
+    build: defaultPlanBuild(),
     openQuestions: uniqueStrings(metadata.questions ?? []),
     proposedWrites: bundle.files.map((file) => ({
       path: file.path,
@@ -262,7 +386,7 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
 async function saveNewPlan(root, proposal, now, note) {
   const savedAt = now.toISOString();
   const plan = normalizePlan({
-    schemaVersion: 2,
+    schemaVersion: 3,
     kind: "codex-prep-plan",
     status: "draft",
     savedAt,
@@ -324,6 +448,7 @@ function updatePlanDocument(plan, change) {
     approvalBoundaries: appendUnique(plan.approvalBoundaries, change.approvalBoundaries),
     riskLevel: change.riskLevel === undefined ? plan.riskLevel : validatePlanRiskLevel(change.riskLevel),
     targetAgent: change.targetAgent === undefined ? plan.targetAgent : validatePlanTargetAgent(change.targetAgent),
+    build: change.build ? normalizePlanBuild({ ...plan.build, ...change.build }) : normalizePlanBuild(plan.build),
     openQuestions: appendUnique(plan.openQuestions, change.questions)
   });
 
@@ -340,6 +465,7 @@ function updatePlanDocument(plan, change) {
   if ((change.approvalBoundaries ?? []).length > 0) changes.push("approval-boundaries");
   if (change.riskLevel !== undefined) changes.push(`risk:${next.riskLevel}`);
   if (change.targetAgent !== undefined) changes.push(`target-agent:${next.targetAgent}`);
+  if (change.build?.status !== undefined) changes.push(`build:${next.build.status}`);
   if ((change.questions ?? []).length > 0) changes.push("questions");
 
   next.decisionLog = [
@@ -397,6 +523,7 @@ function normalizePlan(plan) {
     approvalBoundaries: uniqueStrings(plan.approvalBoundaries ?? []),
     riskLevel: normalizePlanRiskLevel(plan.riskLevel),
     targetAgent: normalizePlanTargetAgent(plan.targetAgent),
+    build: normalizePlanBuild(plan.build),
     openQuestions: uniqueStrings(plan.openQuestions ?? []),
     decisionLog: Array.isArray(plan.decisionLog) ? plan.decisionLog : [],
     proposedWrites: Array.isArray(plan.proposedWrites) ? plan.proposedWrites : [],
@@ -439,6 +566,36 @@ function normalizePlanTargetAgent(value) {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
+function defaultPlanBuild() {
+  return {
+    status: "not_started",
+    branchName: "",
+    baseBranch: "",
+    baseCommit: "",
+    startedAt: "",
+    approvedAt: "",
+    approvalNote: ""
+  };
+}
+
+function normalizePlanBuild(build = {}) {
+  const fallback = defaultPlanBuild();
+  const status = typeof build?.status === "string" && PLAN_BUILD_STATUSES.has(build.status) ? build.status : fallback.status;
+  return {
+    status,
+    branchName: stringOrEmpty(build?.branchName),
+    baseBranch: stringOrEmpty(build?.baseBranch),
+    baseCommit: stringOrEmpty(build?.baseCommit),
+    startedAt: stringOrEmpty(build?.startedAt),
+    approvedAt: stringOrEmpty(build?.approvedAt),
+    approvalNote: stringOrEmpty(build?.approvalNote)
+  };
+}
+
+function stringOrEmpty(value) {
+  return typeof value === "string" ? value : "";
+}
+
 function defaultDecisionNote(event, changes) {
   if (changes.length === 0) {
     return event === "closed" ? "Plan closed." : "Plan updated.";
@@ -456,6 +613,93 @@ function uniqueStrings(values) {
 
 function safeTimestamp(value) {
   return value.replace(/[:.]/g, "-");
+}
+
+async function runPlanLint(root, current) {
+  const config = await loadConfig(root);
+  const manifest = await scanRepo(root);
+  return lintPlan({ plan: current?.plan, source: current?.path, manifest, config });
+}
+
+function buildPlanReviewResult(lintResult) {
+  const readyToBuild = Boolean(lintResult.plan) && lintResult.ok;
+  const suggestedBranch = lintResult.plan ? suggestPlanBranch(lintResult.plan) : undefined;
+  return {
+    readyToBuild,
+    source: lintResult.source,
+    suggestedBranch,
+    plan: lintResult.plan,
+    findings: lintResult.findings,
+    nextActions: buildPlanNextActions({ readyToBuild, suggestedBranch, hasPlan: Boolean(lintResult.plan) })
+  };
+}
+
+function buildPlanNextActions({ readyToBuild, suggestedBranch, hasPlan }) {
+  if (!hasPlan) {
+    return [
+      action("Create plan", "codex-prep plan", "Create an active saved plan before build approval."),
+      action("Keep exploring", "codex-prep scan", "Inspect the repo and decide what the plan should include.")
+    ];
+  }
+
+  if (!readyToBuild) {
+    return [
+      action("Continue planning", "codex-prep plan-update --success \"...\" --stop-rule \"...\"", "Add the missing plan details shown in the findings."),
+      action("Review again", "codex-prep plan-review", "Run this again after updating the active plan.")
+    ];
+  }
+
+  return [
+    action("Continue planning", "codex-prep plan-update --note \"...\"", "Add more detail before approving build."),
+    action("Approve build", "codex-prep plan-approve --note \"Ready to build\"", "Record explicit build approval without editing code."),
+    action("Start branch", `codex-prep plan-start --branch ${suggestedBranch}`, "After approval, create the dedicated implementation branch.")
+  ];
+}
+
+function action(label, command, description) {
+  return { label, command, description };
+}
+
+function suggestPlanBranch(plan) {
+  const source = plan.goal || plan.userIntent || plan.repo?.name || "work";
+  const slug = source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48)
+    .replace(/-+$/g, "");
+  return `codex/${slug || "work"}`;
+}
+
+async function assertCleanWorktree(root) {
+  const status = (await runGit(root, ["status", "--porcelain", "--untracked-files=all"])).stdout.trim();
+  const blocking = status
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .filter((line) => !isPlanStateStatusLine(line));
+
+  if (blocking.length > 0) {
+    throw new Error("plan-start requires a clean worktree outside .codex-prep/plans. Commit, stash, or discard current changes first.");
+  }
+}
+
+function isPlanStateStatusLine(line) {
+  const file = line.slice(3).replace(/\\/g, "/");
+  return file.startsWith(".codex-prep/plans/");
+}
+
+async function runGit(root, args) {
+  try {
+    const { stdout, stderr } = await execFileAsync("git", args, {
+      cwd: root,
+      windowsHide: true,
+      maxBuffer: 1024 * 1024
+    });
+    return { stdout, stderr };
+  } catch (error) {
+    const detail = (error.stderr || error.message || "").trim();
+    throw new Error(`git ${args.join(" ")} failed${detail ? `: ${detail}` : ""}`);
+  }
 }
 
 export async function applyCommand({ root, json }) {
@@ -770,6 +1014,8 @@ function formatPlanStatus(result) {
     `Intent: ${plan.userIntent || "none recorded"}`,
     `Risk: ${plan.riskLevel || "medium"}`,
     `Target agent: ${plan.targetAgent || "none recorded"}`,
+    `Build: ${plan.build.status}`,
+    `Branch: ${plan.build.branchName || "none"}`,
     "",
     "Success criteria:",
     ...formatList(plan.successCriteria),
@@ -835,6 +1081,39 @@ function formatEval(result) {
   ].join("\n");
 }
 
+function formatPlanReview(result) {
+  const lines = [
+    `codex-prep plan-review: ${result.readyToBuild ? "ready to build" : "keep planning"}`,
+    "",
+    `Source: ${result.source || "none"}`,
+    `Suggested branch: ${result.suggestedBranch || "none"}`,
+    "",
+    "Findings:",
+    ...formatFindings(result.findings),
+    "",
+    "Next actions:",
+    ...result.nextActions.map((item) => `- ${item.label}: ${item.command} (${item.description})`)
+  ];
+  return lines.join("\n");
+}
+
+function formatPlanStart(result) {
+  return [
+    "codex-prep plan-start: in_progress",
+    "",
+    `Branch: ${result.branch.name}`,
+    `Base: ${result.branch.baseBranch}@${result.branch.baseCommit.slice(0, 12)}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
+
+function formatFindings(findings = []) {
+  return findings.length > 0
+    ? findings.map((item) => `- [${item.level}] ${item.code} ${item.file || "plan"}: ${item.message} Fix: ${item.fix}`)
+    : ["- none"];
+}
+
 function formatPlanLint(result) {
   if (result.findings.length === 0) {
     return "codex-prep plan-lint: pass\n\nPlan is ready for implementation review.";
@@ -864,9 +1143,11 @@ function printJson(value) {
 
 export const internals = {
   buildPlanProposal,
+  buildPlanReviewResult,
   finalizeManifest,
   normalizePlan,
   runEvalScenarios,
   safeTimestamp,
+  suggestPlanBranch,
   updatePlanDocument
 };

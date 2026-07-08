@@ -27,6 +27,7 @@ test("normalizePlan backfills planning quality fields for legacy plans", () => {
   assert.deepEqual(plan.approvalBoundaries, []);
   assert.equal(plan.riskLevel, "medium");
   assert.equal(plan.targetAgent, "");
+  assert.equal(plan.build.status, "not_started");
 });
 
 test("plan-update records planning quality fields", async () => {

@@ -66,6 +66,18 @@ File changes are allowed only when the user explicitly says "Apply this change",
 
 Committing and pushing require separate explicit authorization.
 
+## Planning Decision Gate
+
+A complete saved plan is not permission to edit files.
+
+After presenting a complete plan, offer the user two paths: keep planning, or approve build and start a dedicated branch.
+
+Treat "implement this plan" as build approval only when the active plan is lint-clean and the user explicitly authorizes implementation.
+
+Start approved implementation work on a dedicated branch, usually \`codex/<short-plan-slug>\`.
+
+Keep commit and push as separate explicit approvals.
+
 ## Repo Snapshot
 
 - Repo: ${manifest.repo.name}
@@ -176,7 +188,9 @@ description: Orient inside this repository before coding. Use when the user asks
 3. Separate inspected evidence from assumptions.
 4. Name relevant validation commands from \`AGENTS.md\`; do not invent commands.
 5. If the map is stale, recommend \`codex-prep check\` or \`codex-prep refresh-map\`.
-6. Stay in Explore / Review mode unless the user explicitly authorizes edits.`;
+6. For saved implementation plans, run \`codex-prep plan-review\` before build approval.
+7. Treat plan approval, branch creation, file edits, commits, and pushes as separate user decisions.
+8. Stay in Explore / Review mode unless the user explicitly authorizes edits.`;
 }
 
 function buildCodeReviewSkill() {
