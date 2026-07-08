@@ -13,6 +13,12 @@ import { lintRepo } from "./lint.js";
 import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
 
+const PLAN_HISTORY_DIR = ".codex-prep/plans";
+const LATEST_PLAN_PATH = `${PLAN_HISTORY_DIR}/latest-plan.json`;
+const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
+const PLAN_STATUSES = new Set(["draft", "approved", "implemented", "superseded", "rejected"]);
+const TERMINAL_PLAN_STATUSES = new Set(["implemented", "superseded", "rejected"]);
+
 export async function scanCommand({ root, json }) {
   const manifest = await scanRepo(root);
   if (json) {
@@ -22,12 +28,124 @@ export async function scanCommand({ root, json }) {
   console.log(formatScan(manifest));
 }
 
-export async function planCommand({ root, json }) {
+export async function planCommand({
+  root,
+  json,
+  save = true,
+  now,
+  intent,
+  note,
+  scope = [],
+  files = [],
+  validation = [],
+  questions = []
+}) {
   const manifest = await scanRepo(root);
   const bundle = buildBundle(manifest);
-  const proposal = {
+  const proposal = buildPlanProposal(manifest, bundle, { intent, scope, files, validation, questions });
+  const savedPlan = save ? await saveNewPlan(root, proposal, now ?? new Date(), note) : undefined;
+
+  if (json) {
+    printJson(savedPlan ? { ...proposal, savedPlan } : proposal);
+    return;
+  }
+
+  console.log(formatPlan(proposal, savedPlan));
+}
+
+export async function planUpdateCommand({
+  root,
+  json,
+  intent,
+  note,
+  status,
+  scope = [],
+  files = [],
+  validation = [],
+  questions = [],
+  now
+}) {
+  const current = await readActiveOrLatestPlan(root);
+  if (!current) {
+    throw new Error("no active plan found. Run codex-prep plan first.");
+  }
+
+  const updated = updatePlanDocument(current.plan, {
+    intent,
+    note,
+    status,
+    scope,
+    files,
+    validation,
+    questions,
+    now: now ?? new Date(),
+    event: "updated"
+  });
+  const writes = await writePlanState(root, updated, { includeHistory: true });
+  const result = { plan: updated, writes };
+
+  if (json) {
+    printJson(result);
+    return;
+  }
+
+  console.log(formatPlanMutation("codex-prep plan-update", result));
+}
+
+export async function planStatusCommand({ root, json }) {
+  const current = await readActiveOrLatestPlan(root);
+  const result = current ? { exists: true, source: current.path, plan: current.plan } : { exists: false };
+
+  if (json) {
+    printJson(result);
+    return;
+  }
+
+  console.log(formatPlanStatus(result));
+}
+
+export async function planCloseCommand({ root, json, status, note, now }) {
+  if (!status) {
+    throw new Error("plan-close requires --status implemented, superseded, or rejected");
+  }
+  if (!TERMINAL_PLAN_STATUSES.has(status)) {
+    throw new Error("plan-close status must be implemented, superseded, or rejected");
+  }
+
+  const current = await readActiveOrLatestPlan(root);
+  if (!current) {
+    throw new Error("no active plan found. Run codex-prep plan first.");
+  }
+
+  const closed = updatePlanDocument(current.plan, {
+    status,
+    note,
+    now: now ?? new Date(),
+    event: "closed"
+  });
+  const writes = await writePlanState(root, closed, { includeHistory: true });
+  const result = { plan: closed, writes };
+
+  if (json) {
+    printJson(result);
+    return;
+  }
+
+  console.log(formatPlanMutation("codex-prep plan-close", result));
+}
+
+function buildPlanProposal(manifest, bundle, metadata = {}) {
+  return {
     repo: manifest.repo,
     summary: manifest.summary,
+    userIntent: metadata.intent ?? "",
+    proposedScope: uniqueStrings(metadata.scope ?? []),
+    filesLikelyTouched: uniqueStrings(metadata.files ?? []),
+    validationPlan: uniqueStrings([
+      ...manifest.discovery.commands.map((command) => command.command),
+      ...(metadata.validation ?? [])
+    ]),
+    openQuestions: uniqueStrings(metadata.questions ?? []),
     proposedWrites: bundle.files.map((file) => ({
       path: file.path,
       mode: file.mode,
@@ -47,13 +165,153 @@ export async function planCommand({ root, json }) {
     assumptions: manifest.assumptions,
     evidence: manifest.evidence
   };
+}
 
-  if (json) {
-    printJson(proposal);
-    return;
+async function saveNewPlan(root, proposal, now, note) {
+  const savedAt = now.toISOString();
+  const plan = normalizePlan({
+    schemaVersion: 1,
+    kind: "codex-prep-plan",
+    status: "draft",
+    savedAt,
+    updatedAt: savedAt,
+    ...proposal,
+    repo: {
+      ...proposal.repo,
+      root: "."
+    },
+    decisionLog: [
+      {
+        at: savedAt,
+        event: "created",
+        note: note || "Plan generated from repo scan."
+      }
+    ]
+  });
+  const writes = await writePlanState(root, plan, { includeHistory: true });
+
+  return {
+    savedAt,
+    files: writes
+  };
+}
+
+async function readActiveOrLatestPlan(root) {
+  const active = await readJsonIfExists(path.join(root, ACTIVE_PLAN_PATH));
+  if (active) {
+    return { path: ACTIVE_PLAN_PATH, plan: normalizePlan(active) };
   }
 
-  console.log(formatPlan(proposal));
+  const latest = await readJsonIfExists(path.join(root, LATEST_PLAN_PATH));
+  if (latest) {
+    return { path: LATEST_PLAN_PATH, plan: normalizePlan(latest) };
+  }
+
+  return undefined;
+}
+
+function updatePlanDocument(plan, change) {
+  const updatedAt = change.now.toISOString();
+  const nextStatus = change.status ?? plan.status ?? "draft";
+  validatePlanStatus(nextStatus);
+
+  const changes = [];
+  const next = normalizePlan({
+    ...plan,
+    status: nextStatus,
+    updatedAt,
+    userIntent: change.intent ?? plan.userIntent ?? "",
+    proposedScope: appendUnique(plan.proposedScope, change.scope),
+    filesLikelyTouched: appendUnique(plan.filesLikelyTouched, change.files),
+    validationPlan: appendUnique(plan.validationPlan, change.validation),
+    openQuestions: appendUnique(plan.openQuestions, change.questions)
+  });
+
+  if (change.intent !== undefined) changes.push("intent");
+  if (change.status !== undefined) changes.push(`status:${change.status}`);
+  if ((change.scope ?? []).length > 0) changes.push("scope");
+  if ((change.files ?? []).length > 0) changes.push("files");
+  if ((change.validation ?? []).length > 0) changes.push("validation");
+  if ((change.questions ?? []).length > 0) changes.push("questions");
+
+  next.decisionLog = [
+    ...next.decisionLog,
+    {
+      at: updatedAt,
+      event: change.event,
+      note: change.note || defaultDecisionNote(change.event, changes)
+    }
+  ];
+
+  return next;
+}
+
+async function writePlanState(root, plan, { includeHistory }) {
+  const writes = [];
+  if (includeHistory) {
+    const historyPath = `${PLAN_HISTORY_DIR}/${safeTimestamp(plan.updatedAt)}-plan.json`;
+    const historyResult = await writeJsonIfChanged(path.join(root, historyPath), plan);
+    writes.push({ path: historyPath, changed: historyResult.changed });
+  }
+
+  const latestResult = await writeJsonIfChanged(path.join(root, LATEST_PLAN_PATH), plan);
+  const activeResult = await writeJsonIfChanged(path.join(root, ACTIVE_PLAN_PATH), plan);
+  writes.push({ path: LATEST_PLAN_PATH, changed: latestResult.changed });
+  writes.push({ path: ACTIVE_PLAN_PATH, changed: activeResult.changed });
+
+  return writes;
+}
+
+function normalizePlan(plan) {
+  const status = plan.status ?? "draft";
+  validatePlanStatus(status);
+
+  return {
+    schemaVersion: plan.schemaVersion ?? 1,
+    kind: plan.kind ?? "codex-prep-plan",
+    status,
+    savedAt: plan.savedAt,
+    updatedAt: plan.updatedAt ?? plan.savedAt,
+    repo: {
+      ...(plan.repo ?? {}),
+      root: "."
+    },
+    summary: plan.summary ?? "",
+    userIntent: plan.userIntent ?? "",
+    proposedScope: uniqueStrings(plan.proposedScope ?? []),
+    filesLikelyTouched: uniqueStrings(plan.filesLikelyTouched ?? []),
+    validationPlan: uniqueStrings(plan.validationPlan ?? []),
+    openQuestions: uniqueStrings(plan.openQuestions ?? []),
+    decisionLog: Array.isArray(plan.decisionLog) ? plan.decisionLog : [],
+    proposedWrites: Array.isArray(plan.proposedWrites) ? plan.proposedWrites : [],
+    assumptions: Array.isArray(plan.assumptions) ? plan.assumptions : [],
+    evidence: Array.isArray(plan.evidence) ? plan.evidence : []
+  };
+}
+
+function validatePlanStatus(status) {
+  if (!PLAN_STATUSES.has(status)) {
+    throw new Error(`invalid plan status "${status}". Expected one of: ${[...PLAN_STATUSES].join(", ")}`);
+  }
+}
+
+function defaultDecisionNote(event, changes) {
+  if (changes.length === 0) {
+    return event === "closed" ? "Plan closed." : "Plan updated.";
+  }
+  return `Plan ${event}: ${changes.join(", ")}.`;
+}
+
+function appendUnique(existing = [], additions = []) {
+  return uniqueStrings([...(existing ?? []), ...(additions ?? [])]);
+}
+
+function uniqueStrings(values) {
+  return [...new Set((values ?? []).filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim()))];
+}
+
+function safeTimestamp(value) {
+  return value.replace(/[:.]/g, "-");
 }
 
 export async function applyCommand({ root, json }) {
@@ -313,8 +571,8 @@ function formatScan(manifest) {
   return lines.join("\n");
 }
 
-function formatPlan(proposal) {
-  return [
+function formatPlan(proposal, savedPlan) {
+  const lines = [
     `codex-prep plan: ${proposal.repo.name}`,
     "",
     proposal.summary,
@@ -322,9 +580,69 @@ function formatPlan(proposal) {
     "Proposed writes:",
     ...proposal.proposedWrites.map((write) => `- ${write.path} (${write.mode}): ${write.reason}`),
     "",
+    "Validation plan:",
+    ...formatList(proposal.validationPlan),
+    "",
     "Assumptions:",
-    ...proposal.assumptions.map((assumption) => `- ${assumption}`)
+    ...formatList(proposal.assumptions)
+  ];
+
+  if (savedPlan) {
+    lines.push(
+      "",
+      "Saved plan:",
+      ...savedPlan.files.map((file) => `- ${file.changed ? "updated" : "unchanged"} ${relativePath(file.path)}`)
+    );
+  }
+
+  return lines.join("\n");
+}
+
+function formatPlanMutation(title, result) {
+  return [
+    `${title}: ${result.plan.status}`,
+    "",
+    `Intent: ${result.plan.userIntent || "none recorded"}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
   ].join("\n");
+}
+
+function formatPlanStatus(result) {
+  if (!result.exists) {
+    return "codex-prep plan-status: none\n\nNo active plan found. Run codex-prep plan to create one.";
+  }
+
+  const plan = result.plan;
+  const recentDecisions = plan.decisionLog.slice(-3).map((item) => `${item.at} ${item.event}: ${item.note}`);
+  return [
+    `codex-prep plan-status: ${plan.status}`,
+    "",
+    `Source: ${result.source}`,
+    `Repo: ${plan.repo?.name || "unknown"}`,
+    `Saved: ${plan.savedAt || "unknown"}`,
+    `Updated: ${plan.updatedAt || "unknown"}`,
+    `Intent: ${plan.userIntent || "none recorded"}`,
+    "",
+    "Scope:",
+    ...formatList(plan.proposedScope),
+    "",
+    "Likely touched files:",
+    ...formatList(plan.filesLikelyTouched),
+    "",
+    "Validation:",
+    ...formatList(plan.validationPlan),
+    "",
+    "Open questions:",
+    ...formatList(plan.openQuestions),
+    "",
+    "Recent decisions:",
+    ...formatList(recentDecisions)
+  ].join("\n");
+}
+
+function formatList(values) {
+  return values.length > 0 ? values.map((value) => `- ${value}`) : ["- none"];
 }
 
 function formatApply(result) {
@@ -371,6 +689,10 @@ function printJson(value) {
 }
 
 export const internals = {
+  buildPlanProposal,
   finalizeManifest,
-  runEvalScenarios
+  normalizePlan,
+  runEvalScenarios,
+  safeTimestamp,
+  updatePlanDocument
 };

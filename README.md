@@ -14,6 +14,10 @@ The goal is a repo learning loop:
 ```powershell
 node ./bin/codex-prep.js scan
 node ./bin/codex-prep.js plan
+node ./bin/codex-prep.js plan --no-save
+node ./bin/codex-prep.js plan-update --note "User clarified the scope"
+node ./bin/codex-prep.js plan-status
+node ./bin/codex-prep.js plan-close --status implemented
 node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
@@ -30,6 +34,7 @@ From this repo, run:
 ```powershell
 .\codex-prep.cmd scan --repo D:\path\to\repo
 .\codex-prep.cmd plan --repo D:\path\to\repo
+.\codex-prep.cmd plan-status --repo D:\path\to\repo
 .\codex-prep.cmd apply --repo D:\path\to\repo
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
@@ -59,6 +64,44 @@ npm.cmd run verify
 ```
 
 It runs unit tests, managed-file lint, drift detection, and the eval harness. GitHub Actions runs the same gate on pushes to `main` and pull requests.
+
+## Planning Loop
+
+`plan` autosaves by default. This lets Codex keep a durable draft while you are still in Explore / Review mode, before you approve implementation:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan --repo D:\path\to\repo --intent "Add the linter MVP"
+```
+
+Saved plans are written to `.codex-prep/plans/`:
+
+- timestamped plan snapshots
+- `latest-plan.json`
+- `active-plan.json`
+
+Use `--no-save` for preview-only behavior:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan --repo D:\path\to\repo --no-save
+```
+
+Update the active plan as the conversation clarifies:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --note "User prefers a small first pass"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --scope "Add CLI command" --file src/cli.js
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --validation "npm.cmd run verify"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --status approved
+```
+
+Inspect or close the active plan:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-status --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd plan-close --repo D:\path\to\repo --status implemented --note "Built and verified"
+```
+
+A saved plan is memory, not approval to edit. Editing still requires explicit user authorization.
 
 ## Generated Bundle
 
