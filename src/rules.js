@@ -154,6 +154,96 @@ export const RULES = {
     defaultLevel: "warning",
     description: "A new workspace package appeared since the last apply.",
     fix: "Review the package and run codex-prep apply if it should be documented."
+  },
+  "plan-missing": {
+    id: "CP201",
+    defaultLevel: "error",
+    description: "No active saved plan exists.",
+    fix: "Run codex-prep plan to create a reviewable plan before implementation."
+  },
+  "plan-missing-goal": {
+    id: "CP202",
+    defaultLevel: "error",
+    description: "The plan does not state a clear goal or user intent.",
+    fix: "Add --goal or --intent so the implementation target is explicit."
+  },
+  "plan-missing-success-criteria": {
+    id: "CP203",
+    defaultLevel: "error",
+    description: "The plan does not define success criteria.",
+    fix: "Add one or more --success entries describing what done means."
+  },
+  "plan-missing-validation": {
+    id: "CP204",
+    defaultLevel: "error",
+    description: "The plan does not include a validation path.",
+    fix: "Add --validation entries for the commands or checks that prove the work."
+  },
+  "plan-missing-stop-rules": {
+    id: "CP205",
+    defaultLevel: "error",
+    description: "The plan does not include stop rules.",
+    fix: "Add --stop-rule entries that say when validation is enough and what becomes follow-up work."
+  },
+  "plan-high-risk-missing-approval-boundaries": {
+    id: "CP206",
+    defaultLevel: "error",
+    description: "A high-risk plan does not state approval boundaries.",
+    fix: "Add --approval-boundary entries for edits, commits, pushes, migrations, deploys, or destructive actions."
+  },
+  "plan-risky-action-missing-permission-gate": {
+    id: "CP207",
+    defaultLevel: "error",
+    description: "The plan mentions risky or external-state-changing work without explicit permission gates.",
+    fix: "Add both --approval-boundary and --forbidden-action entries before implementing risky work."
+  },
+  "plan-missing-files": {
+    id: "CP208",
+    defaultLevel: "warning",
+    description: "The plan does not list likely touched files or paths.",
+    fix: "Add --file entries for expected implementation areas, or document why the scope is not file-bound."
+  },
+  "plan-missing-non-goals": {
+    id: "CP209",
+    defaultLevel: "warning",
+    description: "The plan does not list non-goals.",
+    fix: "Add --non-goal entries to keep adjacent work from drifting into scope."
+  },
+  "plan-too-many-open-questions": {
+    id: "CP210",
+    defaultLevel: "warning",
+    description: "The plan has more than three open questions.",
+    fix: "Resolve or group questions so the next planning turn has a small decision surface."
+  },
+  "plan-missing-target-agent": {
+    id: "CP211",
+    defaultLevel: "warning",
+    description: "The plan does not name a target agent or editor surface.",
+    fix: "Add --target-agent codex, cursor, claude-code, or generic."
+  },
+  "plan-validation-ignores-detected-commands": {
+    id: "CP212",
+    defaultLevel: "warning",
+    description: "The validation plan does not mention any command detected from the repo.",
+    fix: "Use a detected package script when it is relevant, or record why a different validation path is better."
+  },
+  "plan-web-missing-browser-validation": {
+    id: "CP213",
+    defaultLevel: "warning",
+    description: "The repo looks like a web UI but the plan has no browser-facing validation path.",
+    fix: "Add an existing browser or UI validation command, or note why unit checks are enough for this change."
+  },
+  "plan-playwright-validation-available": {
+    id: "CP214",
+    defaultLevel: "warning",
+    description: "Playwright appears to be available but the plan does not mention it.",
+    fix: "Add the detected Playwright validation command when the change affects browser behavior."
+  },
+  "plan-secret-looking-content": {
+    id: "CP215",
+    defaultLevel: "error",
+    description: "The plan contains text that looks like a secret.",
+    fix: "Remove the secret-looking value from the plan and rotate it if it was real."
   }
 };
 

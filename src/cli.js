@@ -6,6 +6,7 @@ import {
   lintCommand,
   planCloseCommand,
   planCommand,
+  planLintCommand,
   planStatusCommand,
   planUpdateCommand,
   refreshMapCommand,
@@ -17,6 +18,7 @@ const COMMANDS = new Set([
   "plan",
   "plan-update",
   "plan-status",
+  "plan-lint",
   "plan-close",
   "apply",
   "check",
@@ -53,7 +55,15 @@ export async function runCli(argv) {
       scope: options.scope,
       files: options.files,
       validation: options.validation,
-      questions: options.questions
+      questions: options.questions,
+      goal: options.goal,
+      successCriteria: options.successCriteria,
+      nonGoals: options.nonGoals,
+      stopRules: options.stopRules,
+      forbiddenActions: options.forbiddenActions,
+      approvalBoundaries: options.approvalBoundaries,
+      riskLevel: options.riskLevel,
+      targetAgent: options.targetAgent
     });
   } else if (command === "plan-update") {
     await planUpdateCommand({
@@ -64,10 +74,20 @@ export async function runCli(argv) {
       scope: options.scope,
       files: options.files,
       validation: options.validation,
-      questions: options.questions
+      questions: options.questions,
+      goal: options.goal,
+      successCriteria: options.successCriteria,
+      nonGoals: options.nonGoals,
+      stopRules: options.stopRules,
+      forbiddenActions: options.forbiddenActions,
+      approvalBoundaries: options.approvalBoundaries,
+      riskLevel: options.riskLevel,
+      targetAgent: options.targetAgent
     });
   } else if (command === "plan-status") {
     await planStatusCommand(common);
+  } else if (command === "plan-lint") {
+    await planLintCommand(common);
   } else if (command === "plan-close") {
     await planCloseCommand({ ...common, status: options.status, note: options.note });
   } else if (command === "apply") {
@@ -96,7 +116,15 @@ function parseArgs(argv) {
     scope: [],
     files: [],
     validation: [],
-    questions: []
+    questions: [],
+    goal: undefined,
+    successCriteria: [],
+    nonGoals: [],
+    stopRules: [],
+    forbiddenActions: [],
+    approvalBoundaries: [],
+    riskLevel: undefined,
+    targetAgent: undefined
   };
   let command;
 
@@ -140,6 +168,30 @@ function parseArgs(argv) {
     } else if (value === "--question") {
       options.questions.push(readOptionValue(argv, i, value));
       i += 1;
+    } else if (value === "--goal") {
+      options.goal = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--success") {
+      options.successCriteria.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--non-goal") {
+      options.nonGoals.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--stop-rule") {
+      options.stopRules.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--forbidden-action") {
+      options.forbiddenActions.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--approval-boundary") {
+      options.approvalBoundaries.push(readOptionValue(argv, i, value));
+      i += 1;
+    } else if (value === "--risk") {
+      options.riskLevel = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--target-agent") {
+      options.targetAgent = readOptionValue(argv, i, value);
+      i += 1;
     } else {
       throw new Error(`unknown option "${value}"`);
     }
@@ -157,13 +209,14 @@ function readOptionValue(argv, index, optionName) {
 }
 
 function validateOptions(command, options) {
+  const planningCommands = ["plan", "plan-update"];
   if (options.save && command !== "plan") {
     throw new Error("--save is only supported for the plan command");
   }
   if (options.noSave && command !== "plan") {
     throw new Error("--no-save is only supported for the plan command");
   }
-  if (options.intent && !["plan", "plan-update"].includes(command)) {
+  if (options.intent && !planningCommands.includes(command)) {
     throw new Error("--intent is only supported for plan and plan-update");
   }
   if (options.note && !["plan", "plan-update", "plan-close"].includes(command)) {
@@ -172,17 +225,41 @@ function validateOptions(command, options) {
   if (options.status && !["plan-update", "plan-close"].includes(command)) {
     throw new Error("--status is only supported for plan-update and plan-close");
   }
-  if (hasAny(options.scope) && !["plan", "plan-update"].includes(command)) {
+  if (hasAny(options.scope) && !planningCommands.includes(command)) {
     throw new Error("--scope is only supported for plan and plan-update");
   }
-  if (hasAny(options.files) && !["plan", "plan-update"].includes(command)) {
+  if (hasAny(options.files) && !planningCommands.includes(command)) {
     throw new Error("--file is only supported for plan and plan-update");
   }
-  if (hasAny(options.validation) && !["plan", "plan-update"].includes(command)) {
+  if (hasAny(options.validation) && !planningCommands.includes(command)) {
     throw new Error("--validation is only supported for plan and plan-update");
   }
-  if (hasAny(options.questions) && !["plan", "plan-update"].includes(command)) {
+  if (hasAny(options.questions) && !planningCommands.includes(command)) {
     throw new Error("--question is only supported for plan and plan-update");
+  }
+  if (options.goal && !planningCommands.includes(command)) {
+    throw new Error("--goal is only supported for plan and plan-update");
+  }
+  if (hasAny(options.successCriteria) && !planningCommands.includes(command)) {
+    throw new Error("--success is only supported for plan and plan-update");
+  }
+  if (hasAny(options.nonGoals) && !planningCommands.includes(command)) {
+    throw new Error("--non-goal is only supported for plan and plan-update");
+  }
+  if (hasAny(options.stopRules) && !planningCommands.includes(command)) {
+    throw new Error("--stop-rule is only supported for plan and plan-update");
+  }
+  if (hasAny(options.forbiddenActions) && !planningCommands.includes(command)) {
+    throw new Error("--forbidden-action is only supported for plan and plan-update");
+  }
+  if (hasAny(options.approvalBoundaries) && !planningCommands.includes(command)) {
+    throw new Error("--approval-boundary is only supported for plan and plan-update");
+  }
+  if (options.riskLevel && !planningCommands.includes(command)) {
+    throw new Error("--risk is only supported for plan and plan-update");
+  }
+  if (options.targetAgent && !planningCommands.includes(command)) {
+    throw new Error("--target-agent is only supported for plan and plan-update");
   }
 }
 
@@ -198,6 +275,7 @@ Usage:
   codex-prep plan [--repo <path>] [--json] [--no-save]
   codex-prep plan-update [--repo <path>] [--note <text>] [--status <status>]
   codex-prep plan-status [--repo <path>] [--json]
+  codex-prep plan-lint [--repo <path>] [--json]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
 
 Commands:
@@ -205,6 +283,7 @@ Commands:
   plan         Preview and autosave the onboarding plan draft.
   plan-update  Update the active saved plan before implementation approval.
   plan-status  Show the active saved plan.
+  plan-lint    Check whether the active saved plan is ready to implement.
   plan-close   Mark the active saved plan as implemented, superseded, or rejected.
   apply        Write or refresh the Codex onboarding bundle.
   check        Detect stale generated guidance and obvious repo drift.
@@ -221,12 +300,24 @@ Planning options:
   --validation TEXT
                   Append a validation step.
   --question TEXT Append an open question.
+  --goal TEXT     Set the plan goal.
+  --success TEXT  Append a success criterion.
+  --non-goal TEXT Append a non-goal.
+  --stop-rule TEXT
+                  Append a stop rule.
+  --forbidden-action TEXT
+                  Append a forbidden action.
+  --approval-boundary TEXT
+                  Append an approval boundary.
+  --risk TEXT     Set plan risk: low, medium, or high.
+  --target-agent TEXT
+                  Set target agent: codex, cursor, claude-code, or generic.
   --status TEXT   Set plan status with plan-update or plan-close.
 
 Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access.
-  scan, check, eval, and lint do not edit repo-tracked files.
+  scan, check, eval, lint, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);
 }

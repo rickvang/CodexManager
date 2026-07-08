@@ -176,6 +176,9 @@ function detectFrameworks(files, packageJson, pyproject) {
   if (deps.vite) frameworks.add("Vite");
   if (deps.vitest) frameworks.add("Vitest");
   if (deps.jest) frameworks.add("Jest");
+  if (deps["@playwright/test"] || deps.playwright || files.some((file) => /^playwright\.config\.[cm]?[jt]s$/.test(file))) {
+    frameworks.add("Playwright");
+  }
   if (files.some((file) => file.endsWith("pytest.ini")) || pyproject.includes("pytest")) frameworks.add("pytest");
   if (files.some((file) => file.endsWith("manage.py"))) frameworks.add("Django");
   return [...frameworks].sort();
@@ -287,6 +290,12 @@ function detectImportantFiles(files) {
         "README.md",
         "AGENTS.md",
         "tsconfig.json",
+        "playwright.config.cjs",
+        "playwright.config.cts",
+        "playwright.config.js",
+        "playwright.config.mjs",
+        "playwright.config.mts",
+        "playwright.config.ts",
         "vite.config.ts",
         "next.config.js"
       ].includes(file)

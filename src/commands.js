@@ -10,6 +10,7 @@ import {
   writeJsonIfChanged
 } from "./fs-utils.js";
 import { lintRepo } from "./lint.js";
+import { lintPlan } from "./plan-lint.js";
 import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
 
@@ -18,6 +19,23 @@ const LATEST_PLAN_PATH = `${PLAN_HISTORY_DIR}/latest-plan.json`;
 const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
 const PLAN_STATUSES = new Set(["draft", "approved", "implemented", "superseded", "rejected"]);
 const TERMINAL_PLAN_STATUSES = new Set(["implemented", "superseded", "rejected"]);
+const PLAN_RISK_LEVELS = new Set(["low", "medium", "high"]);
+const PLAN_TARGET_AGENTS = new Set(["codex", "cursor", "claude-code", "generic"]);
+const DEFAULT_STOP_RULES = [
+  "Stop when the requested scope is implemented, listed validation passes, and remaining improvements are captured as follow-up work."
+];
+const DEFAULT_FORBIDDEN_ACTIONS = [
+  "Do not edit files until the user explicitly approves implementation.",
+  "Do not commit unless the user explicitly says to commit.",
+  "Do not push unless the user explicitly says to push.",
+  "Do not run destructive commands, migrations, deployments, or dependency installs without explicit approval.",
+  "Do not copy secrets into generated plans or docs."
+];
+const DEFAULT_APPROVAL_BOUNDARIES = [
+  "Planning approval does not authorize file edits.",
+  "File edit approval does not authorize commit or push.",
+  "Dependency installs, migrations, deployments, and destructive commands require separate explicit approval."
+];
 
 export async function scanCommand({ root, json }) {
   const manifest = await scanRepo(root);
@@ -38,11 +56,33 @@ export async function planCommand({
   scope = [],
   files = [],
   validation = [],
-  questions = []
+  questions = [],
+  goal,
+  successCriteria = [],
+  nonGoals = [],
+  stopRules = [],
+  forbiddenActions = [],
+  approvalBoundaries = [],
+  riskLevel,
+  targetAgent
 }) {
   const manifest = await scanRepo(root);
   const bundle = buildBundle(manifest);
-  const proposal = buildPlanProposal(manifest, bundle, { intent, scope, files, validation, questions });
+  const proposal = buildPlanProposal(manifest, bundle, {
+    intent,
+    scope,
+    files,
+    validation,
+    questions,
+    goal,
+    successCriteria,
+    nonGoals,
+    stopRules,
+    forbiddenActions,
+    approvalBoundaries,
+    riskLevel,
+    targetAgent
+  });
   const savedPlan = save ? await saveNewPlan(root, proposal, now ?? new Date(), note) : undefined;
 
   if (json) {
@@ -63,6 +103,14 @@ export async function planUpdateCommand({
   files = [],
   validation = [],
   questions = [],
+  goal,
+  successCriteria = [],
+  nonGoals = [],
+  stopRules = [],
+  forbiddenActions = [],
+  approvalBoundaries = [],
+  riskLevel,
+  targetAgent,
   now
 }) {
   const current = await readActiveOrLatestPlan(root);
@@ -78,6 +126,14 @@ export async function planUpdateCommand({
     files,
     validation,
     questions,
+    goal,
+    successCriteria,
+    nonGoals,
+    stopRules,
+    forbiddenActions,
+    approvalBoundaries,
+    riskLevel,
+    targetAgent,
     now: now ?? new Date(),
     event: "updated"
   });
@@ -102,6 +158,25 @@ export async function planStatusCommand({ root, json }) {
   }
 
   console.log(formatPlanStatus(result));
+}
+
+export async function planLintCommand({ root, json }) {
+  const config = await loadConfig(root);
+  const current = await readActiveOrLatestPlan(root);
+  const manifest = await scanRepo(root);
+  const result = lintPlan({ plan: current?.plan, source: current?.path, manifest, config });
+
+  if (json) {
+    printJson(result);
+  } else {
+    console.log(formatPlanLint(result));
+  }
+
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+
+  return result;
 }
 
 export async function planCloseCommand({ root, json, status, note, now }) {
@@ -138,6 +213,7 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
   return {
     repo: manifest.repo,
     summary: manifest.summary,
+    goal: metadata.goal ?? "",
     userIntent: metadata.intent ?? "",
     proposedScope: uniqueStrings(metadata.scope ?? []),
     filesLikelyTouched: uniqueStrings(metadata.files ?? []),
@@ -145,6 +221,22 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
       ...manifest.discovery.commands.map((command) => command.command),
       ...(metadata.validation ?? [])
     ]),
+    successCriteria: uniqueStrings(metadata.successCriteria ?? []),
+    nonGoals: uniqueStrings(metadata.nonGoals ?? []),
+    stopRules: uniqueStrings([
+      ...DEFAULT_STOP_RULES,
+      ...(metadata.stopRules ?? [])
+    ]),
+    forbiddenActions: uniqueStrings([
+      ...DEFAULT_FORBIDDEN_ACTIONS,
+      ...(metadata.forbiddenActions ?? [])
+    ]),
+    approvalBoundaries: uniqueStrings([
+      ...DEFAULT_APPROVAL_BOUNDARIES,
+      ...(metadata.approvalBoundaries ?? [])
+    ]),
+    riskLevel: validatePlanRiskLevel(metadata.riskLevel ?? "medium"),
+    targetAgent: validatePlanTargetAgent(metadata.targetAgent ?? "codex"),
     openQuestions: uniqueStrings(metadata.questions ?? []),
     proposedWrites: bundle.files.map((file) => ({
       path: file.path,
@@ -170,7 +262,7 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
 async function saveNewPlan(root, proposal, now, note) {
   const savedAt = now.toISOString();
   const plan = normalizePlan({
-    schemaVersion: 1,
+    schemaVersion: 2,
     kind: "codex-prep-plan",
     status: "draft",
     savedAt,
@@ -220,18 +312,34 @@ function updatePlanDocument(plan, change) {
     ...plan,
     status: nextStatus,
     updatedAt,
+    goal: change.goal ?? plan.goal ?? "",
     userIntent: change.intent ?? plan.userIntent ?? "",
     proposedScope: appendUnique(plan.proposedScope, change.scope),
     filesLikelyTouched: appendUnique(plan.filesLikelyTouched, change.files),
     validationPlan: appendUnique(plan.validationPlan, change.validation),
+    successCriteria: appendUnique(plan.successCriteria, change.successCriteria),
+    nonGoals: appendUnique(plan.nonGoals, change.nonGoals),
+    stopRules: appendUnique(plan.stopRules, change.stopRules),
+    forbiddenActions: appendUnique(plan.forbiddenActions, change.forbiddenActions),
+    approvalBoundaries: appendUnique(plan.approvalBoundaries, change.approvalBoundaries),
+    riskLevel: change.riskLevel === undefined ? plan.riskLevel : validatePlanRiskLevel(change.riskLevel),
+    targetAgent: change.targetAgent === undefined ? plan.targetAgent : validatePlanTargetAgent(change.targetAgent),
     openQuestions: appendUnique(plan.openQuestions, change.questions)
   });
 
+  if (change.goal !== undefined) changes.push("goal");
   if (change.intent !== undefined) changes.push("intent");
   if (change.status !== undefined) changes.push(`status:${change.status}`);
   if ((change.scope ?? []).length > 0) changes.push("scope");
   if ((change.files ?? []).length > 0) changes.push("files");
   if ((change.validation ?? []).length > 0) changes.push("validation");
+  if ((change.successCriteria ?? []).length > 0) changes.push("success");
+  if ((change.nonGoals ?? []).length > 0) changes.push("non-goals");
+  if ((change.stopRules ?? []).length > 0) changes.push("stop-rules");
+  if ((change.forbiddenActions ?? []).length > 0) changes.push("forbidden-actions");
+  if ((change.approvalBoundaries ?? []).length > 0) changes.push("approval-boundaries");
+  if (change.riskLevel !== undefined) changes.push(`risk:${next.riskLevel}`);
+  if (change.targetAgent !== undefined) changes.push(`target-agent:${next.targetAgent}`);
   if ((change.questions ?? []).length > 0) changes.push("questions");
 
   next.decisionLog = [
@@ -277,10 +385,18 @@ function normalizePlan(plan) {
       root: "."
     },
     summary: plan.summary ?? "",
+    goal: plan.goal ?? "",
     userIntent: plan.userIntent ?? "",
     proposedScope: uniqueStrings(plan.proposedScope ?? []),
     filesLikelyTouched: uniqueStrings(plan.filesLikelyTouched ?? []),
     validationPlan: uniqueStrings(plan.validationPlan ?? []),
+    successCriteria: uniqueStrings(plan.successCriteria ?? []),
+    nonGoals: uniqueStrings(plan.nonGoals ?? []),
+    stopRules: uniqueStrings(plan.stopRules ?? []),
+    forbiddenActions: uniqueStrings(plan.forbiddenActions ?? []),
+    approvalBoundaries: uniqueStrings(plan.approvalBoundaries ?? []),
+    riskLevel: normalizePlanRiskLevel(plan.riskLevel),
+    targetAgent: normalizePlanTargetAgent(plan.targetAgent),
     openQuestions: uniqueStrings(plan.openQuestions ?? []),
     decisionLog: Array.isArray(plan.decisionLog) ? plan.decisionLog : [],
     proposedWrites: Array.isArray(plan.proposedWrites) ? plan.proposedWrites : [],
@@ -293,6 +409,34 @@ function validatePlanStatus(status) {
   if (!PLAN_STATUSES.has(status)) {
     throw new Error(`invalid plan status "${status}". Expected one of: ${[...PLAN_STATUSES].join(", ")}`);
   }
+}
+
+function validatePlanRiskLevel(value) {
+  const normalized = typeof value === "string" ? value.trim().toLowerCase() : "";
+  if (!PLAN_RISK_LEVELS.has(normalized)) {
+    throw new Error(`invalid plan risk "${value}". Expected one of: ${[...PLAN_RISK_LEVELS].join(", ")}`);
+  }
+  return normalized;
+}
+
+function validatePlanTargetAgent(value) {
+  const normalized = normalizePlanTargetAgent(value);
+  if (normalized && !PLAN_TARGET_AGENTS.has(normalized)) {
+    throw new Error(`invalid target agent "${value}". Expected one of: ${[...PLAN_TARGET_AGENTS].join(", ")}`);
+  }
+  return normalized;
+}
+
+function normalizePlanRiskLevel(value) {
+  if (typeof value !== "string" || !value.trim()) {
+    return "medium";
+  }
+  const normalized = value.trim().toLowerCase();
+  return PLAN_RISK_LEVELS.has(normalized) ? normalized : "medium";
+}
+
+function normalizePlanTargetAgent(value) {
+  return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
 function defaultDecisionNote(event, changes) {
@@ -622,16 +766,34 @@ function formatPlanStatus(result) {
     `Repo: ${plan.repo?.name || "unknown"}`,
     `Saved: ${plan.savedAt || "unknown"}`,
     `Updated: ${plan.updatedAt || "unknown"}`,
+    `Goal: ${plan.goal || "none recorded"}`,
     `Intent: ${plan.userIntent || "none recorded"}`,
+    `Risk: ${plan.riskLevel || "medium"}`,
+    `Target agent: ${plan.targetAgent || "none recorded"}`,
+    "",
+    "Success criteria:",
+    ...formatList(plan.successCriteria),
     "",
     "Scope:",
     ...formatList(plan.proposedScope),
+    "",
+    "Non-goals:",
+    ...formatList(plan.nonGoals),
     "",
     "Likely touched files:",
     ...formatList(plan.filesLikelyTouched),
     "",
     "Validation:",
     ...formatList(plan.validationPlan),
+    "",
+    "Stop rules:",
+    ...formatList(plan.stopRules),
+    "",
+    "Approval boundaries:",
+    ...formatList(plan.approvalBoundaries),
+    "",
+    "Forbidden actions:",
+    ...formatList(plan.forbiddenActions),
     "",
     "Open questions:",
     ...formatList(plan.openQuestions),
@@ -641,7 +803,7 @@ function formatPlanStatus(result) {
   ].join("\n");
 }
 
-function formatList(values) {
+function formatList(values = []) {
   return values.length > 0 ? values.map((value) => `- ${value}`) : ["- none"];
 }
 
@@ -670,6 +832,18 @@ function formatEval(result) {
     `codex-prep eval: ${result.ok ? "pass" : "fail"}`,
     "",
     ...result.scenarios.map((item) => `- ${item.pass ? "PASS" : "FAIL"} ${item.name}: ${item.evidence}`)
+  ].join("\n");
+}
+
+function formatPlanLint(result) {
+  if (result.findings.length === 0) {
+    return "codex-prep plan-lint: pass\n\nPlan is ready for implementation review.";
+  }
+  return [
+    "codex-prep plan-lint: " + (result.ok ? "pass with warnings" : "failed"),
+    "",
+    `Source: ${result.source || "none"}`,
+    ...result.findings.map((item) => "- [" + item.level + "] " + item.code + " " + (item.file || "plan") + ": " + item.message + " Fix: " + item.fix)
   ].join("\n");
 }
 

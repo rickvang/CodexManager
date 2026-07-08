@@ -45,6 +45,22 @@ export async function withMutedConsole(callback) {
   }
 }
 
+export async function withCapturedConsole(callback) {
+  const originalLog = console.log;
+  const originalError = console.error;
+  const stdout = [];
+  const stderr = [];
+  console.log = (...args) => stdout.push(args.map(String).join(" "));
+  console.error = (...args) => stderr.push(args.map(String).join(" "));
+  try {
+    const result = await callback();
+    return { stdout: stdout.join("\n"), stderr: stderr.join("\n"), result };
+  } finally {
+    console.log = originalLog;
+    console.error = originalError;
+  }
+}
+
 export function jsRepoFiles() {
   return {
     "package.json": JSON.stringify(

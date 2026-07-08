@@ -17,6 +17,7 @@ node ./bin/codex-prep.js plan
 node ./bin/codex-prep.js plan --no-save
 node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
+node ./bin/codex-prep.js plan-lint
 node ./bin/codex-prep.js plan-close --status implemented
 node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
@@ -35,6 +36,7 @@ From this repo, run:
 .\codex-prep.cmd scan --repo D:\path\to\repo
 .\codex-prep.cmd plan --repo D:\path\to\repo
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
+.\codex-prep.cmd plan-lint --repo D:\path\to\repo
 .\codex-prep.cmd apply --repo D:\path\to\repo
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
@@ -89,8 +91,12 @@ Update the active plan as the conversation clarifies:
 
 ```powershell
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --note "User prefers a small first pass"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --goal "Add the planning quality gate"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --success "plan-lint passes"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --non-goal "No new dependencies"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --scope "Add CLI command" --file src/cli.js
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --validation "npm.cmd run verify"
+D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --stop-rule "Stop after verify passes and capture follow-ups"
 D:\codexmanager\codex-prep.cmd plan-update --repo D:\path\to\repo --status approved
 ```
 
@@ -98,10 +104,24 @@ Inspect or close the active plan:
 
 ```powershell
 D:\codexmanager\codex-prep.cmd plan-status --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd plan-lint --repo D:\path\to\repo
 D:\codexmanager\codex-prep.cmd plan-close --repo D:\path\to\repo --status implemented --note "Built and verified"
 ```
 
 A saved plan is memory, not approval to edit. Editing still requires explicit user authorization.
+
+## Plan Lint
+
+`plan-lint` checks the active saved plan without editing files:
+
+```powershell
+D:\codexmanager\codex-prep.cmd plan-lint --repo D:\path\to\repo
+D:\codexmanager\codex-prep.cmd plan-lint --repo D:\path\to\repo --json
+```
+
+It fails plans that are missing a goal or intent, success criteria, validation, stop rules, or required approval boundaries for high-risk work. It warns when the plan lacks likely touched files, non-goals, target agent, repo-detected validation commands, or a browser-facing check for a web UI repo.
+
+If Playwright is already present, `plan-lint` suggests the detected Playwright command. It does not install Playwright or add dependencies.
 
 ## Generated Bundle
 
