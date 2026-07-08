@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T16:59:05.219Z",
-  "fingerprint": "d928720bd79b92feda90134e2ee70abe9194ee2009488b8a6fa5ace6134d3535",
+  "generatedAt": "2026-07-08T17:02:42.825Z",
+  "fingerprint": "4b405916f5e954521683a57ec026bb56dd8084bbe89452c9c8eeb95f8f24255e",
   "repo": {
     "root": ".",
     "name": "codexmanager"
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 14468,
+      "size": 14456,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -124,7 +124,7 @@
     {
       "path": "src/codegraph.js",
       "language": "JavaScript",
-      "size": 18506,
+      "size": 18502,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -436,7 +436,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 43117,
+      "size": 43115,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1851,7 +1851,7 @@
     {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 1659,
+      "size": 1658,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -1880,7 +1880,7 @@
     {
       "path": "test/codegraph.test.js",
       "language": "JavaScript",
-      "size": 6560,
+      "size": 6559,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -1952,7 +1952,7 @@
     {
       "path": "test/commands.test.js",
       "language": "JavaScript",
-      "size": 9206,
+      "size": 9203,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -1999,7 +1999,7 @@
     {
       "path": "test/generate.test.js",
       "language": "JavaScript",
-      "size": 1817,
+      "size": 1816,
       "role": "test",
       "confidence": "high",
       "imports": [
