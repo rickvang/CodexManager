@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T17:52:51.688Z",
-  "fingerprint": "9e4f400bc11ba2e277e3ac87fe8f6be5fcc440e07a15d94e0004d3ab0b031276",
+  "generatedAt": "2026-07-08T17:56:10.139Z",
+  "fingerprint": "9faf11f5ad8a2c85158fa72fe3d27e82c99711626c823fa202c9d4d1ee6fa065",
   "repo": {
     "root": ".",
     "name": "codexmanager"
@@ -1861,7 +1861,7 @@
     {
       "path": "src/scan.js",
       "language": "JavaScript",
-      "size": 12793,
+      "size": 12789,
       "role": "source",
       "confidence": "medium",
       "imports": [
