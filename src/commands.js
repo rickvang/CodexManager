@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, queryCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
 import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
 import {
@@ -332,6 +333,51 @@ export async function planCloseCommand({ root, json, status, note, now }) {
   console.log(formatPlanMutation("codex-prep plan-close", result));
 }
 
+export async function graphCommand({ root, json }) {
+  const manifest = await scanRepo(root);
+  const graph = await buildCodeGraph(root, { manifest });
+
+  if (json) {
+    printJson(graph);
+    return graph;
+  }
+
+  console.log(formatGraph(graph, { source: "live" }));
+  return graph;
+}
+
+export async function refreshGraphCommand({ root, json }) {
+  const manifest = await scanRepo(root);
+  const previousGraph = await readPreviousCodeGraph(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const graphResult = await writeJsonIfChanged(path.join(root, CODEGRAPH_PATH), finalizeCodeGraph(graph, previousGraph));
+  const result = {
+    repo: graph.repo,
+    graph: graph.summary,
+    writes: [{ path: CODEGRAPH_PATH, changed: graphResult.changed, mode: "managed-json" }]
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatGraphRefresh(result));
+  return result;
+}
+
+export async function graphQueryCommand({ root, json, file, symbol }) {
+  const { graph, source } = await loadOrBuildCodeGraph(root);
+  const result = { source, ...queryCodeGraph(graph, { file, symbol }) };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatGraphQuery(result));
+  return result;
+}
 function buildPlanProposal(manifest, bundle, metadata = {}) {
   return {
     repo: manifest.repo,
@@ -371,6 +417,11 @@ function buildPlanProposal(manifest, bundle, metadata = {}) {
         path: CONFIG_PATH,
         mode: "user-config",
         reason: "Repo-specific codex-prep rule and lint settings; created only when missing."
+      },
+      {
+        path: CODEGRAPH_PATH,
+        mode: "managed-json",
+        reason: "Structured local code graph used by graph-query, check, eval, and repo orientation."
       },
       {
         path: ".codex-prep/manifest.json",
@@ -704,8 +755,10 @@ async function runGit(root, args) {
 
 export async function applyCommand({ root, json }) {
   const previousManifest = await readJsonIfExists(path.join(root, ".codex-prep", "manifest.json"));
+  const previousGraph = await readPreviousCodeGraph(root);
   const manifest = await scanRepo(root, { previousManifest });
-  const bundle = buildBundle(manifest);
+  const graph = await buildCodeGraph(root, { manifest });
+  const bundle = buildBundle(manifest, { graph });
   const writes = [];
 
   for (const file of bundle.files) {
@@ -713,14 +766,17 @@ export async function applyCommand({ root, json }) {
     writes.push({ path: file.path, changed: result.changed, mode: file.mode });
   }
 
+  const graphResult = await writeJsonIfChanged(path.join(root, CODEGRAPH_PATH), finalizeCodeGraph(graph, previousGraph));
+  const graphWrite = { path: CODEGRAPH_PATH, changed: graphResult.changed, mode: "managed-json" };
   const configResult = await writeDefaultConfigIfMissing(root);
   const configWrite = { path: CONFIG_PATH, changed: configResult.changed, mode: "user-config" };
 
-  const manifestForWrite = finalizeManifest(manifest, previousManifest, writes);
+  const manifestForWrite = finalizeManifest(manifest, previousManifest, [...writes, graphWrite]);
   const manifestResult = await writeJsonIfChanged(
     path.join(root, ".codex-prep", "manifest.json"),
     manifestForWrite
   );
+  writes.push(graphWrite);
   writes.push(configWrite);
   writes.push({ path: ".codex-prep/manifest.json", changed: manifestResult.changed, mode: "managed-json" });
 
@@ -738,6 +794,8 @@ export async function checkCommand({ root, json }) {
   const manifestPath = path.join(root, ".codex-prep", "manifest.json");
   const previousManifest = await readJsonIfExists(manifestPath);
   const current = await scanRepo(root, { previousManifest });
+  const previousGraph = await readCodeGraphForCheck(root, config);
+  const currentGraph = await buildCodeGraph(root, { manifest: current });
   const findings = [];
 
   if (!previousManifest) {
@@ -748,6 +806,14 @@ export async function checkCommand({ root, json }) {
     if (!(await fileExists(path.join(root, filePath)))) {
       pushFinding(findings, config, "missing-generated-file", { file: filePath, message: `${filePath} is missing.` });
     }
+  }
+
+  if (!previousGraph.exists) {
+    pushFinding(findings, config, "missing-codegraph", { file: CODEGRAPH_PATH, message: `${CODEGRAPH_PATH} is missing.` });
+  } else if (!previousGraph.graph) {
+    pushFinding(findings, config, "invalid-codegraph-json", { file: CODEGRAPH_PATH, message: previousGraph.error });
+  } else if (previousGraph.graph.fingerprint !== currentGraph.fingerprint) {
+    pushFinding(findings, config, "codegraph-stale", { file: CODEGRAPH_PATH, message: `${CODEGRAPH_PATH} is stale.` });
   }
 
   if (previousManifest) {
@@ -775,7 +841,8 @@ export async function checkCommand({ root, json }) {
 
 export async function evalCommand({ root, json }) {
   const manifest = (await readJsonIfExists(path.join(root, ".codex-prep", "manifest.json"))) ?? await scanRepo(root);
-  const scenarios = await runEvalScenarios(root, manifest);
+  const codeGraph = (await readCodeGraphIfExists(root)) ?? await buildCodeGraph(root, { manifest });
+  const scenarios = await runEvalScenarios(root, manifest, codeGraph);
   const result = {
     ok: scenarios.every((scenario) => scenario.pass),
     scenarios
@@ -809,7 +876,8 @@ export async function lintCommand({ root, json }) {
 export async function refreshMapCommand({ root, json }) {
   const previousManifest = await readJsonIfExists(path.join(root, ".codex-prep", "manifest.json"));
   const manifest = await scanRepo(root, { previousManifest });
-  const mapFile = buildBundle(manifest).files.find((file) => file.path === "docs/CODEBASE_MAP.md");
+  const graph = await buildCodeGraph(root, { manifest });
+  const mapFile = buildBundle(manifest, { graph }).files.find((file) => file.path === "docs/CODEBASE_MAP.md");
   const mapResult = await writeManagedFile(root, mapFile.path, mapFile.content);
   const manifestForWrite = finalizeManifest(manifest, previousManifest, [{ path: mapFile.path, changed: mapResult.changed }]);
   const manifestResult = await writeJsonIfChanged(
@@ -850,12 +918,14 @@ function finalizeManifest(manifest, previousManifest, writes) {
   };
 }
 
-async function runEvalScenarios(root, manifest) {
+async function runEvalScenarios(root, manifest, codeGraph) {
   const agentsPath = path.join(root, "AGENTS.md");
   const reviewSkillPath = path.join(root, ".agents", "skills", "code-review", "SKILL.md");
   const mapPath = path.join(root, "docs", "CODEBASE_MAP.md");
   const agents = (await fileExists(agentsPath)) ? await fs.readFile(agentsPath, "utf8") : "";
   const map = (await fileExists(mapPath)) ? await fs.readFile(mapPath, "utf8") : "";
+  const testedBy = codeGraph.relationships?.find((item) => item.kind === "tested-by");
+  const dependentEdge = codeGraph.edges?.[0];
 
   return [
     scenario(
@@ -887,6 +957,16 @@ async function runEvalScenarios(root, manifest) {
       "review a sample diff using repo rules",
       await fileExists(reviewSkillPath),
       ".agents/skills/code-review/SKILL.md exists."
+    ),
+    scenario(
+      "find file dependents from code graph",
+      codeGraph.files?.length > 0 && Array.isArray(codeGraph.edges),
+      dependentEdge ? `${dependentEdge.to} is imported by ${dependentEdge.from}` : "Graph has no local import edges yet."
+    ),
+    scenario(
+      "find likely tests from code graph",
+      Boolean(testedBy),
+      testedBy ? `${testedBy.source} tested by ${testedBy.test}` : "No likely source/test relationships detected."
     )
   ];
 }
@@ -903,6 +983,34 @@ function commandEvidence(manifest, pattern) {
   return `${command.name}: ${command.command}`;
 }
 
+function finalizeCodeGraph(graph, previousGraph) {
+  const unchanged = previousGraph?.fingerprint === graph.fingerprint;
+  const generatedAt = unchanged && previousGraph?.generatedAt ? previousGraph.generatedAt : graph.generatedAt;
+  return {
+    ...graph,
+    generatedAt,
+    repo: {
+      ...graph.repo,
+      root: "."
+    }
+  };
+}
+
+async function readPreviousCodeGraph(root) {
+  try {
+    return await readCodeGraphIfExists(root);
+  } catch {
+    return undefined;
+  }
+}
+async function readCodeGraphForCheck(root, config) {
+  try {
+    const graph = await readCodeGraphIfExists(root);
+    return graph ? { exists: true, graph } : { exists: false };
+  } catch (error) {
+    return { exists: true, graph: undefined, error: `codegraph JSON is invalid: ${error.message}` };
+  }
+}
 function compareStringArrays(findings, name, previous = [], current = [], config = {}) {
   const oldSet = new Set(previous);
   const newSet = new Set(current);
@@ -939,6 +1047,59 @@ function comparePackageWorkspaces(findings, previous = [], current = [], config 
   compareStringArrays(findings, "workspace-package", previous, current, config);
 }
 
+function formatGraph(graph, { source }) {
+  return [
+    `codex-prep graph: ${graph.repo.name}`,
+    "",
+    `Source: ${source}`,
+    `Files: ${graph.summary.fileCount}`,
+    `Edges: ${graph.summary.edgeCount}`,
+    `Symbols: ${graph.summary.symbolCount}`,
+    `Languages: ${graph.summary.languages.join(", ") || "unknown"}`
+  ].join("\n");
+}
+
+function formatGraphRefresh(result) {
+  return [
+    `codex-prep refresh-graph: ${result.repo.name}`,
+    "",
+    `Files: ${result.graph.fileCount}`,
+    `Edges: ${result.graph.edgeCount}`,
+    `Symbols: ${result.graph.symbolCount}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
+
+function formatGraphQuery(result) {
+  if (!result.found) {
+    return `codex-prep graph-query: no match\n\n${result.message || "No graph result found."}`;
+  }
+  if (result.type === "file") {
+    return [
+      `codex-prep graph-query: ${result.query}`,
+      "",
+      `Source: ${result.source}`,
+      `Role: ${result.file.role}`,
+      `Language: ${result.file.language}`,
+      "Imports:",
+      ...formatList(result.imports.map((item) => item.resolved ? `${item.specifier} -> ${item.resolved}` : `${item.specifier} (${item.kind})`)),
+      "Dependents:",
+      ...formatList(result.dependents),
+      "Symbols:",
+      ...formatList(result.symbols.map((item) => `${item.name} (${item.kind}${item.exported ? ", exported" : ""})`)),
+      "Related tests:",
+      ...formatList(result.relatedTests.map((item) => `${item.path} [${item.confidence}]`))
+    ].join("\n");
+  }
+  return [
+    `codex-prep graph-query: ${result.query}`,
+    "",
+    `Source: ${result.source}`,
+    "Matches:",
+    ...formatList(result.matches.map((item) => `${item.name} (${item.kind}) in ${item.file} [${item.confidence}]`))
+  ].join("\n");
+}
 function formatScan(manifest) {
   const lines = [
     `codex-prep scan: ${manifest.repo.name}`,
@@ -1147,6 +1308,7 @@ export const internals = {
   finalizeManifest,
   normalizePlan,
   runEvalScenarios,
+  finalizeCodeGraph,
   safeTimestamp,
   suggestPlanBranch,
   updatePlanDocument

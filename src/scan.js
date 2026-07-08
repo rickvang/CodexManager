@@ -84,6 +84,10 @@ export async function scanRepo(root, options = {}) {
   };
 }
 
+export async function collectRepoFiles(root) {
+  return collectFiles(root);
+}
+
 async function collectFiles(root) {
   const results = [];
 

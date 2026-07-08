@@ -1,0 +1,4584 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-08T16:59:05.219Z",
+  "fingerprint": "d928720bd79b92feda90134e2ee70abe9194ee2009488b8a6fa5ace6134d3535",
+  "repo": {
+    "root": ".",
+    "name": "codexmanager"
+  },
+  "summary": {
+    "fileCount": 20,
+    "edgeCount": 43,
+    "symbolCount": 245,
+    "languages": [
+      "JavaScript"
+    ],
+    "entrypointCount": 1,
+    "testRelationshipCount": 23
+  },
+  "files": [
+    {
+      "path": "bin/codex-prep.js",
+      "language": "JavaScript",
+      "size": 255,
+      "role": "entrypoint",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
+      "path": "src/cli.js",
+      "language": "JavaScript",
+      "size": 14468,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "COMMANDS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hasAny",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "parseArgs",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "printHelp",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readOptionValue",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "runCli",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "validateOptions",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/cli.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/codegraph.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/plan-lint.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/plan-workflow.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "src/codegraph.js",
+      "language": "JavaScript",
+      "size": 18506,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./scan.js",
+          "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:crypto",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "applyRelatedTests",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildCodeGraph",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildGraphAssumptions",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildGraphEvidence",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildRelationships",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "CODEGRAPH_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "compareSymbol",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "confidenceRank",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectLanguage",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectRole",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractImports",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractJavaScriptImports",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractJavaScriptSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractPythonImports",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractPythonSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "FILE_LEVEL_EXTENSIONS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hashStable",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "internals",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "isGraphFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "isRelativeSpecifier",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "isTestFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "JS_EXTENSIONS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "likelyTestForSource",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "loadOrBuildCodeGraph",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "normalizedStem",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizeQueryPath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PY_EXTENSIONS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "queryCodeGraph",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "queryFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "querySymbol",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readCodeGraphIfExists",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "readText",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "relationshipKey",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "RESOLVABLE_JS_EXTENSIONS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "resolveCandidates",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "resolveJavaScriptImport",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "resolvePythonImport",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "sortGraph",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "splitPythonImportList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "TEST_SEGMENTS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "uniqueImports",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "uniqueRelationships",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "uniqueSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/codegraph.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "src/commands.js",
+      "language": "JavaScript",
+      "size": 43117,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./codegraph.js",
+          "resolved": "src/codegraph.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./config.js",
+          "resolved": "src/config.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./generate.js",
+          "resolved": "src/generate.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./lint.js",
+          "resolved": "src/lint.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./plan-lint.js",
+          "resolved": "src/plan-lint.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./rules.js",
+          "resolved": "src/rules.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./scan.js",
+          "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:child_process",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:util",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "action",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "ACTIVE_PLAN_PATH",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "appendUnique",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "applyCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "assertCleanWorktree",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildPlanNextActions",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildPlanProposal",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildPlanReviewResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "checkCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "commandEvidence",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "compareCommands",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "comparePackageWorkspaces",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "compareStringArrays",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "DEFAULT_APPROVAL_BOUNDARIES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "DEFAULT_BASE_BRANCH",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "DEFAULT_FORBIDDEN_ACTIONS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "DEFAULT_STOP_RULES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "defaultDecisionNote",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "defaultPlanBuild",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "evalCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "execFileAsync",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "finalizeCodeGraph",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "finalizeManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatApply",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatCheck",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatEval",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatFindings",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatGraph",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatGraphQuery",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatGraphRefresh",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatLint",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlanLint",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlanMutation",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlanReview",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlanStart",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPlanStatus",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatScan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "graphCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "graphQueryCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "internals",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "isPlanStateStatusLine",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "LATEST_PLAN_PATH",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "normalizePlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizePlanBuild",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizePlanRiskLevel",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizePlanTargetAgent",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_BUILD_STATUSES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_HISTORY_DIR",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_RISK_LEVELS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_STATUSES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PLAN_TARGET_AGENTS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "planApproveCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planCloseCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planLintCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planReviewCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planStartCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planStatusCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "planUpdateCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "printJson",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readActiveOrLatestPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readCodeGraphForCheck",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readPreviousCodeGraph",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "refreshGraphCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "refreshMapCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "runEvalScenarios",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "runGit",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "runPlanLint",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "safeTimestamp",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "saveNewPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "scanCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "scenario",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "stringOrEmpty",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "suggestPlanBranch",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "TERMINAL_PLAN_STATUSES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "uniqueStrings",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "updatePlanDocument",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "validatePlanRiskLevel",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "validatePlanStatus",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "validatePlanTargetAgent",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writePlanState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/codegraph.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/commands.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/lint.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/plan-lint.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/plan-workflow.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "src/config.js",
+      "language": "JavaScript",
+      "size": 2877,
+      "role": "config",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "clone",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "compilePatterns",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "CONFIG_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "DEFAULT_CONFIG",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "loadConfig",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "mergeConfig",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readConfig",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "writeDefaultConfigIfMissing",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "src/fs-utils.js",
+      "language": "JavaScript",
+      "size": 2319,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "ensureTrailingNewline",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "fileExists",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "joinSections",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "MANAGED_BEGIN",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "MANAGED_END",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "mergeManagedContent",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readJsonIfExists",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "relativePath",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "slashPath",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "writeFileIfChanged",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "writeJsonIfChanged",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "writeManagedFile",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/generate.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "src/generate.js",
+      "language": "JavaScript",
+      "size": 9281,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "buildAgents",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildBundle",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildCodebaseMap",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildCodeReviewSkill",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildFeedback",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildManagedSection",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildRepoOnboardingSkill",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "listOrNone",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "MANAGED_FILES",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/generate.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "src/lint.js",
+      "language": "JavaScript",
+      "size": 7964,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./config.js",
+          "resolved": "src/config.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./generate.js",
+          "resolved": "src/generate.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./rules.js",
+          "resolved": "src/rules.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "compilePatternSet",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "countOccurrences",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractFrontmatter",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "extractManagedContent",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "internals",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "lintContentSafety",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintManagedFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintRepo",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "lintSkill",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "manifestRootMatches",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "REQUIRED_MANIFEST_FIELDS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "samePath",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/lint.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/plan-lint.test.js",
+          "confidence": "medium",
+          "reason": "Source and test file names match."
+        }
+      ]
+    },
+    {
+      "path": "src/plan-lint.js",
+      "language": "JavaScript",
+      "size": 7656,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./config.js",
+          "resolved": "src/config.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./rules.js",
+          "resolved": "src/rules.js",
+          "kind": "local",
+          "confidence": "high"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "BROWSER_VALIDATION_PATTERN",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectPlaywright",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "findRiskyTopics",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hasItems",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hasRiskPermissionGate",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "hasText",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "isWebRepo",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintBrowserValidation",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintPlan",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "lintPlanSecrets",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "lintValidationAgainstRepo",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "mentionsDetectedCommand",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "PERMISSION_GATE_PATTERN",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "planText",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "repoValidationCommands",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "RISKY_TOPICS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "VALIDATION_COMMAND_PATTERN",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "WEB_FRAMEWORKS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/plan-lint.test.js",
+          "confidence": "medium",
+          "reason": "Source and test file names match."
+        }
+      ]
+    },
+    {
+      "path": "src/rules.js",
+      "language": "JavaScript",
+      "size": 11462,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [],
+      "symbols": [
+        {
+          "name": "applyRuleConfig",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "createFinding",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "hasErrors",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "pushFinding",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "RULES",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "src/scan.js",
+      "language": "JavaScript",
+      "size": 12510,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:crypto",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "buildAssumptions",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildEvidence",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "collectFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "collectRepoFiles",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "detectArchitectureDocs",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectCi",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectCommands",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectDocs",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectEntrypoints",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectFrameworks",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectImportantFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectLanguages",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectPackageManagers",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectRoots",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectWorkspacePackages",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "DOC_DIR_CANDIDATES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "fingerprintDiscovery",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "GENERATED_FILE_PATHS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "IGNORED_DIRS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "internals",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "readPackageJson",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "readTextIfExists",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "safeReadDir",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "scanRepo",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "SECRET_FILE_NAMES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "SOURCE_DIR_CANDIDATES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "summarize",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "TEST_DIR_CANDIDATES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/generate.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
+        {
+          "path": "test/scan.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        }
+      ]
+    },
+    {
+      "path": "test/cli.test.js",
+      "language": "JavaScript",
+      "size": 1659,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
+      "path": "test/codegraph.test.js",
+      "language": "JavaScript",
+      "size": 6560,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/codegraph.js",
+          "resolved": "src/codegraph.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "jsGraphFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "pythonGraphFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "test/commands.test.js",
+      "language": "JavaScript",
+      "size": 9206,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
+      "path": "test/generate.test.js",
+      "language": "JavaScript",
+      "size": 1817,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/fs-utils.js",
+          "resolved": "src/fs-utils.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/generate.js",
+          "resolved": "src/generate.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/scan.js",
+          "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
+      "path": "test/helpers.js",
+      "language": "JavaScript",
+      "size": 3490,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "node:child_process",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:os",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:util",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "createGitRepo",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "createTempRepo",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "execFileAsync",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "git",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "jsRepoFiles",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "readTree",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "withCapturedConsole",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "withMutedConsole",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "test/lint.test.js",
+      "language": "JavaScript",
+      "size": 5621,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/lint.js",
+          "resolved": "src/lint.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
+      "path": "test/plan-lint.test.js",
+      "language": "JavaScript",
+      "size": 9345,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "completePlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "playwrightRepoFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "withoutExitLeak",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writeActivePlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "test/plan-workflow.test.js",
+      "language": "JavaScript",
+      "size": 6678,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/cli.js",
+          "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "createCompletePlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
+      "relatedTests": []
+    },
+    {
+      "path": "test/scan.test.js",
+      "language": "JavaScript",
+      "size": 3030,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/scan.js",
+          "resolved": "src/scan.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    }
+  ],
+  "edges": [
+    {
+      "from": "bin/codex-prep.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/cli.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "./commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/codegraph.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/codegraph.js",
+      "to": "src/scan.js",
+      "kind": "imports",
+      "specifier": "./scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/codegraph.js",
+      "kind": "imports",
+      "specifier": "./codegraph.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/config.js",
+      "kind": "imports",
+      "specifier": "./config.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/generate.js",
+      "kind": "imports",
+      "specifier": "./generate.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/lint.js",
+      "kind": "imports",
+      "specifier": "./lint.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/plan-lint.js",
+      "kind": "imports",
+      "specifier": "./plan-lint.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/rules.js",
+      "kind": "imports",
+      "specifier": "./rules.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/scan.js",
+      "kind": "imports",
+      "specifier": "./scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/config.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/generate.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/lint.js",
+      "to": "src/config.js",
+      "kind": "imports",
+      "specifier": "./config.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/lint.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/lint.js",
+      "to": "src/generate.js",
+      "kind": "imports",
+      "specifier": "./generate.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/lint.js",
+      "to": "src/rules.js",
+      "kind": "imports",
+      "specifier": "./rules.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/plan-lint.js",
+      "to": "src/config.js",
+      "kind": "imports",
+      "specifier": "./config.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/plan-lint.js",
+      "to": "src/rules.js",
+      "kind": "imports",
+      "specifier": "./rules.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/scan.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "./fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/cli.test.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/codegraph.test.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/codegraph.test.js",
+      "to": "src/codegraph.js",
+      "kind": "imports",
+      "specifier": "../src/codegraph.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/codegraph.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/codegraph.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/commands.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/commands.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/generate.test.js",
+      "to": "src/fs-utils.js",
+      "kind": "imports",
+      "specifier": "../src/fs-utils.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/generate.test.js",
+      "to": "src/generate.js",
+      "kind": "imports",
+      "specifier": "../src/generate.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/generate.test.js",
+      "to": "src/scan.js",
+      "kind": "imports",
+      "specifier": "../src/scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/generate.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/lint.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/lint.test.js",
+      "to": "src/lint.js",
+      "kind": "imports",
+      "specifier": "../src/lint.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/lint.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-lint.test.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-lint.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-lint.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-workflow.test.js",
+      "to": "src/cli.js",
+      "kind": "imports",
+      "specifier": "../src/cli.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-workflow.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/plan-workflow.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/scan.test.js",
+      "to": "src/scan.js",
+      "kind": "imports",
+      "specifier": "../src/scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/scan.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    }
+  ],
+  "symbols": [
+    {
+      "name": "COMMANDS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "hasAny",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "parseArgs",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "printHelp",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "readOptionValue",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "runCli",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "validateOptions",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/cli.js"
+    },
+    {
+      "name": "applyRelatedTests",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildCodeGraph",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildGraphAssumptions",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildGraphEvidence",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildRelationships",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "CODEGRAPH_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "compareSymbol",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "confidenceRank",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "detectLanguage",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "detectRole",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractImports",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractJavaScriptImports",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractJavaScriptSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractPythonImports",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractPythonSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "extractSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "FILE_LEVEL_EXTENSIONS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "hashStable",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "internals",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "isGraphFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "isRelativeSpecifier",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "isTestFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "JS_EXTENSIONS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "likelyTestForSource",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "loadOrBuildCodeGraph",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "normalizedStem",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "normalizeQueryPath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "PY_EXTENSIONS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "queryCodeGraph",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "queryFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "querySymbol",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "readCodeGraphIfExists",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "readText",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "relationshipKey",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "RESOLVABLE_JS_EXTENSIONS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "resolveCandidates",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "resolveJavaScriptImport",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "resolvePythonImport",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "sortGraph",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "splitPythonImportList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "TEST_SEGMENTS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "uniqueImports",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "uniqueRelationships",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "uniqueSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "action",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "ACTIVE_PLAN_PATH",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "appendUnique",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "applyCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "assertCleanWorktree",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildPlanNextActions",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildPlanProposal",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildPlanReviewResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "checkCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "commandEvidence",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "compareCommands",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "comparePackageWorkspaces",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "compareStringArrays",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "DEFAULT_APPROVAL_BOUNDARIES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "DEFAULT_BASE_BRANCH",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "DEFAULT_FORBIDDEN_ACTIONS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "DEFAULT_STOP_RULES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "defaultDecisionNote",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "defaultPlanBuild",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "evalCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "execFileAsync",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "finalizeCodeGraph",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "finalizeManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatApply",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatCheck",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatEval",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatFindings",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatGraph",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatGraphQuery",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatGraphRefresh",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatLint",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlanLint",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlanMutation",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlanReview",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlanStart",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPlanStatus",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatScan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "graphCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "graphQueryCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "internals",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "isPlanStateStatusLine",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "LATEST_PLAN_PATH",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "lintCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "normalizePlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "normalizePlanBuild",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "normalizePlanRiskLevel",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "normalizePlanTargetAgent",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "PLAN_BUILD_STATUSES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "PLAN_HISTORY_DIR",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "PLAN_RISK_LEVELS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "PLAN_STATUSES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "PLAN_TARGET_AGENTS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planApproveCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planCloseCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planLintCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planReviewCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planStartCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planStatusCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "planUpdateCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "printJson",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "readActiveOrLatestPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "readCodeGraphForCheck",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "readPreviousCodeGraph",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "refreshGraphCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "refreshMapCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "runEvalScenarios",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "runGit",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "runPlanLint",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "safeTimestamp",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "saveNewPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "scanCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "scenario",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "stringOrEmpty",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "suggestPlanBranch",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "TERMINAL_PLAN_STATUSES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "uniqueStrings",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "updatePlanDocument",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "validatePlanRiskLevel",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "validatePlanStatus",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "validatePlanTargetAgent",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "writePlanState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "clone",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/config.js"
+    },
+    {
+      "name": "compilePatterns",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "CONFIG_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "DEFAULT_CONFIG",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "loadConfig",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "mergeConfig",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/config.js"
+    },
+    {
+      "name": "readConfig",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "writeDefaultConfigIfMissing",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/config.js"
+    },
+    {
+      "name": "ensureTrailingNewline",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "fileExists",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "joinSections",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "MANAGED_BEGIN",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "MANAGED_END",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "mergeManagedContent",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "readJsonIfExists",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "relativePath",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "slashPath",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "writeFileIfChanged",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "writeJsonIfChanged",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "writeManagedFile",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/fs-utils.js"
+    },
+    {
+      "name": "buildAgents",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildBundle",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildCodebaseMap",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildCodeReviewSkill",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildFeedback",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildManagedSection",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "buildRepoOnboardingSkill",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "listOrNone",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "MANAGED_FILES",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/generate.js"
+    },
+    {
+      "name": "compilePatternSet",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "countOccurrences",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "extractFrontmatter",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "extractManagedContent",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "internals",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintContentSafety",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintManagedFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintRepo",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintSkill",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "manifestRootMatches",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "readManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "REQUIRED_MANIFEST_FIELDS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "samePath",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "BROWSER_VALIDATION_PATTERN",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "buildResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "detectPlaywright",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "findRiskyTopics",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "hasItems",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "hasRiskPermissionGate",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "hasText",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "isWebRepo",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "lintBrowserValidation",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "lintPlan",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "lintPlanSecrets",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "lintValidationAgainstRepo",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "mentionsDetectedCommand",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "PERMISSION_GATE_PATTERN",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "planText",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "repoValidationCommands",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "RISKY_TOPICS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "VALIDATION_COMMAND_PATTERN",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "WEB_FRAMEWORKS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/plan-lint.js"
+    },
+    {
+      "name": "applyRuleConfig",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/rules.js"
+    },
+    {
+      "name": "createFinding",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/rules.js"
+    },
+    {
+      "name": "hasErrors",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/rules.js"
+    },
+    {
+      "name": "pushFinding",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/rules.js"
+    },
+    {
+      "name": "RULES",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/rules.js"
+    },
+    {
+      "name": "buildAssumptions",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "buildEvidence",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "collectFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "collectRepoFiles",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectArchitectureDocs",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectCi",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectCommands",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectDocs",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectEntrypoints",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectFrameworks",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectImportantFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectLanguages",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectPackageManagers",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectRoots",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "detectWorkspacePackages",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "DOC_DIR_CANDIDATES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "fingerprintDiscovery",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "GENERATED_FILE_PATHS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "IGNORED_DIRS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "internals",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "readPackageJson",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "readTextIfExists",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "safeReadDir",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "scanRepo",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "SECRET_FILE_NAMES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "SOURCE_DIR_CANDIDATES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "summarize",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "TEST_DIR_CANDIDATES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/scan.js"
+    },
+    {
+      "name": "jsGraphFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/codegraph.test.js"
+    },
+    {
+      "name": "pythonGraphFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/codegraph.test.js"
+    },
+    {
+      "name": "createGitRepo",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "createTempRepo",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "execFileAsync",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "git",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "jsRepoFiles",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "readTree",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "withCapturedConsole",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "withMutedConsole",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "test/helpers.js"
+    },
+    {
+      "name": "completePlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/plan-lint.test.js"
+    },
+    {
+      "name": "playwrightRepoFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/plan-lint.test.js"
+    },
+    {
+      "name": "withoutExitLeak",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/plan-lint.test.js"
+    },
+    {
+      "name": "writeActivePlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/plan-lint.test.js"
+    },
+    {
+      "name": "createCompletePlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/plan-workflow.test.js"
+    }
+  ],
+  "relationships": [
+    {
+      "kind": "entrypoint",
+      "file": "bin/codex-prep.js",
+      "confidence": "high",
+      "reason": "Detected by repo scan."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
+      "test": "test/cli.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
+      "test": "test/cli.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
+      "test": "test/codegraph.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
+      "test": "test/plan-lint.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/cli.js",
+      "test": "test/plan-workflow.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/codegraph.js",
+      "test": "test/codegraph.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/codegraph.js",
+      "test": "test/codegraph.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/codegraph.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/commands.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/commands.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/lint.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/plan-lint.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/plan-workflow.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/fs-utils.js",
+      "test": "test/generate.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/generate.js",
+      "test": "test/generate.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/generate.js",
+      "test": "test/generate.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/lint.js",
+      "test": "test/lint.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/lint.js",
+      "test": "test/lint.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/lint.js",
+      "test": "test/plan-lint.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/plan-lint.js",
+      "test": "test/plan-lint.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/scan.js",
+      "test": "test/generate.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/scan.js",
+      "test": "test/scan.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/scan.js",
+      "test": "test/scan.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    }
+  ],
+  "evidence": [
+    {
+      "confidence": "high",
+      "fact": "Indexed 20 code files",
+      "source": ".codex-prep/codegraph.json"
+    },
+    {
+      "confidence": "medium",
+      "fact": "Detected 43 local import edges",
+      "source": ".codex-prep/codegraph.json"
+    },
+    {
+      "confidence": "medium",
+      "fact": "Detected 245 symbols",
+      "source": ".codex-prep/codegraph.json"
+    }
+  ],
+  "assumptions": [
+    "Regex extraction is deterministic but not a full compiler or interpreter."
+  ]
+}

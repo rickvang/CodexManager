@@ -3,6 +3,8 @@ import {
   applyCommand,
   checkCommand,
   evalCommand,
+  graphCommand,
+  graphQueryCommand,
   lintCommand,
   planApproveCommand,
   planCloseCommand,
@@ -12,6 +14,7 @@ import {
   planStartCommand,
   planStatusCommand,
   planUpdateCommand,
+  refreshGraphCommand,
   refreshMapCommand,
   scanCommand
 } from "./commands.js";
@@ -29,7 +32,10 @@ const COMMANDS = new Set([
   "apply",
   "check",
   "eval",
+  "graph",
+  "graph-query",
   "lint",
+  "refresh-graph",
   "refresh-map"
 ]);
 
@@ -108,8 +114,14 @@ export async function runCli(argv) {
     await checkCommand(common);
   } else if (command === "eval") {
     await evalCommand(common);
+  } else if (command === "graph") {
+    await graphCommand(common);
+  } else if (command === "graph-query") {
+    await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol });
   } else if (command === "lint") {
     await lintCommand(common);
+  } else if (command === "refresh-graph") {
+    await refreshGraphCommand(common);
   } else if (command === "refresh-map") {
     await refreshMapCommand(common);
   }
@@ -137,6 +149,7 @@ function parseArgs(argv) {
     approvalBoundaries: [],
     riskLevel: undefined,
     targetAgent: undefined,
+    symbol: undefined,
     branch: undefined,
     base: undefined,
     syncBase: false
@@ -209,6 +222,9 @@ function parseArgs(argv) {
     } else if (value === "--target-agent") {
       options.targetAgent = readOptionValue(argv, i, value);
       i += 1;
+    } else if (value === "--symbol") {
+      options.symbol = readOptionValue(argv, i, value);
+      i += 1;
     } else if (value === "--branch") {
       options.branch = readOptionValue(argv, i, value);
       i += 1;
@@ -251,8 +267,8 @@ function validateOptions(command, options) {
   if (hasAny(options.scope) && !planningCommands.includes(command)) {
     throw new Error("--scope is only supported for plan and plan-update");
   }
-  if (hasAny(options.files) && !planningCommands.includes(command)) {
-    throw new Error("--file is only supported for plan and plan-update");
+  if (hasAny(options.files) && ![...planningCommands, "graph-query"].includes(command)) {
+    throw new Error("--file is only supported for plan, plan-update, and graph-query");
   }
   if (hasAny(options.validation) && !planningCommands.includes(command)) {
     throw new Error("--validation is only supported for plan and plan-update");
@@ -284,6 +300,18 @@ function validateOptions(command, options) {
   if (options.targetAgent && !planningCommands.includes(command)) {
     throw new Error("--target-agent is only supported for plan and plan-update");
   }
+  if (options.symbol && command !== "graph-query") {
+    throw new Error("--symbol is only supported for graph-query");
+  }
+  if (command === "graph-query" && options.files.length === 0 && !options.symbol) {
+    throw new Error("graph-query requires --file <path> or --symbol <name>");
+  }
+  if (command === "graph-query" && options.files.length > 0 && options.symbol) {
+    throw new Error("graph-query accepts either --file or --symbol, not both");
+  }
+  if (command === "graph-query" && options.files.length > 1) {
+    throw new Error("graph-query accepts one --file value");
+  }
   if (options.branch && command !== "plan-start") {
     throw new Error("--branch is only supported for plan-start");
   }
@@ -312,6 +340,9 @@ Usage:
   codex-prep plan-approve [--repo <path>] --note <text>
   codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
+  codex-prep graph [--repo <path>] [--json]
+  codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--json]
+  codex-prep refresh-graph [--repo <path>] [--json]
 
 Commands:
   scan         Inspect a repo and print an evidence-backed summary.
@@ -326,7 +357,10 @@ Commands:
   apply        Write or refresh the Codex onboarding bundle.
   check        Detect stale generated guidance and obvious repo drift.
   eval         Run fixed scenarios against the generated guidance.
+  graph        Preview the local code graph without writing files.
+  graph-query  Query graph imports, dependents, symbols, and likely tests.
   lint         Lint codex-prep managed files without editing them.
+  refresh-graph Write or refresh .codex-prep/codegraph.json.
   refresh-map  Refresh docs/CODEBASE_MAP.md and the manifest.
 
 Planning options:
@@ -334,7 +368,7 @@ Planning options:
   --intent TEXT   Set or replace the active plan intent.
   --note TEXT     Append a decision-log note or approve a plan.
   --scope TEXT    Append a proposed scope item.
-  --file PATH     Append a likely touched file or path.
+  --file PATH     Append a likely touched file, or query one graph file.
   --validation TEXT
                   Append a validation step.
   --question TEXT Append an open question.
@@ -350,6 +384,7 @@ Planning options:
   --risk TEXT     Set plan risk: low, medium, or high.
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, or generic.
+  --symbol TEXT   Symbol name for graph-query.
   --branch TEXT   Branch name for plan-start.
   --base TEXT     Base branch for plan-start. Defaults to main.
   --sync-base     With plan-start, fetch and fast-forward pull the base first.

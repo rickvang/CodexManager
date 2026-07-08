@@ -188,11 +188,13 @@ test("apply writes the onboarding bundle idempotently", async () => {
   assert.equal(Boolean(first["docs/CODEX_FEEDBACK.md"]), true);
   assert.equal(Boolean(first[".codex-prep/config.json"]), true);
   assert.equal(Boolean(first[".codex-prep/manifest.json"]), true);
+  assert.equal(Boolean(first[".codex-prep/codegraph.json"]), true);
   assert.equal(Boolean(first[".agents/skills/repo-onboarding/SKILL.md"]), true);
   assert.equal(Boolean(first[".agents/skills/code-review/SKILL.md"]), true);
 
   const manifest = JSON.parse(first[".codex-prep/manifest.json"]);
   assert.equal(manifest.repo.root, ".");
+  assert.equal(manifest.generatedFiles.some((file) => file.path === ".codex-prep/codegraph.json"), true);
   assert.equal(first["docs/CODEBASE_MAP.md"].includes(root), false);
   assert.equal(first["docs/CODEBASE_MAP.md"].includes("- Root: `.`"), true);
 });

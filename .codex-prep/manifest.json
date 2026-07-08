@@ -122,6 +122,10 @@
     {
       "path": ".agents/skills/code-review/SKILL.md",
       "managed": true
+    },
+    {
+      "path": ".codex-prep/codegraph.json",
+      "managed": true
     }
   ]
 }

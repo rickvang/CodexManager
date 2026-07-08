@@ -112,7 +112,7 @@ export function jsRepoFiles() {
       2
     ),
     "src/index.ts": "export const answer = 42;\n",
-    "tests/index.test.ts": "import test from 'node:test';\n",
+    "tests/index.test.ts": "import test from 'node:test';\nimport { answer } from '../src/index';\ntest('answer', () => answer);\n",
     "README.md": "# Sample\n",
     ".github/workflows/ci.yml": "name: ci\n"
   };
