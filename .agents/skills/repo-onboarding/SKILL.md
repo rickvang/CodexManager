@@ -11,8 +11,9 @@ description: Orient inside this repository before coding. Use when the user asks
 5. Inspect `.codex-prep/codegraph.json` or run `codex-prep graph-query` before broad searching.
 6. Run `codex-prep status` to check plan, branch, dashboard, graph, and validation state.
 7. If the workflow looks inconsistent, run `codex-prep doctor` and follow the highest-severity finding first.
-8. If the map or graph is stale, recommend `codex-prep check`, `codex-prep refresh-map`, or `codex-prep refresh-graph`.
-9. For saved implementation plans, run `codex-prep plan-review` before build approval.
-10. Treat plan approval, branch creation, file edits, commits, and pushes as separate user decisions.
-11. Stay in Explore / Review mode unless the user explicitly authorizes edits.
+8. If local CodexManager memory appears in git status, run `codex-prep local-ignore`.
+9. If the map or graph is stale, recommend `codex-prep check`, `codex-prep refresh-map`, or `codex-prep refresh-graph`.
+10. For saved implementation plans, run `codex-prep plan-review` before build approval.
+11. Treat plan approval, branch creation, file edits, commits, and pushes as separate user decisions.
+12. Stay in Explore / Review mode unless the user explicitly authorizes edits.
 <!-- codex-prep:end -->

@@ -14,6 +14,11 @@ export const VALIDATION_RESULTS_PATH = ".codex-prep/validation-results.jsonl";
 export const PLAN_HISTORY_DIR = ".codex-prep/plans";
 export const LATEST_PLAN_PATH = `${PLAN_HISTORY_DIR}/latest-plan.json`;
 export const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
+export const LOCAL_GIT_EXCLUDE_PATH = ".git/info/exclude";
+export const LOCAL_STATE_IGNORE_PATTERNS = Object.freeze([
+  `${PLAN_HISTORY_DIR}/`,
+  VALIDATION_RESULTS_PATH
+]);
 
 const MANIFEST_PATH = ".codex-prep/manifest.json";
 const OBSIDIAN_INDEX_PATH = `${OBSIDIAN_EXPORT_DIR}/Index.md`;
@@ -62,8 +67,7 @@ export async function buildControlState(root, options = {}) {
 }
 
 export async function readGitState(root) {
-  const gitDir = path.join(root, ".git");
-  if (!(await fileExists(gitDir))) {
+  if (!(await resolveGitDir(root))) {
     return {
       isGitRepo: false,
       branchName: "",
@@ -133,10 +137,57 @@ export async function readValidationMemory(root) {
 }
 
 export async function appendValidationResult(root, entry) {
+  await ensureLocalStateIgnored(root);
   const absolutePath = path.join(root, VALIDATION_RESULTS_PATH);
   await fs.mkdir(path.dirname(absolutePath), { recursive: true });
   await fs.appendFile(absolutePath, `${JSON.stringify(entry)}\n`, "utf8");
   return { path: VALIDATION_RESULTS_PATH, changed: true, mode: "local-jsonl" };
+}
+
+export async function ensureLocalStateIgnored(root) {
+  const gitDir = await resolveGitDir(root);
+  const result = {
+    isGitRepo: Boolean(gitDir),
+    path: LOCAL_GIT_EXCLUDE_PATH,
+    changed: false,
+    entries: [...LOCAL_STATE_IGNORE_PATTERNS],
+    added: []
+  };
+
+  if (!gitDir) {
+    return result;
+  }
+
+  const excludePath = path.join(gitDir, "info", "exclude");
+  await fs.mkdir(path.dirname(excludePath), { recursive: true });
+
+  let content = "";
+  try {
+    content = await fs.readFile(excludePath, "utf8");
+  } catch (error) {
+    if (error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+
+  const existing = new Set(
+    content
+      .split(/\r?\n/)
+      .map(normalizeIgnoreLine)
+      .filter(Boolean)
+  );
+  const missing = LOCAL_STATE_IGNORE_PATTERNS.filter((entry) => !existing.has(entry));
+
+  if (missing.length > 0) {
+    const prefix = content && !content.endsWith("\n") ? "\n" : "";
+    await fs.appendFile(excludePath, `${prefix}${missing.join("\n")}\n`, "utf8");
+  }
+
+  return {
+    ...result,
+    changed: missing.length > 0,
+    added: missing
+  };
 }
 
 export function buildDoctorResult(state) {
@@ -297,6 +348,41 @@ async function runGit(root, args) {
     maxBuffer: 1024 * 1024
   });
   return { stdout, stderr };
+}
+
+async function resolveGitDir(root) {
+  const dotGit = path.join(root, ".git");
+  let stat;
+  try {
+    stat = await fs.lstat(dotGit);
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return undefined;
+    }
+    throw error;
+  }
+
+  if (stat.isDirectory()) {
+    return dotGit;
+  }
+  if (!stat.isFile()) {
+    return undefined;
+  }
+
+  const content = await fs.readFile(dotGit, "utf8");
+  const match = content.match(/^gitdir:\s*(.+)\s*$/im);
+  if (!match) {
+    return undefined;
+  }
+  return path.resolve(root, match[1].trim());
+}
+
+function normalizeIgnoreLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed || trimmed.startsWith("#")) {
+    return "";
+  }
+  return trimmed.replace(/\\/g, "/");
 }
 
 function isLocalStateStatusLine(line) {

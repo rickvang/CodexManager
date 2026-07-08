@@ -20,6 +20,7 @@ import {
   appendValidationResult,
   buildControlState,
   buildDoctorResult,
+  ensureLocalStateIgnored,
   readGitState,
   readValidationMemory,
   selectNextAction
@@ -186,6 +187,18 @@ export async function statusCommand({ root, json }) {
   }
 
   console.log(formatStatus(result));
+  return result;
+}
+
+export async function localIgnoreCommand({ root, json }) {
+  const result = await ensureLocalStateIgnored(root);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatLocalIgnore(result));
   return result;
 }
 
@@ -686,7 +699,11 @@ function updatePlanDocument(plan, change) {
 }
 
 async function writePlanState(root, plan, { includeHistory }) {
+  const localIgnore = await ensureLocalStateIgnored(root);
   const writes = [];
+  if (localIgnore.isGitRepo) {
+    writes.push({ path: localIgnore.path, changed: localIgnore.changed, mode: "local-git-exclude" });
+  }
   if (includeHistory) {
     const historyPath = `${PLAN_HISTORY_DIR}/${safeTimestamp(plan.updatedAt)}-plan.json`;
     const historyResult = await writeJsonIfChanged(path.join(root, historyPath), plan);
@@ -1416,6 +1433,28 @@ function formatDoctor(result) {
     ...formatFindings(result.findings),
     "",
     `Next action: ${result.nextAction}`
+  ].join("\n");
+}
+
+function formatLocalIgnore(result) {
+  if (!result.isGitRepo) {
+    return [
+      "codex-prep local-ignore: skipped",
+      "",
+      "No git repo was found, so no local ignore rules were installed.",
+      "Entries:",
+      ...formatList(result.entries)
+    ].join("\n");
+  }
+
+  return [
+    `codex-prep local-ignore: ${result.changed ? "updated" : "unchanged"}`,
+    "",
+    `File: ${result.path}`,
+    "Entries:",
+    ...formatList(result.entries),
+    "Added:",
+    ...formatList(result.added)
   ].join("\n");
 }
 

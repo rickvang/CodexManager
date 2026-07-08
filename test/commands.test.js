@@ -15,7 +15,7 @@ import {
   statusCommand,
   validationRecordCommand
 } from "../src/commands.js";
-import { createTempRepo, jsRepoFiles, readTree, withMutedConsole } from "./helpers.js";
+import { createGitRepo, createTempRepo, git, jsRepoFiles, readTree, withMutedConsole } from "./helpers.js";
 
 test("scan and plan with save false do not write files", async () => {
   const root = await createTempRepo(jsRepoFiles());
@@ -191,6 +191,29 @@ test("doctor is read-only and reports stable workflow finding codes", async () =
   assert.equal(result.findings.some((finding) => finding.code === "CM011"), true);
 });
 
+test("plan and validation local state are hidden by repo-local git excludes", async () => {
+  const root = await createGitRepo(jsRepoFiles());
+  const now = new Date("2026-07-08T10:11:12.345Z");
+
+  await withMutedConsole(async () => {
+    await planCommand({ root, json: true, now, intent: "Keep local state quiet" });
+    await validationRecordCommand({
+      root,
+      json: true,
+      now,
+      validationCommand: "npm run verify",
+      validationResult: "pass",
+      summary: "verify passed"
+    });
+  });
+
+  const status = (await git(root, ["status", "--porcelain", "--untracked-files=all"])).stdout.trim();
+  const exclude = await fs.readFile(path.join(root, ".git", "info", "exclude"), "utf8");
+
+  assert.equal(status, "");
+  assert.match(exclude, /^\.codex-prep\/plans\/$/m);
+  assert.match(exclude, /^\.codex-prep\/validation-results\.jsonl$/m);
+});
 test("validation-record rejects unknown validation outcomes", async () => {
   const root = await createTempRepo(jsRepoFiles());
 

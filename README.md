@@ -19,6 +19,7 @@ node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
 node ./bin/codex-prep.js status
 node ./bin/codex-prep.js doctor
+node ./bin/codex-prep.js local-ignore
 node ./bin/codex-prep.js validation-record --validation-command "npm run verify" --result pass --summary "verify passed"
 node ./bin/codex-prep.js plan-attach --note "Attached current branch to active plan"
 node ./bin/codex-prep.js plan-review
@@ -50,6 +51,7 @@ From this repo, run:
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
 .\codex-prep.cmd status --repo D:\path\to\repo
 .\codex-prep.cmd doctor --repo D:\path\to\repo
+.\codex-prep.cmd local-ignore --repo D:\path\to\repo
 .\codex-prep.cmd validation-record --repo D:\path\to\repo --validation-command "npm run verify" --result pass --summary "verify passed"
 .\codex-prep.cmd plan-attach --repo D:\path\to\repo --note "Attached current branch to active plan"
 .\codex-prep.cmd plan-review --repo D:\path\to\repo
@@ -185,6 +187,14 @@ D:\codexmanager\codex-prep.cmd validation-record --repo D:\path\to\repo --valida
 ```
 
 Validation memory is stored locally in `.codex-prep/validation-results.jsonl`. It is evidence that a validation command was run; it is not a substitute for rerunning validation after new changes.
+
+If `.codex-prep/plans/` or `.codex-prep/validation-results.jsonl` appear in `git status`, install the repo-local ignore rules:
+
+```powershell
+D:\codexmanager\codex-prep.cmd local-ignore --repo D:\path\to\repo
+```
+
+`local-ignore` writes only `.git/info/exclude`, so it keeps local CodexManager memory out of version control without changing tracked repo files.
 
 ## Plan Lint
 

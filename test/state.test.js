@@ -1,7 +1,31 @@
 import assert from "node:assert/strict";
+import fs from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
-import { buildDoctorResult, selectNextAction } from "../src/state.js";
+import {
+  LOCAL_STATE_IGNORE_PATTERNS,
+  buildDoctorResult,
+  ensureLocalStateIgnored,
+  selectNextAction
+} from "../src/state.js";
+import { createGitRepo, jsRepoFiles } from "./helpers.js";
 
+
+test("ensureLocalStateIgnored installs repo-local git excludes idempotently", async () => {
+  const root = await createGitRepo(jsRepoFiles());
+
+  const first = await ensureLocalStateIgnored(root);
+  const second = await ensureLocalStateIgnored(root);
+  const exclude = await fs.readFile(path.join(root, ".git", "info", "exclude"), "utf8");
+
+  assert.equal(first.isGitRepo, true);
+  assert.equal(first.changed, true);
+  assert.deepEqual(first.added, [...LOCAL_STATE_IGNORE_PATTERNS]);
+  assert.equal(second.changed, false);
+  for (const pattern of LOCAL_STATE_IGNORE_PATTERNS) {
+    assert.equal(exclude.split(pattern).length - 1, 1);
+  }
+});
 test("terminal plans do not require switching back to old implementation branches", () => {
   const state = completeState({
     plan: {

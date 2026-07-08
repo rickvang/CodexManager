@@ -8,6 +8,7 @@ import {
   graphExportCommand,
   graphQueryCommand,
   lintCommand,
+  localIgnoreCommand,
   planApproveCommand,
   planAttachCommand,
   planCloseCommand,
@@ -31,6 +32,7 @@ const COMMANDS = new Set([
   "plan-status",
   "status",
   "doctor",
+  "local-ignore",
   "validation-record",
   "plan-attach",
   "plan-review",
@@ -112,6 +114,8 @@ export async function runCli(argv) {
     await statusCommand(common);
   } else if (command === "doctor") {
     await doctorCommand(common);
+  } else if (command === "local-ignore") {
+    await localIgnoreCommand(common);
   } else if (command === "validation-record") {
     await validationRecordCommand({
       ...common,
@@ -407,6 +411,7 @@ Usage:
   codex-prep plan-status [--repo <path>] [--json]
   codex-prep status [--repo <path>] [--json]
   codex-prep doctor [--repo <path>] [--json]
+  codex-prep local-ignore [--repo <path>] [--json]
   codex-prep validation-record [--repo <path>] --validation-command <command> --result <pass|fail> [--summary <text>] [--phase <name>] [--json]
   codex-prep plan-attach [--repo <path>] --note <text> [--json]
   codex-prep plan-review [--repo <path>] [--json]
@@ -426,6 +431,7 @@ Commands:
   plan-status  Show the active saved plan.
   status       Show plan, branch, graph, dashboard, and validation state.
   doctor       Diagnose missing or stale workflow artifacts.
+  local-ignore Install repo-local git exclude rules for codex-prep local state.
   validation-record
                Record an explicit validation result in local JSONL memory.
   plan-attach  Attach the active plan to the current branch when work started outside plan-start.
@@ -482,6 +488,7 @@ Planning options:
 Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access unless plan-start --sync-base is used.
+  local-ignore writes only .git/info/exclude and does not edit repo-tracked files.
   scan, check, eval, lint, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);

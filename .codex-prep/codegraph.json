@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T20:17:58.144Z",
-  "fingerprint": "01cfda11b467af1492be4fb6e3af42f25981ccb1272f02676828d0e1eabbae16",
+  "generatedAt": "2026-07-08T21:05:58.685Z",
+  "fingerprint": "8f1a6907cd3affda5555fbfc398aa107b229003e99b7c2b8e48686146a44b8ca",
   "repo": {
     "root": ".",
-    "name": "codexmanager"
+    "name": "CodexManager"
   },
   "summary": {
     "fileCount": 24,
-    "edgeCount": 57,
-    "symbolCount": 356,
+    "edgeCount": 59,
+    "symbolCount": 363,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 18445,
+      "size": 18780,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -446,7 +446,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 52391,
+      "size": 53369,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -759,6 +759,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatLocalIgnore",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatPlan",
           "kind": "function",
           "exported": false,
@@ -856,6 +862,12 @@
         },
         {
           "name": "lintCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "localIgnoreCommand",
           "kind": "function",
           "exported": true,
           "confidence": "high"
@@ -1329,7 +1341,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 12708,
+      "size": 12967,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2430,7 +2442,7 @@
     {
       "path": "src/state.js",
       "language": "JavaScript",
-      "size": 12683,
+      "size": 14654,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2515,6 +2527,12 @@
           "confidence": "high"
         },
         {
+          "name": "ensureLocalStateIgnored",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "execFileAsync",
           "kind": "variable",
           "exported": false,
@@ -2539,8 +2557,26 @@
           "confidence": "high"
         },
         {
+          "name": "LOCAL_GIT_EXCLUDE_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "LOCAL_STATE_IGNORE_PATTERNS",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "MANIFEST_PATH",
           "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizeIgnoreLine",
+          "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
@@ -2587,6 +2623,12 @@
           "confidence": "high"
         },
         {
+          "name": "resolveGitDir",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "runGit",
           "kind": "function",
           "exported": false,
@@ -2628,13 +2670,19 @@
     {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 2534,
+      "size": 3049,
       "role": "test",
       "confidence": "high",
       "imports": [
         {
           "specifier": "../src/cli.js",
           "resolved": "src/cli.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
           "kind": "local",
           "confidence": "high"
         },
@@ -2729,7 +2777,7 @@
     {
       "path": "test/commands.test.js",
       "language": "JavaScript",
-      "size": 11232,
+      "size": 12117,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3229,7 +3277,7 @@
     {
       "path": "test/state.test.js",
       "language": "JavaScript",
-      "size": 1754,
+      "size": 2583,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3240,7 +3288,25 @@
           "confidence": "high"
         },
         {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
           "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
           "resolved": null,
           "kind": "external",
           "confidence": "medium"
@@ -3475,6 +3541,13 @@
       "confidence": "high"
     },
     {
+      "from": "test/cli.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
+      "confidence": "high"
+    },
+    {
       "from": "test/codegraph.test.js",
       "to": "src/cli.js",
       "kind": "imports",
@@ -3661,6 +3734,13 @@
       "to": "src/state.js",
       "kind": "imports",
       "specifier": "../src/state.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/state.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
       "confidence": "high"
     }
   ],
@@ -4282,6 +4362,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatLocalIgnore",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatPlan",
       "kind": "function",
       "exported": false,
@@ -4395,6 +4482,13 @@
     },
     {
       "name": "lintCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "localIgnoreCommand",
       "kind": "function",
       "exported": true,
       "confidence": "high",
@@ -5899,6 +5993,13 @@
       "file": "src/state.js"
     },
     {
+      "name": "ensureLocalStateIgnored",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
       "name": "execFileAsync",
       "kind": "variable",
       "exported": false,
@@ -5927,8 +6028,29 @@
       "file": "src/state.js"
     },
     {
+      "name": "LOCAL_GIT_EXCLUDE_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "LOCAL_STATE_IGNORE_PATTERNS",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
       "name": "MANIFEST_PATH",
       "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
+      "name": "normalizeIgnoreLine",
+      "kind": "function",
       "exported": false,
       "confidence": "medium",
       "file": "src/state.js"
@@ -5980,6 +6102,13 @@
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "resolveGitDir",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/state.js"
     },
     {
@@ -6384,12 +6513,12 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 57 local import edges",
+      "fact": "Detected 59 local import edges",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 356 symbols",
+      "fact": "Detected 363 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

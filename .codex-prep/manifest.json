@@ -4,7 +4,7 @@
   "fingerprint": "7aa48b4a3fe231a680cfed0955a9640e7d8c4202604046c44d80398926ba404b",
   "repo": {
     "root": ".",
-    "name": "codexmanager",
+    "name": "CodexManager",
     "hasGit": true
   },
   "summary": "Detected JavaScript repo with 4 command(s); source roots: src.",
