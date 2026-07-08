@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
 import {
   fileExists,
@@ -9,6 +10,7 @@ import {
   writeJsonIfChanged
 } from "./fs-utils.js";
 import { lintRepo } from "./lint.js";
+import { hasErrors, pushFinding } from "./rules.js";
 import { scanRepo } from "./scan.js";
 
 export async function scanCommand({ root, json }) {
@@ -31,6 +33,11 @@ export async function planCommand({ root, json }) {
       mode: file.mode,
       reason: file.reason
     })).concat([
+      {
+        path: CONFIG_PATH,
+        mode: "user-config",
+        reason: "Repo-specific codex-prep rule and lint settings; created only when missing."
+      },
       {
         path: ".codex-prep/manifest.json",
         mode: "managed-json",
@@ -60,11 +67,15 @@ export async function applyCommand({ root, json }) {
     writes.push({ path: file.path, changed: result.changed, mode: file.mode });
   }
 
+  const configResult = await writeDefaultConfigIfMissing(root);
+  const configWrite = { path: CONFIG_PATH, changed: configResult.changed, mode: "user-config" };
+
   const manifestForWrite = finalizeManifest(manifest, previousManifest, writes);
   const manifestResult = await writeJsonIfChanged(
     path.join(root, ".codex-prep", "manifest.json"),
     manifestForWrite
   );
+  writes.push(configWrite);
   writes.push({ path: ".codex-prep/manifest.json", changed: manifestResult.changed, mode: "managed-json" });
 
   const result = { repo: manifest.repo, writes };
@@ -77,30 +88,31 @@ export async function applyCommand({ root, json }) {
 }
 
 export async function checkCommand({ root, json }) {
+  const config = await loadConfig(root);
   const manifestPath = path.join(root, ".codex-prep", "manifest.json");
   const previousManifest = await readJsonIfExists(manifestPath);
   const current = await scanRepo(root, { previousManifest });
   const findings = [];
 
   if (!previousManifest) {
-    findings.push(finding("missing-manifest", "error", ".codex-prep/manifest.json is missing."));
+    pushFinding(findings, config, "missing-manifest", { file: ".codex-prep/manifest.json", message: ".codex-prep/manifest.json is missing." });
   }
 
   for (const filePath of MANAGED_FILES) {
     if (!(await fileExists(path.join(root, filePath)))) {
-      findings.push(finding("missing-generated-file", "error", `${filePath} is missing.`));
+      pushFinding(findings, config, "missing-generated-file", { file: filePath, message: `${filePath} is missing.` });
     }
   }
 
   if (previousManifest) {
-    compareStringArrays(findings, "source-roots", previousManifest.discovery?.sourceRoots, current.discovery.sourceRoots);
-    compareStringArrays(findings, "test-roots", previousManifest.discovery?.testRoots, current.discovery.testRoots);
-    compareCommands(findings, previousManifest.discovery?.commands, current.discovery.commands);
-    comparePackageWorkspaces(findings, previousManifest.discovery?.workspacePackages, current.discovery.workspacePackages);
+    compareStringArrays(findings, "source-roots", previousManifest.discovery?.sourceRoots, current.discovery.sourceRoots, config);
+    compareStringArrays(findings, "test-roots", previousManifest.discovery?.testRoots, current.discovery.testRoots, config);
+    compareCommands(findings, previousManifest.discovery?.commands, current.discovery.commands, config);
+    comparePackageWorkspaces(findings, previousManifest.discovery?.workspacePackages, current.discovery.workspacePackages, config);
   }
 
   const result = {
-    ok: findings.filter((item) => item.level === "error").length === 0,
+    ok: !hasErrors(findings),
     findings
   };
 
@@ -241,44 +253,40 @@ function commandEvidence(manifest, pattern) {
   return `${command.name}: ${command.command}`;
 }
 
-function compareStringArrays(findings, name, previous = [], current = []) {
+function compareStringArrays(findings, name, previous = [], current = [], config = {}) {
   const oldSet = new Set(previous);
   const newSet = new Set(current);
   for (const value of oldSet) {
     if (!newSet.has(value)) {
-      findings.push(finding(`${name}-removed`, "error", `${name} entry removed or moved: ${value}`));
+      pushFinding(findings, config, `${name}-removed`, { message: `${name} entry removed or moved: ${value}` });
     }
   }
   for (const value of newSet) {
     if (!oldSet.has(value)) {
-      findings.push(finding(`${name}-added`, "warning", `${name} entry added since last apply: ${value}`));
+      pushFinding(findings, config, `${name}-added`, { message: `${name} entry added since last apply: ${value}` });
     }
   }
 }
 
-function compareCommands(findings, previous = [], current = []) {
+function compareCommands(findings, previous = [], current = [], config = {}) {
   const oldMap = new Map(previous.map((command) => [command.name, command.command]));
   const newMap = new Map(current.map((command) => [command.name, command.command]));
   for (const [name, command] of oldMap) {
     if (!newMap.has(name)) {
-      findings.push(finding("command-removed", "error", `command removed since last apply: ${name}`));
+      pushFinding(findings, config, "command-removed", { message: `command removed since last apply: ${name}` });
     } else if (newMap.get(name) !== command) {
-      findings.push(finding("command-changed", "error", `command changed since last apply: ${name}`));
+      pushFinding(findings, config, "command-changed", { message: `command changed since last apply: ${name}` });
     }
   }
   for (const [name] of newMap) {
     if (!oldMap.has(name)) {
-      findings.push(finding("command-added", "warning", `new command discovered since last apply: ${name}`));
+      pushFinding(findings, config, "command-added", { message: `new command discovered since last apply: ${name}` });
     }
   }
 }
 
-function comparePackageWorkspaces(findings, previous = [], current = []) {
-  compareStringArrays(findings, "workspace-package", previous, current);
-}
-
-function finding(code, level, message) {
-  return { code, level, message };
+function comparePackageWorkspaces(findings, previous = [], current = [], config = {}) {
+  compareStringArrays(findings, "workspace-package", previous, current, config);
 }
 
 function formatScan(manifest) {
@@ -331,7 +339,7 @@ function formatCheck(result) {
   return [
     `codex-prep check: ${result.ok ? "ok with warnings" : "drift found"}`,
     "",
-    ...result.findings.map((item) => `- [${item.level}] ${item.message}`)
+    ...result.findings.map((item) => `- [${item.level}] ${item.code} ${item.message} Fix: ${item.fix}`)
   ].join("\n");
 }
 
@@ -350,7 +358,7 @@ function formatLint(result) {
   return [
     "codex-prep lint: " + (result.ok ? "ok with warnings" : "failed"),
     "",
-    ...result.findings.map((item) => "- [" + item.level + "] " + item.file + ": " + item.message + " (" + item.code + ")")
+    ...result.findings.map((item) => "- [" + item.level + "] " + item.code + " " + item.file + ": " + item.message + " Fix: " + item.fix)
   ].join("\n");
 }
 

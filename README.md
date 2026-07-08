@@ -34,11 +34,11 @@ Use `--repo <path>` to target another repository and `--json` for machine-readab
 - `.agents/skills/repo-onboarding/SKILL.md`
 - `.agents/skills/code-review/SKILL.md`
 
-Existing files are preserved outside managed `codex-prep` sections.
+Existing files are preserved outside managed `codex-prep` sections. `apply` also creates `.codex-prep/config.json` when missing and preserves it after that.
 
 ## Lint
 
-`lint` checks the generated/managed repo files without editing them. It verifies managed markers, skill frontmatter, manifest shape, stale `D:\Codex` path references, and obvious secret-looking content.
+`lint` checks the generated/managed repo files without editing them. It verifies managed markers, skill frontmatter, manifest shape, stale `D:\Codex` path references, and obvious secret-looking content. Findings use stable rule IDs such as `CP002`, include fix suggestions, and can be tuned in `.codex-prep/config.json`.
 
 ## MVP Boundary
 

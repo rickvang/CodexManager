@@ -1,38 +1,62 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { compilePatterns, CONFIG_PATH, readConfig } from "./config.js";
 import { MANAGED_BEGIN, MANAGED_END, fileExists } from "./fs-utils.js";
 import { MANAGED_FILES } from "./generate.js";
+import { hasErrors, pushFinding } from "./rules.js";
 
 const REQUIRED_MANIFEST_FIELDS = ["schemaVersion", "fingerprint", "repo", "discovery", "generatedFiles"];
-const STALE_PATH_PATTERNS = [/D:\\Codex(?!Manager)/i];
-const SECRET_PATTERNS = [
-  /\b[A-Z0-9_]*(SECRET|TOKEN|PASSWORD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*\s*=/i,
-  /-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----/,
-  /\bghp_[A-Za-z0-9_]{20,}\b/,
-  /\bsk-[A-Za-z0-9_-]{20,}\b/
-];
 
 export async function lintRepo(root) {
   const findings = [];
+  const configState = await readConfig(root);
+  const config = configState.config;
 
-  for (const filePath of MANAGED_FILES) {
-    await lintManagedFile(root, filePath, findings);
+  if (configState.missing) {
+    pushFinding(findings, config, "missing-config", {
+      file: CONFIG_PATH,
+      message: "codex-prep config is missing; defaults are being used"
+    });
+  }
+  if (configState.invalid) {
+    pushFinding(findings, config, "invalid-config-json", {
+      file: CONFIG_PATH,
+      message: "config JSON is invalid: " + configState.invalid
+    });
   }
 
-  await lintManifest(root, findings);
-  await lintSkill(root, ".agents/skills/repo-onboarding/SKILL.md", findings);
-  await lintSkill(root, ".agents/skills/code-review/SKILL.md", findings);
+  const stalePathPatterns = compilePatternSet(findings, config, "lint.stalePathPatterns", config.lint?.stalePathPatterns ?? []);
+  const secretPatterns = compilePatternSet(findings, config, "lint.secretPatterns", config.lint?.secretPatterns ?? []);
+
+  for (const filePath of MANAGED_FILES) {
+    await lintManagedFile(root, filePath, findings, config, stalePathPatterns, secretPatterns);
+  }
+
+  await lintManifest(root, findings, config, stalePathPatterns, secretPatterns);
+  await lintSkill(root, ".agents/skills/repo-onboarding/SKILL.md", findings, config);
+  await lintSkill(root, ".agents/skills/code-review/SKILL.md", findings, config);
 
   return {
-    ok: findings.filter((item) => item.level === "error").length === 0,
+    ok: !hasErrors(findings),
     findings
   };
 }
 
-async function lintManagedFile(root, filePath, findings) {
+function compilePatternSet(findings, config, configField, patterns) {
+  const { compiled, invalid } = compilePatterns(patterns);
+  for (const item of invalid) {
+    pushFinding(findings, config, "invalid-lint-pattern", {
+      file: CONFIG_PATH,
+      message: configField + " contains invalid regex " + JSON.stringify(item.pattern) + ": " + item.error
+    });
+  }
+  return compiled;
+}
+
+async function lintManagedFile(root, filePath, findings, config, stalePathPatterns, secretPatterns) {
   const absolutePath = path.join(root, filePath);
   if (!(await fileExists(absolutePath))) {
-    findings.push(finding("missing-managed-file", "error", filePath, "managed file is missing"));
+    pushFinding(findings, config, "missing-managed-file", { file: filePath, message: "managed file is missing" });
     return;
   }
 
@@ -41,25 +65,24 @@ async function lintManagedFile(root, filePath, findings) {
   const endCount = countOccurrences(content, MANAGED_END);
 
   if (beginCount !== 1 || endCount !== 1) {
-    findings.push(
-      finding(
-        "invalid-managed-markers",
-        "error",
-        filePath,
-        "expected exactly one managed marker pair, found begin=" + beginCount + ", end=" + endCount
-      )
-    );
+    pushFinding(findings, config, "invalid-managed-markers", {
+      file: filePath,
+      message: "expected exactly one managed marker pair, found begin=" + beginCount + ", end=" + endCount
+    });
   } else if (content.indexOf(MANAGED_BEGIN) > content.indexOf(MANAGED_END)) {
-    findings.push(finding("invalid-managed-marker-order", "error", filePath, "managed begin marker appears after end marker"));
+    pushFinding(findings, config, "invalid-managed-marker-order", {
+      file: filePath,
+      message: "managed begin marker appears after end marker"
+    });
   }
 
-  lintContentSafety(filePath, content, findings);
+  lintContentSafety(filePath, content, findings, config, stalePathPatterns, secretPatterns);
 }
 
-async function lintManifest(root, findings) {
+async function lintManifest(root, findings, config, stalePathPatterns, secretPatterns) {
   const filePath = ".codex-prep/manifest.json";
   const absolutePath = path.join(root, filePath);
-  const manifest = await readManifest(absolutePath, findings, filePath);
+  const manifest = await readManifest(absolutePath, findings, config, filePath);
 
   if (!manifest) {
     return;
@@ -67,49 +90,54 @@ async function lintManifest(root, findings) {
 
   for (const field of REQUIRED_MANIFEST_FIELDS) {
     if (!(field in manifest)) {
-      findings.push(finding("manifest-missing-field", "error", filePath, "missing required field: " + field));
+      pushFinding(findings, config, "manifest-missing-field", {
+        file: filePath,
+        message: "missing required field: " + field
+      });
     }
   }
 
   if (manifest.repo?.root && !samePath(manifest.repo.root, root)) {
-    findings.push(
-      finding(
-        "manifest-root-mismatch",
-        "error",
-        filePath,
-        "manifest repo root " + manifest.repo.root + " does not match lint target " + root
-      )
-    );
+    pushFinding(findings, config, "manifest-root-mismatch", {
+      file: filePath,
+      message: "manifest repo root " + manifest.repo.root + " does not match lint target " + root
+    });
   }
 
   const generatedFiles = Array.isArray(manifest.generatedFiles) ? manifest.generatedFiles : [];
   for (const expectedPath of MANAGED_FILES) {
     if (!generatedFiles.some((file) => file.path === expectedPath && file.managed === true)) {
-      findings.push(finding("manifest-generated-file-missing", "error", filePath, "generatedFiles missing managed entry for " + expectedPath));
+      pushFinding(findings, config, "manifest-generated-file-missing", {
+        file: filePath,
+        message: "generatedFiles missing managed entry for " + expectedPath
+      });
     }
   }
 
-  lintContentSafety(filePath, JSON.stringify(manifest), findings);
+  lintContentSafety(filePath, JSON.stringify(manifest), findings, config, stalePathPatterns, secretPatterns);
 }
 
-async function readManifest(absolutePath, findings, filePath) {
+async function readManifest(absolutePath, findings, config, filePath) {
   if (!(await fileExists(absolutePath))) {
-    findings.push(finding("missing-manifest", "error", filePath, "manifest is missing"));
+    pushFinding(findings, config, "missing-manifest", { file: filePath, message: "manifest is missing" });
     return undefined;
   }
 
   try {
     return JSON.parse(await fs.readFile(absolutePath, "utf8"));
   } catch (error) {
-    findings.push(finding("invalid-manifest-json", "error", filePath, "manifest JSON is invalid: " + error.message));
+    pushFinding(findings, config, "invalid-manifest-json", {
+      file: filePath,
+      message: "manifest JSON is invalid: " + error.message
+    });
     return undefined;
   }
 }
 
-async function lintSkill(root, filePath, findings) {
+async function lintSkill(root, filePath, findings, config) {
   const absolutePath = path.join(root, filePath);
   if (!(await fileExists(absolutePath))) {
-    findings.push(finding("missing-skill", "error", filePath, "skill file is missing"));
+    pushFinding(findings, config, "missing-skill", { file: filePath, message: "skill file is missing" });
     return;
   }
 
@@ -118,27 +146,39 @@ async function lintSkill(root, filePath, findings) {
   const frontmatter = extractFrontmatter(managed ?? content);
 
   if (!frontmatter) {
-    findings.push(finding("skill-missing-frontmatter", "error", filePath, "skill is missing YAML-style frontmatter"));
+    pushFinding(findings, config, "skill-missing-frontmatter", {
+      file: filePath,
+      message: "skill is missing YAML-style frontmatter"
+    });
     return;
   }
 
   for (const key of ["name", "description"]) {
     if (!frontmatter[key]) {
-      findings.push(finding("skill-frontmatter-missing-field", "error", filePath, "frontmatter missing " + key));
+      pushFinding(findings, config, "skill-frontmatter-missing-field", {
+        file: filePath,
+        message: "frontmatter missing " + key
+      });
     }
   }
 }
 
-function lintContentSafety(filePath, content, findings) {
-  for (const pattern of STALE_PATH_PATTERNS) {
+function lintContentSafety(filePath, content, findings, config, stalePathPatterns, secretPatterns) {
+  for (const pattern of stalePathPatterns) {
     if (pattern.test(content)) {
-      findings.push(finding("stale-path-reference", "error", filePath, "contains stale D:\\Codex path reference"));
+      pushFinding(findings, config, "stale-path-reference", {
+        file: filePath,
+        message: "contains stale path reference"
+      });
     }
   }
 
-  for (const pattern of SECRET_PATTERNS) {
+  for (const pattern of secretPatterns) {
     if (pattern.test(content)) {
-      findings.push(finding("secret-looking-content", "error", filePath, "contains secret-looking content"));
+      pushFinding(findings, config, "secret-looking-content", {
+        file: filePath,
+        message: "contains secret-looking content"
+      });
     }
   }
 }
@@ -187,12 +227,9 @@ function countOccurrences(content, search) {
   return content.split(search).length - 1;
 }
 
-function finding(code, level, file, message) {
-  return { code, level, file, message };
-}
-
 export const internals = {
   extractFrontmatter,
   extractManagedContent,
-  lintContentSafety
+  lintContentSafety,
+  samePath
 };

@@ -35,6 +35,7 @@ test("apply writes the onboarding bundle idempotently", async () => {
   assert.equal(Boolean(first["AGENTS.md"]), true);
   assert.equal(Boolean(first["docs/CODEBASE_MAP.md"]), true);
   assert.equal(Boolean(first["docs/CODEX_FEEDBACK.md"]), true);
+  assert.equal(Boolean(first[".codex-prep/config.json"]), true);
   assert.equal(Boolean(first[".codex-prep/manifest.json"]), true);
   assert.equal(Boolean(first[".agents/skills/repo-onboarding/SKILL.md"]), true);
   assert.equal(Boolean(first[".agents/skills/code-review/SKILL.md"]), true);

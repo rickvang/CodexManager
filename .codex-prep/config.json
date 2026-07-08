@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "rules": {
+    "disabled": [],
+    "severityOverrides": {}
+  },
+  "lint": {
+    "stalePathPatterns": [
+      "D:\\\\Codex(?!Manager)"
+    ],
+    "secretPatterns": [
+      "\\b[A-Z0-9_]*(SECRET|TOKEN|PASSWORD|API_KEY|PRIVATE_KEY)[A-Z0-9_]*\\s*=",
+      "-----BEGIN (RSA |OPENSSH |EC )?PRIVATE KEY-----",
+      "\\bghp_[A-Za-z0-9_]{20,}\\b",
+      "\\bsk-[A-Za-z0-9_-]{20,}\\b"
+    ]
+  }
+}

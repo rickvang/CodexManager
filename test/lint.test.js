@@ -43,7 +43,7 @@ test("lint reports invalid managed marker pairs", async () => {
   const result = await lintRepo(root);
 
   assert.equal(result.ok, false);
-  assert.equal(result.findings.some((item) => item.code === "invalid-managed-markers"), true);
+  assert.equal(result.findings.some((item) => item.rule === "invalid-managed-markers" && item.code === "CP002"), true);
 });
 
 test("lint reports missing skill frontmatter fields", async () => {
@@ -60,7 +60,7 @@ test("lint reports missing skill frontmatter fields", async () => {
   const result = await lintRepo(root);
 
   assert.equal(result.ok, false);
-  assert.equal(result.findings.some((item) => item.code === "skill-frontmatter-missing-field"), true);
+  assert.equal(result.findings.some((item) => item.rule === "skill-frontmatter-missing-field" && item.code === "CP011"), true);
 });
 
 test("lint treats Windows manifest path casing as equivalent", async (context) => {
@@ -81,7 +81,7 @@ test("lint treats Windows manifest path casing as equivalent", async (context) =
 
   const result = await lintRepo(root);
 
-  assert.equal(result.findings.some((item) => item.code === "manifest-root-mismatch"), false);
+  assert.equal(result.findings.some((item) => item.rule === "manifest-root-mismatch"), false);
 });
 
 test("lint reports stale paths and secret-looking content", async () => {
@@ -94,6 +94,41 @@ test("lint reports stale paths and secret-looking content", async () => {
   const result = await lintRepo(root);
 
   assert.equal(result.ok, false);
-  assert.equal(result.findings.some((item) => item.code === "stale-path-reference"), true);
-  assert.equal(result.findings.some((item) => item.code === "secret-looking-content"), true);
+  assert.equal(result.findings.some((item) => item.rule === "stale-path-reference" && item.code === "CP012"), true);
+  assert.equal(result.findings.some((item) => item.rule === "secret-looking-content" && item.code === "CP013"), true);
+});
+
+test("lint respects disabled rules from config", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  await withMutedConsole(async () => {
+    await applyCommand({ root, json: true });
+  });
+
+  const configPath = path.join(root, ".codex-prep", "config.json");
+  const config = JSON.parse(await fs.readFile(configPath, "utf8"));
+  config.rules.disabled = ["stale-path-reference"];
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
+  await fs.appendFile(path.join(root, "docs", "CODEBASE_MAP.md"), "\nOld path: D:\\Codex\n", "utf8");
+
+  const result = await lintRepo(root);
+
+  assert.equal(result.findings.some((item) => item.rule === "stale-path-reference"), false);
+});
+
+test("lint respects severity overrides from config", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  await withMutedConsole(async () => {
+    await applyCommand({ root, json: true });
+  });
+
+  const configPath = path.join(root, ".codex-prep", "config.json");
+  const config = JSON.parse(await fs.readFile(configPath, "utf8"));
+  config.rules.severityOverrides["secret-looking-content"] = "warning";
+  await fs.writeFile(configPath, JSON.stringify(config, null, 2) + "\n", "utf8");
+  await fs.appendFile(path.join(root, "docs", "CODEBASE_MAP.md"), "\nAPI_TOKEN=abc123\n", "utf8");
+
+  const result = await lintRepo(root);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.findings.some((item) => item.rule === "secret-looking-content" && item.level === "warning"), true);
 });
