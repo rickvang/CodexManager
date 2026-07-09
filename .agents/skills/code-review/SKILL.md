@@ -9,5 +9,6 @@ description: Review changes in this repository using repo-specific Codex guidanc
 3. Lead with findings ordered by severity.
 4. Prioritize bugs, regressions, missing tests, unsafe assumptions, and stale guidance.
 5. Mention validation commands that should be run, and say whether they were actually run.
-6. If feedback is likely to recur, add it to `docs/CODEX_FEEDBACK.md` only after the user authorizes edits.
+6. Run `codex-prep preflight` before commit or merge readiness checks.
+7. If feedback is likely to recur, add it to `docs/CODEX_FEEDBACK.md` only after the user authorizes edits.
 <!-- codex-prep:end -->

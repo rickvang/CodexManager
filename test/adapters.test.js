@@ -37,6 +37,11 @@ test("adapter-apply writes deterministic multi-agent adapter outputs", async () 
   assert.deepEqual(second, first);
   assert.equal(first["CLAUDE.md"].includes("@AGENTS.md"), true);
   assert.equal(first[".cursor/rules/codexmanager-workflow.mdc"].includes("alwaysApply: true"), true);
+  assert.equal(first[".cursor/rules/graph-first-orientation.mdc"].includes("globs:"), true);
+  assert.equal(first[".cursor/rules/review-validation.mdc"].includes("codex-prep preflight"), true);
+  assert.equal(first[".cursor/rules/generated-state.mdc"].includes("codex-prep refresh --auto"), true);
+  assert.equal(Boolean(first[".vscode/tasks.json"]), false);
+  assert.equal(Boolean(first[".vscode/extensions.json"]), false);
   assert.equal(first["docs/agent-adapters/jan/system-prompt.md"].includes("Jan System Prompt"), true);
   assert.equal(first["docs/agent-adapters/ollama/Modelfile"].includes("FROM llama3.1"), true);
   assert.equal(first["docs/agent-adapters/generic/system-prompt.md"].includes("Generic Agent System Prompt"), true);

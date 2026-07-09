@@ -32,7 +32,8 @@ export async function buildControlState(root, options = {}) {
   const savedGraphState = await readSavedGraphState(root, options.graph);
   const planState = await readActivePlanState(root);
   const git = await readGitState(root);
-  const validation = await readValidationMemory(root);
+  const validationMemory = await readValidationMemory(root);
+  const validation = buildValidationState(validationMemory, git);
   const adapters = await readAdapterState(root, manifest, liveGraph);
   const handoff = await readHandoffState(root, manifest, liveGraph, { plan: planState, git, validation, adapters });
   const generated = await readGeneratedState(root, manifest, liveGraph, savedGraphState);
@@ -141,6 +142,41 @@ export async function readValidationMemory(root) {
   };
 }
 
+export function buildValidationState(memory, git = {}) {
+  const latest = memory.latest;
+  const freshness = validationFreshness(latest, git);
+  return {
+    ...memory,
+    current: freshness.current,
+    stale: !freshness.current,
+    freshness
+  };
+}
+
+function validationFreshness(latest, git = {}) {
+  if (!latest) {
+    return { current: false, reason: "No validation result recorded." };
+  }
+  if (latest.result !== "pass") {
+    return { current: false, reason: "Latest validation did not pass." };
+  }
+  const dirtyFiles = sortStrings(git.dirtyFiles ?? []);
+  const recordedDirtyFiles = sortStrings(latest.git?.dirtyFiles ?? []);
+  if (dirtyFiles.length > 0 && !sameStringList(dirtyFiles, recordedDirtyFiles)) {
+    return { current: false, reason: "Working tree changed since the latest validation was recorded." };
+  }
+  if (git.isGitRepo && !latest.git?.headCommit) {
+    return { current: false, reason: "Latest validation does not include commit metadata." };
+  }
+  if (git.headCommit && latest.git?.headCommit && latest.git.headCommit !== git.headCommit) {
+    return { current: false, reason: "Latest validation was recorded on a different commit." };
+  }
+  if (git.branchName && latest.git?.branchName && latest.git.branchName !== git.branchName) {
+    return { current: false, reason: "Latest validation was recorded on a different branch." };
+  }
+  return { current: true, reason: "Latest validation matches the current branch and commit." };
+}
+
 export async function appendValidationResult(root, entry) {
   await ensureLocalStateIgnored(root);
   const absolutePath = path.join(root, VALIDATION_RESULTS_PATH);
@@ -244,6 +280,8 @@ export function buildDoctorResult(state) {
     add("warn", "CM014", "No validation result has been recorded.", "After running validation, record it with codex-prep validation-record.", VALIDATION_RESULTS_PATH);
   } else if (state.validation.latest.result === "fail") {
     add("error", "CM015", "The latest recorded validation failed.", "Fix the failure, rerun validation, and record the new result.", VALIDATION_RESULTS_PATH);
+  } else if (state.validation.stale) {
+    add("warn", "CM023", `The latest recorded validation is not current: ${state.validation.freshness?.reason || "unknown reason"}`, "Rerun validation for the current tree and record the result.", VALIDATION_RESULTS_PATH);
   }
   if (!state.commands.some((command) => command.name === "verify" || command.command.includes("verify"))) {
     add("warn", "CM016", "No verify command was detected.", "Document a repo verification command or use the detected test/lint commands.");
@@ -308,9 +346,19 @@ export function selectNextAction(state) {
   if (state.validation.latest.result === "fail") {
     return "Fix the failed validation and record a passing validation result.";
   }
+  if (state.validation.stale) {
+    return "Rerun validation for the current tree, then record it with codex-prep validation-record.";
+  }
   return "Continue the approved scope, then run validation and close the plan when done.";
 }
 
+function sortStrings(values = []) {
+  return [...values].sort();
+}
+
+function sameStringList(left = [], right = []) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
 function isTerminalPlan(plan) {
   return TERMINAL_PLAN_STATUSES.has(plan?.status);
 }

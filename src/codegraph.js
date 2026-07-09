@@ -5,6 +5,13 @@ import { fileExists, readJsonIfExists, slashPath } from "./fs-utils.js";
 import { collectRepoFiles, scanRepo } from "./scan.js";
 
 export const CODEGRAPH_PATH = ".codex-prep/codegraph.json";
+export const ORIENT_PROFILES = Object.freeze(["short", "standard", "deep"]);
+
+const ORIENT_PROFILE_LIMITS = Object.freeze({
+  short: 4,
+  standard: 8,
+  deep: 14
+});
 
 const JS_EXTENSIONS = new Set([".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx"]);
 const PY_EXTENSIONS = new Set([".py"]);
@@ -129,13 +136,22 @@ export function queryCodeGraph(graph, query) {
   throw new Error("graph-query requires --file <path> or --symbol <name>");
 }
 
+export function validateOrientProfile(profile = "standard") {
+  const normalized = String(profile || "standard").trim().toLowerCase();
+  if (!ORIENT_PROFILES.includes(normalized)) {
+    throw new Error(`invalid orient profile "${profile}". Expected one of: ${ORIENT_PROFILES.join(", ")}`);
+  }
+  return normalized;
+}
+
 export function orientCodeGraph(graph, options = {}) {
   const task = String(options.task ?? "").trim();
   if (!task) {
     throw new Error("orient requires --task <text>");
   }
 
-  const limit = normalizePositiveInteger(options.limit, "limit") ?? 8;
+  const profile = validateOrientProfile(options.profile ?? "standard");
+  const limit = normalizePositiveInteger(options.limit, "limit") ?? ORIENT_PROFILE_LIMITS[profile];
   const terms = tokenize(task);
   const files = graph.files ?? [];
   const ranked = rankOrientationFiles(graph, terms, task);
@@ -156,6 +172,7 @@ export function orientCodeGraph(graph, options = {}) {
 
   return {
     task,
+    profile,
     source: options.source ?? "graph",
     terms,
     readingList,

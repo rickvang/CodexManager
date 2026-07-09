@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-09T14:59:11.217Z",
-  "fingerprint": "1320283d603a204bce0657271bb38cf8855f9496f90bb6457309e5689411a69b",
+  "generatedAt": "2026-07-09T23:38:32.536Z",
+  "fingerprint": "b0708ac96cff1ce317321def79667c3dcf34b9b3772aba30ab87b29e021eaaef",
   "repo": {
     "root": ".",
     "name": "CodexManager"
@@ -9,7 +9,7 @@
   "summary": {
     "fileCount": 26,
     "edgeCount": 65,
-    "symbolCount": 438,
+    "symbolCount": 471,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/adapters.js",
       "language": "JavaScript",
-      "size": 19665,
+      "size": 21277,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -253,7 +253,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 22279,
+      "size": 24198,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -345,7 +345,7 @@
     {
       "path": "src/codegraph.js",
       "language": "JavaScript",
-      "size": 31482,
+      "size": 32080,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -622,6 +622,18 @@
           "confidence": "medium"
         },
         {
+          "name": "ORIENT_PROFILE_LIMITS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "ORIENT_PROFILES",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "orientationFileSummary",
           "kind": "function",
           "exported": false,
@@ -766,6 +778,12 @@
           "confidence": "medium"
         },
         {
+          "name": "validateOrientProfile",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "VALIDATION_COMMAND_PATTERN",
           "kind": "variable",
           "exported": false,
@@ -794,7 +812,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 64389,
+      "size": 80230,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -981,6 +999,30 @@
           "confidence": "medium"
         },
         {
+          "name": "buildPreflightNextActions",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildPreflightResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildPreflightRiskAreas",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildRefreshPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "buildStatusResult",
           "kind": "function",
           "exported": false,
@@ -991,6 +1033,12 @@
           "kind": "function",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "collectLikelyTests",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "commandEvidence",
@@ -1048,6 +1096,12 @@
         },
         {
           "name": "defaultPlanBuild",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "detectedValidationCommands",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1179,6 +1233,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatOperationLine",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatOrient",
           "kind": "function",
           "exported": false,
@@ -1227,6 +1287,24 @@
           "confidence": "medium"
         },
         {
+          "name": "formatPreflight",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatPrepare",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatRefresh",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatScan",
           "kind": "function",
           "exported": false,
@@ -1246,6 +1324,12 @@
         },
         {
           "name": "formatValidationRecord",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatValidationStatusLine",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1431,6 +1515,18 @@
           "confidence": "high"
         },
         {
+          "name": "preflightCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "prepareCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "printJson",
           "kind": "function",
           "exported": false,
@@ -1461,6 +1557,12 @@
           "confidence": "medium"
         },
         {
+          "name": "refreshCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
           "name": "refreshGraphCommand",
           "kind": "function",
           "exported": true,
@@ -1471,6 +1573,18 @@
           "kind": "function",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "refreshOperation",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "refreshReason",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "runEvalScenarios",
@@ -1485,7 +1599,19 @@
           "confidence": "medium"
         },
         {
+          "name": "runLifecycleOperation",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "runPlanLint",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "runRefreshOperation",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1533,6 +1659,12 @@
           "confidence": "medium"
         },
         {
+          "name": "summarizeOperationResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "TERMINAL_PLAN_STATUSES",
           "kind": "variable",
           "exported": false,
@@ -1569,13 +1701,49 @@
           "confidence": "medium"
         },
         {
+          "name": "VALIDATION_COMMAND_PATTERN",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "validationRecordCommand",
           "kind": "function",
           "exported": true,
           "confidence": "high"
         },
         {
+          "name": "writeAdapterApplyResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writeApplyResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writeGraphExportResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writeHandoffResult",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "writePlanState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "writeRefreshGraphResult",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1802,7 +1970,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 14559,
+      "size": 15306,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2927,7 +3095,7 @@
     {
       "path": "src/state.js",
       "language": "JavaScript",
-      "size": 19283,
+      "size": 21393,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -3013,6 +3181,12 @@
         },
         {
           "name": "buildDoctorResult",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildValidationState",
           "kind": "function",
           "exported": true,
           "confidence": "high"
@@ -3138,10 +3312,22 @@
           "confidence": "medium"
         },
         {
+          "name": "sameStringList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "selectNextAction",
           "kind": "function",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "sortStrings",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "statusLinePath",
@@ -3160,6 +3346,12 @@
           "kind": "variable",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "validationFreshness",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         }
       ],
       "relatedTests": [
@@ -3173,7 +3365,7 @@
     {
       "path": "test/adapters.test.js",
       "language": "JavaScript",
-      "size": 4385,
+      "size": 4815,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3220,7 +3412,7 @@
     {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 4357,
+      "size": 5237,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3255,7 +3447,7 @@
     {
       "path": "test/codegraph.test.js",
       "language": "JavaScript",
-      "size": 9381,
+      "size": 10091,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3327,7 +3519,7 @@
     {
       "path": "test/commands.test.js",
       "language": "JavaScript",
-      "size": 12117,
+      "size": 16384,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3368,7 +3560,14 @@
           "confidence": "medium"
         }
       ],
-      "symbols": [],
+      "symbols": [
+        {
+          "name": "omitGitInternal",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        }
+      ],
       "relatedTests": []
     },
     {
@@ -4884,6 +5083,20 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "ORIENT_PROFILE_LIMITS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "ORIENT_PROFILES",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "orientationFileSummary",
       "kind": "function",
       "exported": false,
@@ -5052,6 +5265,13 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "validateOrientProfile",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "VALIDATION_COMMAND_PATTERN",
       "kind": "variable",
       "exported": false,
@@ -5171,6 +5391,34 @@
       "file": "src/commands.js"
     },
     {
+      "name": "buildPreflightNextActions",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildPreflightResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildPreflightRiskAreas",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildRefreshPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "buildStatusResult",
       "kind": "function",
       "exported": false,
@@ -5182,6 +5430,13 @@
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "collectLikelyTests",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/commands.js"
     },
     {
@@ -5249,6 +5504,13 @@
     },
     {
       "name": "defaultPlanBuild",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "detectedValidationCommands",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5402,6 +5664,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatOperationLine",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatOrient",
       "kind": "function",
       "exported": false,
@@ -5458,6 +5727,27 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatPreflight",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatPrepare",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatRefresh",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatScan",
       "kind": "function",
       "exported": false,
@@ -5480,6 +5770,13 @@
     },
     {
       "name": "formatValidationRecord",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatValidationStatusLine",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5696,6 +5993,20 @@
       "file": "src/commands.js"
     },
     {
+      "name": "preflightCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "prepareCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
       "name": "printJson",
       "kind": "function",
       "exported": false,
@@ -5731,6 +6042,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "refreshCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
       "name": "refreshGraphCommand",
       "kind": "function",
       "exported": true,
@@ -5742,6 +6060,20 @@
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "refreshOperation",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "refreshReason",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/commands.js"
     },
     {
@@ -5759,7 +6091,21 @@
       "file": "src/commands.js"
     },
     {
+      "name": "runLifecycleOperation",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "runPlanLint",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "runRefreshOperation",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5815,6 +6161,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "summarizeOperationResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "TERMINAL_PLAN_STATUSES",
       "kind": "variable",
       "exported": false,
@@ -5857,6 +6210,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "VALIDATION_COMMAND_PATTERN",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "validationRecordCommand",
       "kind": "function",
       "exported": true,
@@ -5864,7 +6224,42 @@
       "file": "src/commands.js"
     },
     {
+      "name": "writeAdapterApplyResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "writeApplyResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "writeGraphExportResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "writeHandoffResult",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "writePlanState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "writeRefreshGraphResult",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -7096,6 +7491,13 @@
       "file": "src/state.js"
     },
     {
+      "name": "buildValidationState",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
       "name": "ensureLocalStateIgnored",
       "kind": "function",
       "exported": true,
@@ -7236,10 +7638,24 @@
       "file": "src/state.js"
     },
     {
+      "name": "sameStringList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
       "name": "selectNextAction",
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "sortStrings",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/state.js"
     },
     {
@@ -7264,6 +7680,13 @@
       "file": "src/state.js"
     },
     {
+      "name": "validationFreshness",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
       "name": "jsGraphFiles",
       "kind": "function",
       "exported": false,
@@ -7276,6 +7699,13 @@
       "exported": false,
       "confidence": "medium",
       "file": "test/codegraph.test.js"
+    },
+    {
+      "name": "omitGitInternal",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "test/commands.test.js"
     },
     {
       "name": "createGitRepo",
@@ -7649,7 +8079,7 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 438 symbols",
+      "fact": "Detected 471 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

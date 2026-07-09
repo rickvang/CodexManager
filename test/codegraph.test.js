@@ -153,6 +153,19 @@ test("graph-query CLI supports file and symbol JSON output", async () => {
   assert.equal(JSON.parse(limited.stdout).limits.limit, 1);
 });
 
+test("orient profiles choose stable default context budgets", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  const graph = await buildCodeGraph(root);
+
+  const shortResult = orientCodeGraph(graph, { task: "change answer behavior", profile: "short" });
+  const deepResult = orientCodeGraph(graph, { task: "change answer behavior", profile: "deep" });
+
+  assert.equal(shortResult.profile, "short");
+  assert.equal(deepResult.profile, "deep");
+  assert.equal(shortResult.readingList.length <= 4, true);
+  assert.equal(deepResult.readingList.length <= 14, true);
+  assert.throws(() => orientCodeGraph(graph, { task: "change answer behavior", profile: "huge" }), /invalid orient profile/);
+});
 test("orient CLI returns a stable JSON reading list", async () => {
   const root = await createTempRepo(jsRepoFiles());
   await withMutedConsole(() => refreshGraphCommand({ root, json: true }));

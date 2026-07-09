@@ -109,11 +109,11 @@ test("local-ignore runs through the CLI", async () => {
 test("adapter command options validate command ownership", async () => {
   await assert.rejects(
     () => runCli(["scan", "--target", "cursor"]),
-    /--target is only supported for adapter-plan and adapter-apply/
+    /--target is only supported for adapter-plan, adapter-apply, prepare, bootstrap, and refresh/
   );
   await assert.rejects(
     () => runCli(["scan", "--profile", "short"]),
-    /--profile is only supported for adapter-plan and adapter-apply/
+    /--profile is only supported for adapter-plan, adapter-apply, prepare, bootstrap, refresh, and orient/
   );
 
   const root = await createTempRepo(jsRepoFiles());
@@ -122,4 +122,21 @@ test("adapter command options validate command ownership", async () => {
 
   assert.deepEqual(parsed.targets, ["cursor"]);
   assert.equal(parsed.contextProfile, "short");
+});
+test("lifecycle command options validate command ownership", async () => {
+  await assert.rejects(
+    () => runCli(["scan", "--auto"]),
+    /--auto is only supported for refresh/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--profile", "short"]),
+    /--profile is only supported for adapter-plan, adapter-apply, prepare, bootstrap, refresh, and orient/
+  );
+
+  const root = await createTempRepo(jsRepoFiles());
+  const refreshOutput = await withCapturedConsole(() => runCli(["refresh", "--repo", root, "--json"]));
+  const orientOutput = await withCapturedConsole(() => runCli(["orient", "--repo", root, "--task", "change answer", "--profile", "short", "--json"]));
+
+  assert.equal(JSON.parse(refreshOutput.stdout).auto, false);
+  assert.equal(JSON.parse(orientOutput.stdout).profile, "short");
 });

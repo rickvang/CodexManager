@@ -19,6 +19,10 @@ node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
 node ./bin/codex-prep.js status
 node ./bin/codex-prep.js doctor
+node ./bin/codex-prep.js prepare --target all
+node ./bin/codex-prep.js refresh
+node ./bin/codex-prep.js refresh --auto
+node ./bin/codex-prep.js preflight
 node ./bin/codex-prep.js adapters
 node ./bin/codex-prep.js adapter-plan --target all
 node ./bin/codex-prep.js adapter-apply --target all
@@ -35,7 +39,7 @@ node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
 node ./bin/codex-prep.js graph --json
-node ./bin/codex-prep.js orient --task "change answer behavior"
+node ./bin/codex-prep.js orient --task "change answer behavior" --profile standard
 node ./bin/codex-prep.js graph-export --format obsidian
 node ./bin/codex-prep.js graph-export --format obsidian --include-symbols
 node ./bin/codex-prep.js graph-query --file src/index.ts --limit 10 --depth 1
@@ -45,6 +49,21 @@ node ./bin/codex-prep.js refresh-map
 ```
 
 Use `--repo <path>` to target another repository and `--json` for machine-readable output on commands that support it.
+
+## Cursor-Style Lifecycle
+
+CodexManager now keeps the Cursor-like loop in the CLI instead of a VS Code extension:
+
+```powershell
+codex-prep prepare --repo D:\path\to\repo --target all
+codex-prep status --repo D:\path\to\repo
+codex-prep orient --repo D:\path\to\repo --task "change login validation" --profile standard
+codex-prep preflight --repo D:\path\to\repo
+codex-prep refresh --repo D:\path\to\repo
+codex-prep refresh --repo D:\path\to\repo --auto
+```
+
+`prepare`/`bootstrap` performs first-time setup: local ignore rules, `apply`, Obsidian graph export, multi-agent adapters, and handoff. `refresh` is read-only and previews stale generated state; `refresh --auto` applies those updates after edits are authorized. `preflight` is read-only and connects changed files to likely tests, validation freshness, stale generated state, and next actions.
 
 ## Windows Usage
 
@@ -56,6 +75,10 @@ From this repo, run:
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
 .\codex-prep.cmd status --repo D:\path\to\repo
 .\codex-prep.cmd doctor --repo D:\path\to\repo
+.\codex-prep.cmd prepare --repo D:\path\to\repo --target all
+.\codex-prep.cmd refresh --repo D:\path\to\repo
+.\codex-prep.cmd refresh --repo D:\path\to\repo --auto
+.\codex-prep.cmd preflight --repo D:\path\to\repo
 .\codex-prep.cmd adapters
 .\codex-prep.cmd adapter-plan --repo D:\path\to\repo --target all
 .\codex-prep.cmd adapter-apply --repo D:\path\to\repo --target all
@@ -71,7 +94,7 @@ From this repo, run:
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
 .\codex-prep.cmd graph --repo D:\path\to\repo --json
-.\codex-prep.cmd orient --repo D:\path\to\repo --task "change answer behavior"
+.\codex-prep.cmd orient --repo D:\path\to\repo --task "change answer behavior" --profile standard
 .\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
 .\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian --include-symbols
 .\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts --limit 10 --depth 1
@@ -115,7 +138,7 @@ Supported adapter targets:
 - `ollama`: Markdown prompt pack plus a template `Modelfile` under `docs/agent-adapters/ollama/`.
 - `generic`: portable Markdown prompt pack for tools that can consume text but have no native repo-rule format.
 
-Use `--profile short`, `--profile standard`, or `--profile deep` to control how much repo context the generated adapter prompt includes. Adapter files are projections of `AGENTS.md`, `docs/CODEBASE_MAP.md`, the local code graph, and CodexManager state; when those inputs change, run `codex-prep check` and refresh stale adapters or handoff files.
+Use `--profile short`, `--profile standard`, or `--profile deep` to control how much repo context the generated adapter prompt includes. Cursor output is split into scoped `.cursor/rules/*.mdc` files for workflow safety, graph-first orientation, review/validation, and generated state. Adapter files are projections of `AGENTS.md`, `docs/CODEBASE_MAP.md`, the local code graph, and CodexManager state; when those inputs change, run `codex-prep refresh` to preview updates or `codex-prep refresh --auto` after file changes are authorized.
 ## Development Loop
 
 Before committing local changes, run the finite verification gate:

@@ -8,9 +8,12 @@ import {
   doctorCommand,
   evalCommand,
   planCloseCommand,
+  preflightCommand,
+  prepareCommand,
   planCommand,
   planStatusCommand,
   planUpdateCommand,
+  refreshCommand,
   scanCommand,
   statusCommand,
   validationRecordCommand
@@ -27,7 +30,7 @@ test("scan and plan with save false do not write files", async () => {
   });
 
   const after = await readTree(root);
-  assert.deepEqual(after, before);
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
 });
 
 test("plan autosaves timestamped latest and active plan JSON", async () => {
@@ -148,7 +151,7 @@ test("plan-status reads the active plan without editing", async () => {
   });
 
   const after = await readTree(root);
-  assert.deepEqual(after, before);
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
 });
 
 test("status reads latest validation memory without editing", async () => {
@@ -171,7 +174,7 @@ test("status reads latest validation memory without editing", async () => {
   const result = await withMutedConsole(() => statusCommand({ root, json: true }));
   const after = await readTree(root);
 
-  assert.deepEqual(after, before);
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
   assert.equal(result.validation.latest.result, "pass");
   assert.equal(result.validation.latest.command, "npm run verify");
   assert.equal(result.validation.count, 1);
@@ -184,7 +187,7 @@ test("doctor is read-only and reports stable workflow finding codes", async () =
   const result = await withMutedConsole(() => doctorCommand({ root, json: true }));
   const after = await readTree(root);
 
-  assert.deepEqual(after, before);
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
   assert.equal(result.ok, true);
   assert.equal(result.findings.some((finding) => finding.code === "CM005"), true);
   assert.equal(result.findings.some((finding) => finding.code === "CM007"), true);
@@ -213,6 +216,24 @@ test("plan and validation local state are hidden by repo-local git excludes", as
   assert.equal(status, "");
   assert.match(exclude, /^\.codex-prep\/plans\/$/m);
   assert.match(exclude, /^\.codex-prep\/validation-results\.jsonl$/m);
+});
+test("validation-record can be current for the same dirty worktree", async () => {
+  const root = await createGitRepo(jsRepoFiles());
+  await fs.writeFile(path.join(root, "src", "index.ts"), "export const answer = 43;\n", "utf8");
+
+  await withMutedConsole(() => validationRecordCommand({
+    root,
+    json: true,
+    validationCommand: "npm run test",
+    validationResult: "pass",
+    summary: "tests passed against dirty tree"
+  }));
+
+  const result = await withMutedConsole(() => statusCommand({ root, json: true }));
+
+  assert.equal(result.validation.current, true);
+  assert.equal(result.validation.stale, false);
+  assert.deepEqual(result.validation.latest.git.dirtyFiles, ["src/index.ts"]);
 });
 test("validation-record rejects unknown validation outcomes", async () => {
   const root = await createTempRepo(jsRepoFiles());
@@ -315,3 +336,67 @@ test("eval passes after apply for a conventional repo", async () => {
   assert.equal(process.exitCode, undefined);
   process.exitCode = originalExitCode;
 });
+
+test("prepare writes the local-first lifecycle bundle without vscode files", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+
+  await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "short" }));
+  const tree = await readTree(root);
+
+  assert.equal(Boolean(tree["AGENTS.md"]), true);
+  assert.equal(Boolean(tree["docs/codexmanager-dashboard.md"]), true);
+  assert.equal(Boolean(tree[".codex-prep/codegraph.json"]), true);
+  assert.equal(Boolean(tree["docs/obsidian-codegraph/Index.md"]), true);
+  assert.equal(Boolean(tree[".cursor/rules/codexmanager-workflow.mdc"]), true);
+  assert.equal(Boolean(tree[".cursor/rules/generated-state.mdc"]), true);
+  assert.equal(Boolean(tree["docs/AGENT_HANDOFF.md"]), true);
+  assert.equal(Boolean(tree[".vscode/tasks.json"]), false);
+  assert.equal(Boolean(tree[".vscode/extensions.json"]), false);
+});
+
+test("refresh previews stale generated state without writing", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  const before = await readTree(root);
+
+  const result = await withMutedConsole(() => refreshCommand({ root, json: true, auto: false }));
+  const after = await readTree(root);
+
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
+  assert.equal(result.auto, false);
+  assert.equal(result.proposed.some((operation) => operation.id === "apply"), true);
+  assert.equal(result.operations.length, 0);
+});
+
+test("refresh --auto updates stale graph-backed artifacts", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+
+  await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "standard" }));
+  await fs.writeFile(path.join(root, "src", "index.ts"), "export const answer = 43;\n", "utf8");
+
+  const result = await withMutedConsole(() => refreshCommand({ root, json: true, auto: true, target: "cursor", profile: "standard" }));
+  const tree = await readTree(root);
+
+  assert.equal(result.operations.some((operation) => ["apply", "refresh-graph"].includes(operation.id)), true);
+  assert.equal(result.operations.some((operation) => operation.id === "graph-export"), true);
+  assert.equal(result.operations.some((operation) => operation.id === "adapter-apply"), true);
+  assert.equal(result.operations.some((operation) => operation.id === "handoff"), true);
+  assert.equal(JSON.parse(tree[".codex-prep/codegraph.json"]).repo.root, ".");
+});
+
+test("preflight is read-only and reports likely tests for changed files", async () => {
+  const root = await createGitRepo(jsRepoFiles());
+  await fs.writeFile(path.join(root, "src", "index.ts"), "export const answer = 43;\n", "utf8");
+  const before = await readTree(root);
+
+  const result = await withMutedConsole(() => preflightCommand({ root, json: true }));
+  const after = await readTree(root);
+
+  assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
+  assert.equal(result.dirtyFiles.includes("src/index.ts"), true);
+  assert.equal(result.likelyTests.includes("tests/index.test.ts"), true);
+  assert.equal(result.validationCommands.some((command) => command.command.includes("test")), true);
+  assert.equal(result.nextActions.some((action) => action.includes("validation-record")), true);
+});
+function omitGitInternal(tree) {
+  return Object.fromEntries(Object.entries(tree).filter(([file]) => !file.startsWith(".git/")));
+}

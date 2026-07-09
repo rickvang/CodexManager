@@ -41,12 +41,12 @@ Keep commit and push as separate explicit approvals.
 - Graph file: `.codex-prep/codegraph.json`
 - Indexed files: 26
 - Import edges: 65
-- Symbols: 438
+- Symbols: 469
 
-Before broad searching, run `codex-prep orient --task "<task>"` and inspect only the returned reading list. Use `codex-prep graph-query` for focused file or symbol follow-up. Read `.codex-prep/codegraph.json` directly only when the commands are unavailable.
+Before broad searching, run `codex-prep orient --task "<task>" --profile standard` and inspect only the returned reading list. Use `--profile short` for small fixes and `--profile deep` for architecture or cross-cutting work. Use `codex-prep graph-query` for focused file or symbol follow-up. Read `.codex-prep/codegraph.json` directly only when the commands are unavailable.
 
-Use `codex-prep status` for current plan/branch/validation state and `codex-prep doctor` when the workflow looks inconsistent.
-If local CodexManager memory appears in git status, run `codex-prep local-ignore` to install repo-local exclude rules.
+Use `codex-prep status` for current plan/branch/validation state, `codex-prep doctor` when the workflow looks inconsistent, and `codex-prep preflight` before commit or merge discussions.
+If local CodexManager memory appears in git status, run `codex-prep local-ignore` to install repo-local exclude rules. Use `codex-prep refresh` to preview stale generated artifacts and `codex-prep refresh --auto` to update them after file changes are authorized.
 
 ## Multi-Agent Adapters And Handoff
 
