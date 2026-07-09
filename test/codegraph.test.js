@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { runCli } from "../src/cli.js";
-import { buildCodeGraph, queryCodeGraph } from "../src/codegraph.js";
+import { buildCodeGraph, orientCodeGraph, queryCodeGraph } from "../src/codegraph.js";
 import {
   applyCommand,
   checkCommand,
@@ -77,6 +77,48 @@ test("graph queries file imports, dependents, symbols, and related tests", async
   assert.equal(symbolResult.matches.some((item) => item.file === "src/math.ts"), true);
 });
 
+test("orient builds a compact task-aware reading list with related tests", async () => {
+  const root = await createTempRepo(jsGraphFiles());
+  const graph = await buildCodeGraph(root);
+
+  const result = orientCodeGraph(graph, {
+    task: "change add math behavior",
+    commands: [{ name: "test", command: "npm run test", source: "package.json" }],
+    limit: 2,
+    source: "test"
+  });
+
+  assert.equal(result.readingList.some((item) => item.path === "src/math.ts"), true);
+  assert.equal(result.readingList.some((item) => item.path === "tests/math.test.ts"), true);
+  assert.equal(result.relatedTests.some((item) => item.path === "tests/math.test.ts"), true);
+  assert.equal(result.validationCommands.some((item) => item.command === "npm run test"), true);
+  assert.equal(result.contextEstimate.selectedBytes < result.contextEstimate.totalGraphBytes, true);
+});
+
+test("orient respects limits and returns fallback searches for weak matches", async () => {
+  const root = await createTempRepo(jsGraphFiles());
+  const graph = await buildCodeGraph(root);
+
+  const result = orientCodeGraph(graph, { task: "totally unknown workflow", limit: 1 });
+
+  assert.equal(result.readingList.length, 1);
+  assert.equal(result.warnings.length, 1);
+  assert.equal(result.fallbackSearches.length > 0, true);
+});
+
+test("graph queries support limit and neighbor depth", async () => {
+  const root = await createTempRepo(jsGraphFiles());
+  const graph = await buildCodeGraph(root);
+
+  const limitedFile = queryCodeGraph(graph, { file: "src/math.ts", limit: 1, depth: 1 });
+  const limitedSymbol = queryCodeGraph(graph, { symbol: "add", limit: 1 });
+
+  assert.equal(limitedFile.dependents.length, 1);
+  assert.equal(limitedFile.limits.truncated.dependents, true);
+  assert.equal(limitedFile.neighbors.length, 1);
+  assert.equal(limitedSymbol.matches.length, 1);
+  assert.equal(limitedSymbol.limits.limit, 1);
+});
 test("graph command is read-only", async () => {
   const root = await createTempRepo(jsRepoFiles());
   const before = await readTree(root);
@@ -104,11 +146,26 @@ test("graph-query CLI supports file and symbol JSON output", async () => {
 
   const byFile = await withCapturedConsole(() => runCli(["graph-query", "--repo", root, "--file", "src/index.ts", "--json"]));
   const bySymbol = await withCapturedConsole(() => runCli(["graph-query", "--repo", root, "--symbol", "answer", "--json"]));
+  const limited = await withCapturedConsole(() => runCli(["graph-query", "--repo", root, "--file", "src/index.ts", "--limit", "1", "--depth", "1", "--json"]));
 
   assert.equal(JSON.parse(byFile.stdout).found, true);
   assert.equal(JSON.parse(bySymbol.stdout).found, true);
+  assert.equal(JSON.parse(limited.stdout).limits.limit, 1);
 });
 
+test("orient CLI returns a stable JSON reading list", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+  await withMutedConsole(() => refreshGraphCommand({ root, json: true }));
+
+  const output = await withCapturedConsole(() => runCli(["orient", "--repo", root, "--task", "change answer behavior", "--limit", "2", "--json"]));
+  const parsed = JSON.parse(output.stdout);
+
+  assert.equal(parsed.task, "change answer behavior");
+  assert.equal(Array.isArray(parsed.readingList), true);
+  assert.equal(parsed.readingList.length > 0, true);
+  assert.equal(parsed.readingList.length <= 2, true);
+  assert.equal(Boolean(parsed.contextEstimate.estimatedSelectedTokens), true);
+});
 test("check detects stale code graph output", async () => {
   const root = await createTempRepo(jsRepoFiles());
   await withMutedConsole(() => applyCommand({ root, json: true }));

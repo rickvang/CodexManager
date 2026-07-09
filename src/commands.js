@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, queryCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
+import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, orientCodeGraph, queryCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
 import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
 import {
@@ -507,9 +507,28 @@ export async function refreshGraphCommand({ root, json }) {
   return result;
 }
 
-export async function graphQueryCommand({ root, json, file, symbol }) {
+export async function orientCommand({ root, json, task, limit }) {
+  const manifest = await scanRepo(root);
+  const { graph, source } = await loadOrBuildCodeGraph(root, { manifest });
+  const result = orientCodeGraph(graph, {
+    task,
+    limit,
+    source,
+    commands: manifest.discovery.commands
+  });
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatOrient(result));
+  return result;
+}
+
+export async function graphQueryCommand({ root, json, file, symbol, limit, depth }) {
   const { graph, source } = await loadOrBuildCodeGraph(root);
-  const result = { source, ...queryCodeGraph(graph, { file, symbol }) };
+  const result = { source, ...queryCodeGraph(graph, { file, symbol, limit, depth }) };
 
   if (json) {
     printJson(result);
@@ -1160,12 +1179,40 @@ async function runEvalScenarios(root, manifest, codeGraph) {
       "find likely tests from code graph",
       Boolean(testedBy),
       testedBy ? `${testedBy.source} tested by ${testedBy.test}` : "No likely source/test relationships detected."
+    ),
+    scenario(
+      "produce graph-first reading list",
+      graphFirstOrientationPasses(codeGraph, manifest),
+      graphFirstOrientationEvidence(codeGraph, manifest)
     )
   ];
 }
 
 function scenario(name, pass, evidence) {
   return { name, pass, evidence };
+}
+
+function graphFirstOrientationPasses(codeGraph, manifest) {
+  const result = orientCodeGraph(codeGraph, {
+    task: "change answer behavior",
+    commands: manifest.discovery.commands,
+    limit: 1,
+    source: "eval"
+  });
+  return result.readingList.length > 0 &&
+    result.contextEstimate.selectedBytes > 0 &&
+    result.contextEstimate.selectedBytes < result.contextEstimate.totalGraphBytes;
+}
+
+function graphFirstOrientationEvidence(codeGraph, manifest) {
+  const result = orientCodeGraph(codeGraph, {
+    task: "change answer behavior",
+    commands: manifest.discovery.commands,
+    limit: 1,
+    source: "eval"
+  });
+  const files = result.readingList.map((item) => item.path).join(", ") || "none";
+  return `${files}; ${result.contextEstimate.estimatedSelectedTokens}/${result.contextEstimate.estimatedGraphTokens} estimated tokens`;
 }
 
 function commandEvidence(manifest, pattern) {
@@ -1264,6 +1311,25 @@ function formatGraphRefresh(result) {
   ].join("\n");
 }
 
+function formatOrient(result) {
+  return [
+    `codex-prep orient: ${result.task}`,
+    "",
+    `Source: ${result.source}`,
+    `Context estimate: ${result.contextEstimate.selectedFiles}/${result.contextEstimate.totalGraphFiles} files, ${result.contextEstimate.estimatedSelectedTokens}/${result.contextEstimate.estimatedGraphTokens} est. tokens, ${result.contextEstimate.estimatedReductionPercent}% smaller than all indexed code`,
+    "Reading list:",
+    ...formatList(result.readingList.map((item) => `${item.path} [${item.confidence}] ${item.reasons.join("; ")}`)),
+    "Related tests:",
+    ...formatList(result.relatedTests.map((item) => `${item.path} [${item.confidence}] ${item.reason}`)),
+    "Validation commands:",
+    ...formatList(result.validationCommands.map((item) => `${item.command} (${item.source})`)),
+    "Fallback searches:",
+    ...formatList(result.fallbackSearches),
+    "Warnings:",
+    ...formatList(result.warnings)
+  ].join("\n");
+}
+
 function formatGraphQuery(result) {
   if (!result.found) {
     return `codex-prep graph-query: no match\n\n${result.message || "No graph result found."}`;
@@ -1275,22 +1341,31 @@ function formatGraphQuery(result) {
       `Source: ${result.source}`,
       `Role: ${result.file.role}`,
       `Language: ${result.file.language}`,
+      `Depth: ${result.limits?.depth ?? 1}`,
+      `Limit: ${result.limits?.limit ?? "none"}`,
       "Imports:",
       ...formatList(result.imports.map((item) => item.resolved ? `${item.specifier} -> ${item.resolved}` : `${item.specifier} (${item.kind})`)),
       "Dependents:",
       ...formatList(result.dependents),
+      "Neighbor files:",
+      ...formatList((result.neighbors ?? []).map((item) => `${item.path} (${item.direction}, depth ${item.depth})`)),
       "Symbols:",
       ...formatList(result.symbols.map((item) => `${item.name} (${item.kind}${item.exported ? ", exported" : ""})`)),
       "Related tests:",
-      ...formatList(result.relatedTests.map((item) => `${item.path} [${item.confidence}]`))
+      ...formatList(result.relatedTests.map((item) => `${item.path} [${item.confidence}]`)),
+      "Truncated:",
+      ...formatTruncation(result.limits?.truncated)
     ].join("\n");
   }
   return [
     `codex-prep graph-query: ${result.query}`,
     "",
     `Source: ${result.source}`,
+    `Limit: ${result.limits?.limit ?? "none"}`,
     "Matches:",
-    ...formatList(result.matches.map((item) => `${item.name} (${item.kind}) in ${item.file} [${item.confidence}]`))
+    ...formatList(result.matches.map((item) => `${item.name} (${item.kind}) in ${item.file} [${item.confidence}]`)),
+    "Truncated:",
+    ...formatTruncation(result.limits?.truncated)
   ].join("\n");
 }
 
@@ -1537,6 +1612,11 @@ function formatPlanStatus(result) {
 
 function formatList(values = []) {
   return values.length > 0 ? values.map((value) => `- ${value}`) : ["- none"];
+}
+
+function formatTruncation(truncated = {}) {
+  const active = Object.entries(truncated).filter(([, value]) => value).map(([key]) => key);
+  return active.length > 0 ? active.map((key) => `- ${key}`) : ["- none"];
 }
 
 function formatApply(result) {

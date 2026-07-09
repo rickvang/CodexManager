@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T21:05:58.685Z",
-  "fingerprint": "8f1a6907cd3affda5555fbfc398aa107b229003e99b7c2b8e48686146a44b8ca",
+  "generatedAt": "2026-07-09T13:44:22.414Z",
+  "fingerprint": "161bdd627755e322777c3ebe2cd4956e5cf3e416f9ea0b4a95e79f12a3a909f9",
   "repo": {
     "root": ".",
     "name": "CodexManager"
@@ -9,7 +9,7 @@
   "summary": {
     "fileCount": 24,
     "edgeCount": 59,
-    "symbolCount": 363,
+    "symbolCount": 390,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 18780,
+      "size": 20261,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -129,7 +129,7 @@
     {
       "path": "src/codegraph.js",
       "language": "JavaScript",
-      "size": 18502,
+      "size": 31482,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -166,6 +166,12 @@
       ],
       "symbols": [
         {
+          "name": "addOrientationCandidate",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "applyRelatedTests",
           "kind": "function",
           "exported": false,
@@ -178,6 +184,18 @@
           "confidence": "high"
         },
         {
+          "name": "buildContextEstimate",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildFallbackSearches",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "buildGraphAssumptions",
           "kind": "function",
           "exported": false,
@@ -185,6 +203,12 @@
         },
         {
           "name": "buildGraphEvidence",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildLimitSummary",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -202,13 +226,37 @@
           "confidence": "high"
         },
         {
+          "name": "collectNeighborFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "compareOrientationCandidate",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "compareSymbol",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
         {
+          "name": "confidenceForScore",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "confidenceRank",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "dependentsByTarget",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -221,6 +269,12 @@
         },
         {
           "name": "detectRole",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "estimateTokens",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -257,6 +311,12 @@
         },
         {
           "name": "extractSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "fallbackOrientationCandidates",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -310,13 +370,31 @@
           "confidence": "medium"
         },
         {
+          "name": "limitList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "loadOrBuildCodeGraph",
           "kind": "function",
           "exported": true,
           "confidence": "high"
         },
         {
+          "name": "normalizeDepth",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "normalizedStem",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizePositiveInteger",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -326,6 +404,18 @@
           "kind": "function",
           "exported": false,
           "confidence": "medium"
+        },
+        {
+          "name": "orientationFileSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "orientCodeGraph",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
         },
         {
           "name": "PY_EXTENSIONS",
@@ -347,6 +437,12 @@
         },
         {
           "name": "querySymbol",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "rankOrientationFiles",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -394,6 +490,12 @@
           "confidence": "medium"
         },
         {
+          "name": "selectOrientationFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "sortGraph",
           "kind": "function",
           "exported": false,
@@ -406,8 +508,20 @@
           "confidence": "medium"
         },
         {
+          "name": "TASK_STOP_WORDS",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "TEST_SEGMENTS",
           "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "tokenize",
+          "kind": "function",
           "exported": false,
           "confidence": "medium"
         },
@@ -424,7 +538,25 @@
           "confidence": "medium"
         },
         {
+          "name": "uniqueStrings",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "uniqueSymbols",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "VALIDATION_COMMAND_PATTERN",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "validationCommandSummaries",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -446,7 +578,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 53369,
+      "size": 56468,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -765,6 +897,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatOrient",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatPlan",
           "kind": "function",
           "exported": false,
@@ -819,6 +957,12 @@
           "confidence": "medium"
         },
         {
+          "name": "formatTruncation",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatValidationRecord",
           "kind": "function",
           "exported": false,
@@ -835,6 +979,18 @@
           "kind": "function",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "graphFirstOrientationEvidence",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "graphFirstOrientationPasses",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "graphQueryCommand",
@@ -895,6 +1051,12 @@
           "kind": "function",
           "exported": false,
           "confidence": "medium"
+        },
+        {
+          "name": "orientCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
         },
         {
           "name": "PLAN_BUILD_STATUSES",
@@ -1341,7 +1503,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 12967,
+      "size": 13193,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1592,7 +1754,7 @@
     {
       "path": "src/obsidian-export.js",
       "language": "JavaScript",
-      "size": 35405,
+      "size": 35488,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -2670,7 +2832,7 @@
     {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 3049,
+      "size": 3629,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2705,7 +2867,7 @@
     {
       "path": "test/codegraph.test.js",
       "language": "JavaScript",
-      "size": 6559,
+      "size": 9381,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3795,6 +3957,13 @@
       "file": "src/cli.js"
     },
     {
+      "name": "addOrientationCandidate",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "applyRelatedTests",
       "kind": "function",
       "exported": false,
@@ -3809,6 +3978,20 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "buildContextEstimate",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildFallbackSearches",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "buildGraphAssumptions",
       "kind": "function",
       "exported": false,
@@ -3817,6 +4000,13 @@
     },
     {
       "name": "buildGraphEvidence",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "buildLimitSummary",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3837,6 +4027,20 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "collectNeighborFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "compareOrientationCandidate",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "compareSymbol",
       "kind": "function",
       "exported": false,
@@ -3844,7 +4048,21 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "confidenceForScore",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "confidenceRank",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "dependentsByTarget",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3859,6 +4077,13 @@
     },
     {
       "name": "detectRole",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "estimateTokens",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3901,6 +4126,13 @@
     },
     {
       "name": "extractSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "fallbackOrientationCandidates",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -3963,10 +4195,24 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "limitList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "loadOrBuildCodeGraph",
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "normalizeDepth",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/codegraph.js"
     },
     {
@@ -3977,10 +4223,31 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "normalizePositiveInteger",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "normalizeQueryPath",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "orientationFileSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "orientCodeGraph",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
       "file": "src/codegraph.js"
     },
     {
@@ -4006,6 +4273,13 @@
     },
     {
       "name": "querySymbol",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "rankOrientationFiles",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4061,6 +4335,13 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "selectOrientationFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "sortGraph",
       "kind": "function",
       "exported": false,
@@ -4075,8 +4356,22 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "TASK_STOP_WORDS",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "TEST_SEGMENTS",
       "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "tokenize",
+      "kind": "function",
       "exported": false,
       "confidence": "medium",
       "file": "src/codegraph.js"
@@ -4096,7 +4391,28 @@
       "file": "src/codegraph.js"
     },
     {
+      "name": "uniqueStrings",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
       "name": "uniqueSymbols",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "VALIDATION_COMMAND_PATTERN",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/codegraph.js"
+    },
+    {
+      "name": "validationCommandSummaries",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4369,6 +4685,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatOrient",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatPlan",
       "kind": "function",
       "exported": false,
@@ -4432,6 +4755,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatTruncation",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatValidationRecord",
       "kind": "function",
       "exported": false,
@@ -4450,6 +4780,20 @@
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "graphFirstOrientationEvidence",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "graphFirstOrientationPasses",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/commands.js"
     },
     {
@@ -4520,6 +4864,13 @@
       "kind": "function",
       "exported": false,
       "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "orientCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
       "file": "src/commands.js"
     },
     {
@@ -6518,7 +6869,7 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 363 symbols",
+      "fact": "Detected 390 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

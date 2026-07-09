@@ -31,9 +31,10 @@ node ./bin/codex-prep.js apply
 node ./bin/codex-prep.js check
 node ./bin/codex-prep.js eval
 node ./bin/codex-prep.js graph --json
+node ./bin/codex-prep.js orient --task "change answer behavior"
 node ./bin/codex-prep.js graph-export --format obsidian
 node ./bin/codex-prep.js graph-export --format obsidian --include-symbols
-node ./bin/codex-prep.js graph-query --file src/index.ts
+node ./bin/codex-prep.js graph-query --file src/index.ts --limit 10 --depth 1
 node ./bin/codex-prep.js lint
 node ./bin/codex-prep.js refresh-graph
 node ./bin/codex-prep.js refresh-map
@@ -62,9 +63,10 @@ From this repo, run:
 .\codex-prep.cmd check --repo D:\path\to\repo
 .\codex-prep.cmd eval --repo D:\path\to\repo
 .\codex-prep.cmd graph --repo D:\path\to\repo --json
+.\codex-prep.cmd orient --repo D:\path\to\repo --task "change answer behavior"
 .\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian
 .\codex-prep.cmd graph-export --repo D:\path\to\repo --format obsidian --include-symbols
-.\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
+.\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts --limit 10 --depth 1
 .\codex-prep.cmd refresh-graph --repo D:\path\to\repo
 .\codex-prep.cmd lint --repo D:\path\to\repo
 ```
@@ -224,14 +226,21 @@ D:\codexmanager\codex-prep.cmd graph --repo D:\path\to\repo --json
 D:\codexmanager\codex-prep.cmd refresh-graph --repo D:\path\to\repo
 ```
 
-`graph-query` answers focused orientation questions without broad searching:
+`orient` is the preferred graph-first entrypoint for token discipline. It returns a compact task-aware reading list, related tests, validation commands, confidence labels, fallback searches, and a local context estimate:
 
 ```powershell
-D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts
-D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --symbol createApp
+D:\codexmanager\codex-prep.cmd orient --repo D:\path\to\repo --task "change login validation"
+D:\codexmanager\codex-prep.cmd orient --repo D:\path\to\repo --task "change login validation" --limit 5 --json
 ```
 
-The graph records files, languages, roles, local import edges, exported/top-level symbols, entrypoints, likely test relationships, and confidence labels. JavaScript, TypeScript, and Python get import/symbol extraction. Other supported languages are indexed at file level only.
+`graph-query` answers focused follow-up questions without broad searching:
+
+```powershell
+D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --file src/index.ts --limit 10 --depth 1
+D:\codexmanager\codex-prep.cmd graph-query --repo D:\path\to\repo --symbol createApp --limit 10
+```
+
+The graph records files, languages, roles, local import edges, exported/top-level symbols, entrypoints, likely test relationships, and confidence labels. JavaScript, TypeScript, and Python get import/symbol extraction. Other supported languages are indexed at file level only. The context estimate is a deterministic bytes-to-token proxy, not real model billing.
 
 ## Obsidian Graph Export
 

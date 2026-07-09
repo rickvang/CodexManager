@@ -270,11 +270,11 @@ function buildWorkflowMap(graph, manifest, activePlan, validationState) {
     ? latestValidation.result === "pass" ? "validated" : "failed"
     : commands.length > 0 ? "configured" : "unknown";
   const phases = [
-    workflowPhase("01 Orientation", "orientation", "configured", "Start by reading AGENTS.md, CODEBASE_MAP.md, and the generated code graph before broad searching.", [
+    workflowPhase("01 Orientation", "orientation", "configured", "Start with AGENTS.md and CODEBASE_MAP.md, then use codex-prep orient for a compact task reading list before broad searching.", [
       evidenceLine(generatedFiles.has("AGENTS.md"), "AGENTS.md generated guidance is present", "AGENTS.md generated guidance is not listed in manifest"),
       evidenceLine(generatedFiles.has("docs/CODEBASE_MAP.md"), "CODEBASE_MAP.md generated map is present", "CODEBASE_MAP.md generated map is not listed in manifest"),
       evidenceLine(Boolean(graph?.summary), ".codex-prep/codegraph.json is available", "code graph summary is unavailable")
-    ], ["codex-prep scan", "codex-prep graph-query --file <path>"]),
+    ], ["codex-prep scan", "codex-prep orient --task <text>", "codex-prep graph-query --file <path> --limit 10 --depth 1"]),
     workflowPhase("02 Planning", "planning", activePlan ? activePlan.status : "unknown", "Capture intent, scope, success criteria, stop rules, and likely files before implementation.", [
       activePlan ? `Active plan status: ${activePlan.status}` : "Active plan status: unknown",
       activePlan?.goal ? `Plan goal: ${activePlan.goal}` : "Plan goal: unknown"

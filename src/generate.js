@@ -104,7 +104,7 @@ Keep commit and push as separate explicit approvals.
 - Import edges: ${graph?.summary?.edgeCount ?? "not generated"}
 - Symbols: ${graph?.summary?.symbolCount ?? "not generated"}
 
-Before broad searching, inspect \`.codex-prep/codegraph.json\` or run \`codex-prep graph-query\` to find imports, dependents, symbols, and likely related tests.
+Before broad searching, run \`codex-prep orient --task "<task>"\` and inspect only the returned reading list. Use \`codex-prep graph-query\` for focused file or symbol follow-up. Read \`.codex-prep/codegraph.json\` directly only when the commands are unavailable.
 
 Use \`codex-prep status\` for current plan/branch/validation state and \`codex-prep doctor\` when the workflow looks inconsistent.
 If local CodexManager memory appears in git status, run \`codex-prep local-ignore\` to install repo-local exclude rules.
@@ -165,7 +165,7 @@ ${manifest.discovery.commands.length > 0 ? manifest.discovery.commands.map((comm
 - Symbols: ${graph?.summary?.symbolCount ?? "not generated"}
 - Languages: ${graph?.summary?.languages?.length ? graph.summary.languages.map((value) => `\`${value}\``).join(", ") : "not generated"}
 
-Use \`codex-prep graph-query --file <path>\` to inspect imports, dependents, symbols, and likely related tests before editing unfamiliar code.
+Use \`codex-prep orient --task "<task>"\` first to get a compact reading list, then use \`codex-prep graph-query --file <path>\` for imports, dependents, symbols, and likely related tests.
 
 ## Evidence
 
@@ -287,17 +287,18 @@ description: Orient inside this repository before coding. Use when the user asks
 ---
 
 1. Read \`AGENTS.md\` and \`docs/CODEBASE_MAP.md\` first.
-2. Inspect only the smallest file set needed to answer the task.
-3. Separate inspected evidence from assumptions.
-4. Name relevant validation commands from \`AGENTS.md\`; do not invent commands.
-5. Inspect \`.codex-prep/codegraph.json\` or run \`codex-prep graph-query\` before broad searching.
-6. Run \`codex-prep status\` to check plan, branch, dashboard, graph, and validation state.
-7. If the workflow looks inconsistent, run \`codex-prep doctor\` and follow the highest-severity finding first.
-8. If local CodexManager memory appears in git status, run \`codex-prep local-ignore\`.
-9. If the map or graph is stale, recommend \`codex-prep check\`, \`codex-prep refresh-map\`, or \`codex-prep refresh-graph\`.
-10. For saved implementation plans, run \`codex-prep plan-review\` before build approval.
-11. Treat plan approval, branch creation, file edits, commits, and pushes as separate user decisions.
-12. Stay in Explore / Review mode unless the user explicitly authorizes edits.`;
+2. Run \`codex-prep status\` to check plan, branch, dashboard, graph, and validation state.
+3. Run \`codex-prep orient --task "<task>"\` before broad searching.
+4. Inspect only the returned reading list unless the graph confidence is low.
+5. Use \`codex-prep graph-query --file <path>\` or \`--symbol <name>\` for focused follow-up.
+6. Separate inspected evidence from assumptions.
+7. Name relevant validation commands from \`AGENTS.md\`; do not invent commands.
+8. If the workflow looks inconsistent, run \`codex-prep doctor\` and follow the highest-severity finding first.
+9. If local CodexManager memory appears in git status, run \`codex-prep local-ignore\`.
+10. If the map or graph is stale, recommend \`codex-prep check\`, \`codex-prep refresh-map\`, or \`codex-prep refresh-graph\`.
+11. For saved implementation plans, run \`codex-prep plan-review\` before build approval.
+12. Treat plan approval, branch creation, file edits, commits, and pushes as separate user decisions.
+13. Stay in Explore / Review mode unless the user explicitly authorizes edits.`;
 }
 
 function buildCodeReviewSkill() {

@@ -41,9 +41,9 @@ Keep commit and push as separate explicit approvals.
 - Graph file: `.codex-prep/codegraph.json`
 - Indexed files: 24
 - Import edges: 59
-- Symbols: 363
+- Symbols: 390
 
-Before broad searching, inspect `.codex-prep/codegraph.json` or run `codex-prep graph-query` to find imports, dependents, symbols, and likely related tests.
+Before broad searching, run `codex-prep orient --task "<task>"` and inspect only the returned reading list. Use `codex-prep graph-query` for focused file or symbol follow-up. Read `.codex-prep/codegraph.json` directly only when the commands are unavailable.
 
 Use `codex-prep status` for current plan/branch/validation state and `codex-prep doctor` when the workflow looks inconsistent.
 If local CodexManager memory appears in git status, run `codex-prep local-ignore` to install repo-local exclude rules.

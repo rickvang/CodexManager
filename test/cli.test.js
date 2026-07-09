@@ -52,6 +52,24 @@ test("graph-query validates query options", async () => {
   );
 });
 
+test("orient and graph budget options validate command ownership", async () => {
+  await assert.rejects(
+    () => runCli(["orient"]),
+    /orient requires --task <text>/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--task", "find auth"]),
+    /--task is only supported for orient/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--limit", "3"]),
+    /--limit is only supported for orient and graph-query/
+  );
+  await assert.rejects(
+    () => runCli(["orient", "--task", "find auth", "--depth", "2"]),
+    /--depth is only supported for graph-query/
+  );
+});
 test("graph-export-only options are rejected elsewhere", async () => {
   await assert.rejects(
     () => runCli(["scan", "--include-symbols"]),

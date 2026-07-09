@@ -18,6 +18,11 @@ const FILE_LEVEL_EXTENSIONS = new Map([
 ]);
 const RESOLVABLE_JS_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"];
 const TEST_SEGMENTS = new Set(["test", "tests", "__tests__", "spec", "e2e"]);
+const TASK_STOP_WORDS = new Set([
+  "the", "and", "for", "with", "from", "this", "that", "into", "onto", "about", "change", "update",
+  "add", "make", "build", "implement", "fix", "work", "code", "file", "files", "repo", "project"
+]);
+const VALIDATION_COMMAND_PATTERN = /\b(test|verify|lint|check|build|eval|typecheck|e2e|playwright)\b/i;
 
 export async function buildCodeGraph(root, options = {}) {
   const absoluteRoot = path.resolve(root);
@@ -111,45 +116,419 @@ export async function loadOrBuildCodeGraph(root, options = {}) {
 }
 
 export function queryCodeGraph(graph, query) {
+  const options = {
+    limit: normalizePositiveInteger(query.limit, "limit"),
+    depth: normalizeDepth(query.depth)
+  };
   if (query.file) {
-    return queryFile(graph, normalizeQueryPath(query.file));
+    return queryFile(graph, normalizeQueryPath(query.file), options);
   }
   if (query.symbol) {
-    return querySymbol(graph, query.symbol);
+    return querySymbol(graph, query.symbol, options);
   }
   throw new Error("graph-query requires --file <path> or --symbol <name>");
 }
 
-function queryFile(graph, filePath) {
+export function orientCodeGraph(graph, options = {}) {
+  const task = String(options.task ?? "").trim();
+  if (!task) {
+    throw new Error("orient requires --task <text>");
+  }
+
+  const limit = normalizePositiveInteger(options.limit, "limit") ?? 8;
+  const terms = tokenize(task);
+  const files = graph.files ?? [];
+  const ranked = rankOrientationFiles(graph, terms, task);
+  const selected = selectOrientationFiles(graph, ranked, limit);
+  const entrypoints = (graph.relationships ?? [])
+    .filter((item) => item.kind === "entrypoint")
+    .map((item) => ({ path: item.file, confidence: item.confidence, reason: item.reason }))
+    .sort((left, right) => left.path.localeCompare(right.path));
+  const readingList = selected.map((item) => orientationFileSummary(item.file, item.score, item.reasons));
+  const relatedTests = readingList.filter((item) => item.role === "test").map((item) => ({
+    path: item.path,
+    confidence: item.confidence,
+    reason: item.reasons.join("; ")
+  }));
+  const validationCommands = validationCommandSummaries(options.commands ?? []);
+  const contextEstimate = buildContextEstimate(files, readingList);
+  const lowConfidence = readingList.length === 0 || readingList.every((item) => item.confidence === "low");
+
+  return {
+    task,
+    source: options.source ?? "graph",
+    terms,
+    readingList,
+    relatedTests,
+    entrypoints: entrypoints.slice(0, limit),
+    validationCommands,
+    contextEstimate,
+    fallbackSearches: buildFallbackSearches(terms, task, lowConfidence),
+    warnings: lowConfidence ? ["Low-confidence graph match. Use the fallback searches before editing."] : []
+  };
+}
+
+function queryFile(graph, filePath, options = {}) {
   const file = (graph.files ?? []).find((item) => item.path === filePath);
   if (!file) {
     return { type: "file", query: filePath, found: false, message: `No graph entry found for ${filePath}.` };
   }
   const dependents = (graph.edges ?? []).filter((edge) => edge.to === filePath).map((edge) => edge.from).sort();
+  const imports = file.imports ?? [];
+  const symbols = file.symbols ?? [];
+  const relatedTests = file.relatedTests ?? [];
+  const allNeighbors = collectNeighborFiles(graph, filePath, options.depth ?? 1);
+  const neighbors = limitList(allNeighbors, options.limit);
   return {
     type: "file",
     query: filePath,
     found: true,
     file,
-    imports: file.imports ?? [],
-    dependents,
-    symbols: file.symbols ?? [],
-    relatedTests: file.relatedTests ?? []
+    imports: limitList(imports, options.limit),
+    dependents: limitList(dependents, options.limit),
+    symbols: limitList(symbols, options.limit),
+    relatedTests: limitList(relatedTests, options.limit),
+    neighbors,
+    limits: buildLimitSummary(options.limit, {
+      imports,
+      dependents,
+      symbols,
+      relatedTests,
+      neighbors: allNeighbors
+    }, { depth: options.depth ?? 1 })
   };
 }
 
-function querySymbol(graph, name) {
+function querySymbol(graph, name, options = {}) {
   const normalized = name.toLowerCase();
   const exact = (graph.symbols ?? []).filter((symbol) => symbol.name.toLowerCase() === normalized);
   const partial = exact.length > 0 ? [] : (graph.symbols ?? []).filter((symbol) => symbol.name.toLowerCase().includes(normalized));
+  const matches = [...exact, ...partial].sort(compareSymbol);
   return {
     type: "symbol",
     query: name,
-    found: exact.length > 0 || partial.length > 0,
-    matches: [...exact, ...partial].sort(compareSymbol)
+    found: matches.length > 0,
+    matches: limitList(matches, options.limit),
+    limits: buildLimitSummary(options.limit, { matches })
   };
 }
 
+function rankOrientationFiles(graph, terms, task) {
+  const phrase = task.toLowerCase();
+  const files = graph.files ?? [];
+  const dependentsByPath = dependentsByTarget(graph.edges ?? []);
+
+  return files.map((file) => {
+    const reasons = [];
+    let score = 0;
+    const pathText = file.path.toLowerCase();
+    const pathTokens = tokenize(file.path);
+    const basename = path.posix.basename(file.path).toLowerCase();
+
+    if (phrase.length > 2 && pathText.includes(phrase)) {
+      score += 20;
+      reasons.push("task phrase appears in file path");
+    }
+
+    for (const term of terms) {
+      if (pathText.includes(term)) {
+        score += basename.includes(term) ? 10 : 6;
+        reasons.push(`path matches "${term}"`);
+      } else if (pathTokens.includes(term)) {
+        score += 4;
+        reasons.push(`path token matches "${term}"`);
+      }
+    }
+
+    for (const symbol of file.symbols ?? []) {
+      const symbolTokens = tokenize(symbol.name);
+      const symbolName = symbol.name.toLowerCase();
+      for (const term of terms) {
+        if (symbolName === term || symbolTokens.includes(term)) {
+          score += symbol.exported ? 24 : 18;
+          reasons.push(`symbol ${symbol.name} matches "${term}"`);
+        } else if (symbolName.includes(term)) {
+          score += symbol.exported ? 12 : 8;
+          reasons.push(`symbol ${symbol.name} partially matches "${term}"`);
+        }
+      }
+    }
+
+    for (const item of file.imports ?? []) {
+      const importText = `${item.specifier} ${item.resolved ?? ""}`.toLowerCase();
+      for (const term of terms) {
+        if (importText.includes(term)) {
+          score += item.resolved ? 5 : 2;
+          reasons.push(`import matches "${term}"`);
+        }
+      }
+    }
+
+    for (const dependent of dependentsByPath.get(file.path) ?? []) {
+      const dependentText = dependent.toLowerCase();
+      for (const term of terms) {
+        if (dependentText.includes(term)) {
+          score += 3;
+          reasons.push(`dependent ${dependent} matches "${term}"`);
+        }
+      }
+    }
+
+    if (file.role === "entrypoint" && terms.some((term) => ["entry", "entrypoint", "start", "main", "app", "cli"].includes(term))) {
+      score += 12;
+      reasons.push("entrypoint role matches task");
+    }
+    if (file.role === "test" && terms.some((term) => ["test", "tests", "spec", "verify"].includes(term))) {
+      score += 10;
+      reasons.push("test role matches task");
+    }
+
+    return { file, score, reasons: uniqueStrings(reasons) };
+  }).sort(compareOrientationCandidate);
+}
+
+function selectOrientationFiles(graph, ranked, limit) {
+  const byPath = new Map((graph.files ?? []).map((file) => [file.path, file]));
+  const positives = ranked.filter((item) => item.score > 0);
+  const candidates = positives.length > 0 ? positives : fallbackOrientationCandidates(graph, ranked);
+  const selected = new Map();
+  const primaryBudget = limit <= 2 ? 1 : Math.max(1, Math.ceil(limit * 0.6));
+
+  for (const candidate of candidates.filter((item) => item.file.role !== "test")) {
+    addOrientationCandidate(selected, candidate);
+    if (selected.size >= primaryBudget) {
+      break;
+    }
+  }
+
+  if (selected.size === 0) {
+    for (const candidate of candidates) {
+      addOrientationCandidate(selected, candidate);
+      if (selected.size >= primaryBudget) {
+        break;
+      }
+    }
+  }
+
+  for (const candidate of selected.values()) {
+    if (candidate.file.role === "test") {
+      continue;
+    }
+    for (const testRef of candidate.file.relatedTests ?? []) {
+      const testFile = byPath.get(testRef.path);
+      if (testFile) {
+        addOrientationCandidate(selected, {
+          file: testFile,
+          score: Math.max(candidate.score - 2, 1),
+          reasons: [`related test for ${candidate.file.path}`]
+        });
+      }
+      if (selected.size >= limit) {
+        break;
+      }
+    }
+    if (selected.size >= limit) {
+      break;
+    }
+  }
+
+  for (const candidate of candidates) {
+    if (selected.size >= limit) {
+      break;
+    }
+    addOrientationCandidate(selected, candidate);
+  }
+
+  return [...selected.values()].slice(0, limit);
+}
+
+function fallbackOrientationCandidates(graph, ranked) {
+  const entrypointPaths = new Set((graph.relationships ?? []).filter((item) => item.kind === "entrypoint").map((item) => item.file));
+  const fallback = ranked.filter((item) => entrypointPaths.has(item.file.path));
+  if (fallback.length > 0) {
+    return fallback.map((item) => ({ ...item, score: 1, reasons: ["fallback entrypoint"] }));
+  }
+  return ranked.slice(0, 3).map((item) => ({ ...item, score: 1, reasons: ["fallback graph file"] }));
+}
+
+function addOrientationCandidate(selected, candidate) {
+  const current = selected.get(candidate.file.path);
+  if (!current || candidate.score > current.score) {
+    selected.set(candidate.file.path, candidate);
+  }
+}
+
+function orientationFileSummary(file, score, reasons) {
+  return {
+    path: file.path,
+    role: file.role,
+    language: file.language,
+    confidence: confidenceForScore(score),
+    score,
+    size: file.size ?? 0,
+    reasons: reasons.length > 0 ? reasons : ["selected by graph fallback"],
+    symbols: (file.symbols ?? []).slice(0, 5).map((symbol) => ({
+      name: symbol.name,
+      kind: symbol.kind,
+      exported: symbol.exported,
+      confidence: symbol.confidence
+    }))
+  };
+}
+
+function collectNeighborFiles(graph, startPath, depth) {
+  if (!depth || depth < 1) {
+    return [];
+  }
+
+  const byPath = new Map((graph.files ?? []).map((file) => [file.path, file]));
+  const seen = new Set([startPath]);
+  let frontier = [startPath];
+  const neighbors = [];
+
+  for (let currentDepth = 1; currentDepth <= depth; currentDepth += 1) {
+    const next = [];
+    for (const currentPath of frontier) {
+      for (const edge of graph.edges ?? []) {
+        const targets = [];
+        if (edge.from === currentPath) {
+          targets.push({ path: edge.to, direction: "import" });
+        }
+        if (edge.to === currentPath) {
+          targets.push({ path: edge.from, direction: "dependent" });
+        }
+        for (const target of targets) {
+          if (!target.path || seen.has(target.path)) {
+            continue;
+          }
+          seen.add(target.path);
+          next.push(target.path);
+          const file = byPath.get(target.path);
+          neighbors.push({
+            path: target.path,
+            direction: target.direction,
+            depth: currentDepth,
+            role: file?.role ?? "unknown",
+            confidence: edge.confidence ?? "medium"
+          });
+        }
+      }
+    }
+    frontier = next.sort();
+  }
+
+  return neighbors.sort((left, right) => `${left.depth}:${left.path}:${left.direction}`.localeCompare(`${right.depth}:${right.path}:${right.direction}`));
+}
+
+function buildContextEstimate(files, readingList) {
+  const byPath = new Map(files.map((file) => [file.path, file]));
+  const graphBytes = files.reduce((total, file) => total + (file.size ?? 0), 0);
+  const selectedBytes = readingList.reduce((total, item) => total + (byPath.get(item.path)?.size ?? item.size ?? 0), 0);
+  return {
+    selectedFiles: readingList.length,
+    totalGraphFiles: files.length,
+    selectedBytes,
+    totalGraphBytes: graphBytes,
+    estimatedSelectedTokens: estimateTokens(selectedBytes),
+    estimatedGraphTokens: estimateTokens(graphBytes),
+    estimatedReductionPercent: graphBytes > 0 ? Math.max(0, Math.round((1 - selectedBytes / graphBytes) * 100)) : 0
+  };
+}
+
+function validationCommandSummaries(commands) {
+  return commands
+    .filter((command) => VALIDATION_COMMAND_PATTERN.test(command.name ?? "") || VALIDATION_COMMAND_PATTERN.test(command.command ?? ""))
+    .map((command) => ({ name: command.name, command: command.command, source: command.source ?? "detected" }));
+}
+
+function buildFallbackSearches(terms, task, lowConfidence) {
+  if (!lowConfidence) {
+    return [];
+  }
+  const usefulTerms = terms.length > 0 ? terms.slice(0, 3) : tokenize(task).slice(0, 3);
+  return usefulTerms.length > 0
+    ? usefulTerms.map((term) => `rg -n "${term}" .`)
+    : [`rg -n "${task.replace(/"/g, "\\\"")}" .`];
+}
+
+function dependentsByTarget(edges) {
+  const result = new Map();
+  for (const edge of edges) {
+    if (!edge.to || !edge.from) {
+      continue;
+    }
+    const current = result.get(edge.to) ?? [];
+    current.push(edge.from);
+    result.set(edge.to, current.sort());
+  }
+  return result;
+}
+
+function limitList(values = [], limit) {
+  return limit ? values.slice(0, limit) : values;
+}
+
+function buildLimitSummary(limit, collections, extra = {}) {
+  const totals = Object.fromEntries(Object.entries(collections).map(([key, value]) => [key, value.length]));
+  const truncated = Object.fromEntries(Object.entries(collections).map(([key, value]) => [key, Boolean(limit && value.length > limit)]));
+  return { limit: limit ?? null, ...extra, totals, truncated };
+}
+
+function normalizePositiveInteger(value, name) {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 1) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return number;
+}
+
+function normalizeDepth(value) {
+  if (value === undefined || value === null || value === "") {
+    return 1;
+  }
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 0) {
+    throw new Error("depth must be a non-negative integer");
+  }
+  return number;
+}
+
+function tokenize(value) {
+  return String(value ?? "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .map((item) => item.trim())
+    .filter((item) => item.length > 1 && !TASK_STOP_WORDS.has(item));
+}
+
+function confidenceForScore(score) {
+  if (score >= 24) {
+    return "high";
+  }
+  if (score >= 8) {
+    return "medium";
+  }
+  return "low";
+}
+
+function estimateTokens(bytes) {
+  return Math.ceil(bytes / 4);
+}
+
+function uniqueStrings(values) {
+  return [...new Set(values)];
+}
+
+function compareOrientationCandidate(left, right) {
+  if (right.score !== left.score) {
+    return right.score - left.score;
+  }
+  return left.file.path.localeCompare(right.file.path);
+}
 function isGraphFile(filePath) {
   const extension = path.extname(filePath).toLowerCase();
   return JS_EXTENSIONS.has(extension) || PY_EXTENSIONS.has(extension) || FILE_LEVEL_EXTENSIONS.has(extension);
@@ -539,6 +918,7 @@ export const internals = {
   extractPythonImports,
   extractPythonSymbols,
   likelyTestForSource,
+  orientCodeGraph,
   resolveJavaScriptImport,
   resolvePythonImport
 };

@@ -9,6 +9,7 @@ import {
   graphQueryCommand,
   lintCommand,
   localIgnoreCommand,
+  orientCommand,
   planApproveCommand,
   planAttachCommand,
   planCloseCommand,
@@ -44,6 +45,7 @@ const COMMANDS = new Set([
   "check",
   "eval",
   "graph",
+  "orient",
   "graph-export",
   "graph-query",
   "lint",
@@ -144,10 +146,12 @@ export async function runCli(argv) {
     await evalCommand(common);
   } else if (command === "graph") {
     await graphCommand(common);
+  } else if (command === "orient") {
+    await orientCommand({ ...common, task: options.task, limit: options.limit });
   } else if (command === "graph-export") {
     await graphExportCommand({ ...common, format: options.format, includeSymbols: options.includeSymbols });
   } else if (command === "graph-query") {
-    await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol });
+    await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol, limit: options.limit, depth: options.depth });
   } else if (command === "lint") {
     await lintCommand(common);
   } else if (command === "refresh-graph") {
@@ -184,6 +188,9 @@ function parseArgs(argv) {
     riskLevel: undefined,
     targetAgent: undefined,
     symbol: undefined,
+    task: undefined,
+    limit: undefined,
+    depth: undefined,
     branch: undefined,
     base: undefined,
     syncBase: false,
@@ -274,6 +281,15 @@ function parseArgs(argv) {
       i += 1;
     } else if (value === "--symbol") {
       options.symbol = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--task") {
+      options.task = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--limit") {
+      options.limit = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--depth") {
+      options.depth = readOptionValue(argv, i, value);
       i += 1;
     } else if (value === "--format") {
       options.format = readOptionValue(argv, i, value);
@@ -368,6 +384,15 @@ function validateOptions(command, options) {
   if (options.symbol && command !== "graph-query") {
     throw new Error("--symbol is only supported for graph-query");
   }
+  if (options.task && command !== "orient") {
+    throw new Error("--task is only supported for orient");
+  }
+  if (options.limit && !["orient", "graph-query"].includes(command)) {
+    throw new Error("--limit is only supported for orient and graph-query");
+  }
+  if (options.depth && command !== "graph-query") {
+    throw new Error("--depth is only supported for graph-query");
+  }
   if (options.format && command !== "graph-export") {
     throw new Error("--format is only supported for graph-export");
   }
@@ -376,6 +401,9 @@ function validateOptions(command, options) {
   }
   if (command === "graph-export" && options.format && options.format !== "obsidian") {
     throw new Error("graph-export currently supports --format obsidian");
+  }
+  if (command === "orient" && !options.task) {
+    throw new Error("orient requires --task <text>");
   }
   if (command === "graph-query" && options.files.length === 0 && !options.symbol) {
     throw new Error("graph-query requires --file <path> or --symbol <name>");
@@ -420,8 +448,9 @@ Usage:
   codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
   codex-prep graph [--repo <path>] [--json]
+  codex-prep orient [--repo <path>] --task <text> [--limit <n>] [--json]
   codex-prep graph-export [--repo <path>] --format obsidian [--include-symbols] [--json]
-  codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--json]
+  codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--limit <n>] [--depth <n>] [--json]
   codex-prep refresh-graph [--repo <path>] [--json]
 
 Commands:
@@ -444,6 +473,7 @@ Commands:
   check        Detect stale generated guidance and obvious repo drift.
   eval         Run fixed scenarios against the generated guidance.
   graph        Preview the local code graph without writing files.
+  orient       Produce a task-aware graph-first reading list to reduce broad file reads.
   graph-export Export the local code graph to adapter formats such as Obsidian Markdown.
   graph-query  Query graph imports, dependents, symbols, and likely tests.
   lint         Lint codex-prep managed files without editing them.
@@ -477,6 +507,9 @@ Planning options:
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, or generic.
   --symbol TEXT   Symbol name for graph-query.
+  --task TEXT     Task description for orient.
+  --limit N       Limit orient or graph-query output. orient defaults to 8.
+  --depth N       Neighbor traversal depth for graph-query --file. Defaults to 1.
   --format TEXT   Export format for graph-export. Currently: obsidian.
   --include-symbols
                   With graph-export, include symbol notes. Omitted by default for a cleaner graph.
@@ -489,7 +522,7 @@ Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access unless plan-start --sync-base is used.
   local-ignore writes only .git/info/exclude and does not edit repo-tracked files.
-  scan, check, eval, lint, plan-review, and plan-lint do not edit repo-tracked files.
+  scan, check, eval, lint, orient, graph-query, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);
 }
