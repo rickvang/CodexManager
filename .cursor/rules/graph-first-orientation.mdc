@@ -1,0 +1,14 @@
+<!-- codex-prep:begin -->
+---
+alwaysApply: false
+description: Use graph-first orientation when locating files, symbols, entrypoints, or related tests.
+globs: "**/*"
+---
+
+# Graph-First Orientation
+
+- Start with codex-prep orient --task "<task>".
+- Follow the returned reading list before opening unrelated files.
+- Use codex-prep graph-query --file <path> for imports, dependents, symbols, and nearby tests.
+- Use codex-prep graph-query --symbol <name> when the task starts from an identifier.
+<!-- codex-prep:end -->

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { runCli } from "../src/cli.js";
-import { createGitRepo, jsRepoFiles, withCapturedConsole } from "./helpers.js";
+import { createGitRepo, createTempRepo, jsRepoFiles, withCapturedConsole } from "./helpers.js";
 
 test("--save is only accepted for plan", async () => {
   await assert.rejects(
@@ -104,4 +104,22 @@ test("local-ignore runs through the CLI", async () => {
   assert.equal(parsed.isGitRepo, true);
   assert.equal(parsed.changed, true);
   assert.deepEqual(parsed.added, [".codex-prep/plans/", ".codex-prep/validation-results.jsonl"]);
+});
+
+test("adapter command options validate command ownership", async () => {
+  await assert.rejects(
+    () => runCli(["scan", "--target", "cursor"]),
+    /--target is only supported for adapter-plan and adapter-apply/
+  );
+  await assert.rejects(
+    () => runCli(["scan", "--profile", "short"]),
+    /--profile is only supported for adapter-plan and adapter-apply/
+  );
+
+  const root = await createTempRepo(jsRepoFiles());
+  const output = await withCapturedConsole(() => runCli(["adapter-plan", "--repo", root, "--target", "cursor", "--profile", "short", "--json"]));
+  const parsed = JSON.parse(output.stdout);
+
+  assert.deepEqual(parsed.targets, ["cursor"]);
+  assert.equal(parsed.contextProfile, "short");
 });

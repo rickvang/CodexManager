@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+import { ADAPTERS_MANIFEST_PATH, HANDOFF_PATH, buildAdapterSourceFingerprint, buildHandoffSourceFingerprint } from "./adapters.js";
 import { CODEGRAPH_PATH, buildCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
 import { DASHBOARD_PATH, MANAGED_FILES } from "./generate.js";
 import { OBSIDIAN_EXPORT_DIR } from "./obsidian-export.js";
@@ -32,6 +33,8 @@ export async function buildControlState(root, options = {}) {
   const planState = await readActivePlanState(root);
   const git = await readGitState(root);
   const validation = await readValidationMemory(root);
+  const adapters = await readAdapterState(root, manifest, liveGraph);
+  const handoff = await readHandoffState(root, manifest, liveGraph, { plan: planState, git, validation, adapters });
   const generated = await readGeneratedState(root, manifest, liveGraph, savedGraphState);
 
   const state = {
@@ -57,6 +60,8 @@ export async function buildControlState(root, options = {}) {
       error: savedGraphState.error ?? ""
     },
     generated,
+    adapters,
+    handoff,
     validation,
     commands: manifest.discovery?.commands ?? []
   };
@@ -195,6 +200,8 @@ export function buildDoctorResult(state) {
   const add = (level, code, message, fix, file = "") => findings.push({ level, code, message, fix, file });
 
   const terminalPlan = state.plan.exists && isTerminalPlan(state.plan.plan);
+  const adapters = state.adapters ?? { exists: false, invalid: false, stale: false, generatedFiles: [] };
+  const handoff = state.handoff ?? { exists: false, stale: false };
 
   if (!state.plan.exists) {
     add("warn", "CM001", "No active saved plan was found.", "Run codex-prep plan before implementation work.", ACTIVE_PLAN_PATH);
@@ -241,6 +248,22 @@ export function buildDoctorResult(state) {
   if (!state.commands.some((command) => command.name === "verify" || command.command.includes("verify"))) {
     add("warn", "CM016", "No verify command was detected.", "Document a repo verification command or use the detected test/lint commands.");
   }
+  if (!adapters.exists) {
+    add("warn", "CM017", "No multi-agent adapter manifest was found.", "Run codex-prep adapter-apply --target all when this repo should work in other agent surfaces.", ADAPTERS_MANIFEST_PATH);
+  } else if (adapters.invalid) {
+    add("error", "CM018", ".codex-prep/adapters.json could not be parsed.", "Regenerate it with codex-prep adapter-apply --target all.", ADAPTERS_MANIFEST_PATH);
+  } else if (adapters.stale) {
+    add("warn", "CM019", "Multi-agent adapter output is stale.", "Run codex-prep adapter-apply --target all.", ADAPTERS_MANIFEST_PATH);
+  } else {
+    for (const file of adapters.generatedFiles.filter((item) => !item.exists)) {
+      add("warn", "CM020", `${file.path} is missing from adapter output.`, "Run codex-prep adapter-apply --target all.", file.path);
+    }
+  }
+  if (!handoff.exists) {
+    add("warn", "CM021", "The agent handoff file is missing.", "Run codex-prep handoff.", HANDOFF_PATH);
+  } else if (handoff.stale) {
+    add("warn", "CM022", "The agent handoff file is stale.", "Run codex-prep handoff.", HANDOFF_PATH);
+  }
 
   return {
     ok: !findings.some((finding) => finding.level === "error"),
@@ -255,6 +278,8 @@ export function selectNextAction(state) {
 
   const plan = state.plan.plan;
   const terminalPlan = isTerminalPlan(plan);
+  const adapters = state.adapters ?? { exists: false, invalid: false, stale: false };
+  const handoff = state.handoff ?? { exists: false, stale: false };
 
   if (!terminalPlan && plan?.build?.status === "approved") {
     return "Start the implementation branch with codex-prep plan-start --branch <name>.";
@@ -262,20 +287,26 @@ export function selectNextAction(state) {
   if (!terminalPlan && plan?.build?.branchName && state.git.branchName && plan.build.branchName !== state.git.branchName) {
     return `Switch to ${plan.build.branchName} or run codex-prep plan-attach intentionally.`;
   }
+  if (terminalPlan) {
+    return "No active implementation work remains; create a new plan for new work.";
+  }
   if (!state.graph.exists || state.graph.stale) {
     return "Refresh the local code graph with codex-prep refresh-graph.";
   }
   if (!state.generated.dashboard.exists) {
     return "Refresh generated guidance and dashboard with codex-prep apply.";
   }
+  if (adapters.exists && (adapters.invalid || adapters.stale)) {
+    return "Refresh multi-agent adapters with codex-prep adapter-apply --target all.";
+  }
+  if (!handoff.exists || handoff.stale) {
+    return "Refresh the agent handoff with codex-prep handoff.";
+  }
   if (!state.validation.latest) {
     return "Run validation, then record the outcome with codex-prep validation-record.";
   }
   if (state.validation.latest.result === "fail") {
     return "Fix the failed validation and record a passing validation result.";
-  }
-  if (terminalPlan) {
-    return "No active implementation work remains; create a new plan for new work.";
   }
   return "Continue the approved scope, then run validation and close the plan when done.";
 }
@@ -311,6 +342,99 @@ async function readSavedGraphState(root, overrideGraph) {
   }
 }
 
+
+async function readAdapterState(root, manifest, liveGraph) {
+  const absolutePath = path.join(root, ADAPTERS_MANIFEST_PATH);
+  if (!(await fileExists(absolutePath))) {
+    return {
+      exists: false,
+      path: ADAPTERS_MANIFEST_PATH,
+      targets: [],
+      generatedFiles: [],
+      sourceFingerprint: "",
+      expectedSourceFingerprint: "",
+      contextProfile: "",
+      stale: false,
+      invalid: false,
+      error: ""
+    };
+  }
+
+  let adapterManifest;
+  try {
+    adapterManifest = JSON.parse(await fs.readFile(absolutePath, "utf8"));
+  } catch (error) {
+    return {
+      exists: true,
+      path: ADAPTERS_MANIFEST_PATH,
+      targets: [],
+      generatedFiles: [],
+      sourceFingerprint: "",
+      expectedSourceFingerprint: "",
+      contextProfile: "",
+      stale: false,
+      invalid: true,
+      error: error.message
+    };
+  }
+
+  const contextProfile = adapterManifest.contextProfile || "standard";
+  let expectedSourceFingerprint = "";
+  let invalid = false;
+  let error = "";
+  try {
+    expectedSourceFingerprint = buildAdapterSourceFingerprint({ manifest, graph: liveGraph, contextProfile });
+  } catch (fingerprintError) {
+    invalid = true;
+    error = fingerprintError.message;
+  }
+
+  const generatedFiles = [];
+  for (const file of adapterManifest.generatedFiles ?? []) {
+    generatedFiles.push({
+      ...file,
+      exists: await fileExists(path.join(root, file.path))
+    });
+  }
+
+  return {
+    exists: true,
+    path: ADAPTERS_MANIFEST_PATH,
+    targets: (adapterManifest.targets ?? []).map((target) => target.name).filter(Boolean),
+    generatedFiles,
+    sourceFingerprint: adapterManifest.sourceFingerprint ?? "",
+    expectedSourceFingerprint,
+    contextProfile,
+    stale: Boolean(expectedSourceFingerprint && adapterManifest.sourceFingerprint !== expectedSourceFingerprint),
+    invalid,
+    error
+  };
+}
+
+async function readHandoffState(root, manifest, liveGraph, stateParts) {
+  const expectedFingerprint = buildHandoffSourceFingerprint({ manifest, graph: liveGraph, state: stateParts });
+  const absolutePath = path.join(root, HANDOFF_PATH);
+  if (!(await fileExists(absolutePath))) {
+    return {
+      exists: false,
+      path: HANDOFF_PATH,
+      fingerprint: "",
+      expectedFingerprint,
+      stale: false
+    };
+  }
+
+  const content = await fs.readFile(absolutePath, "utf8");
+  const match = content.match(/Handoff fingerprint: ([^\r\n]+)/);
+  const fingerprint = match?.[1]?.trim() ?? "";
+  return {
+    exists: true,
+    path: HANDOFF_PATH,
+    fingerprint,
+    expectedFingerprint,
+    stale: fingerprint !== expectedFingerprint
+  };
+}
 async function readGeneratedState(root, manifest, liveGraph, savedGraphState) {
   const files = [];
   for (const filePath of MANAGED_FILES) {

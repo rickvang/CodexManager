@@ -25,6 +25,8 @@ test("generated bundle contains the durable repo learning loop files", async () 
   assert.equal(agents.includes("Explore / Review"), true);
   assert.equal(agents.includes("## Planning Decision Gate"), true);
   assert.equal(agents.includes("## Local Code Graph"), true);
+  assert.equal(agents.includes("## Multi-Agent Adapters And Handoff"), true);
+  assert.equal(agents.includes("codex-prep adapter-plan --target all"), true);
   assert.equal(agents.includes("codex-prep status"), true);
   assert.equal(agents.includes("approve build and start a dedicated branch"), true);
   assert.equal(bundle.files.find((file) => file.path === "docs/CODEBASE_MAP.md").content.includes("## Code Graph Summary"), true);

@@ -2,6 +2,7 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
+import { ADAPTERS_MANIFEST_PATH, HANDOFF_PATH, buildAdapterBundle, buildHandoffFile, listAdapters } from "./adapters.js";
 import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, orientCodeGraph, queryCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
 import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
@@ -35,7 +36,7 @@ const ACTIVE_PLAN_PATH = `${PLAN_HISTORY_DIR}/active-plan.json`;
 const PLAN_STATUSES = new Set(["draft", "approved", "implemented", "superseded", "rejected"]);
 const TERMINAL_PLAN_STATUSES = new Set(["implemented", "superseded", "rejected"]);
 const PLAN_RISK_LEVELS = new Set(["low", "medium", "high"]);
-const PLAN_TARGET_AGENTS = new Set(["codex", "cursor", "claude-code", "generic"]);
+const PLAN_TARGET_AGENTS = new Set(["codex", "cursor", "claude-code", "jan", "ollama", "generic"]);
 const PLAN_BUILD_STATUSES = new Set(["not_started", "approved", "in_progress"]);
 const DEFAULT_BASE_BRANCH = "main";
 const DEFAULT_STOP_RULES = [
@@ -564,6 +565,86 @@ export async function graphExportCommand({ root, json, format = "obsidian", incl
   return result;
 }
 
+
+export async function adaptersCommand({ json }) {
+  const result = { targets: listAdapters() };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatAdaptersList(result));
+  return result;
+}
+
+export async function adapterPlanCommand({ root, json, target = "all", profile = "standard" }) {
+  const manifest = await scanRepo(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const state = await buildControlState(root, { manifest, graph });
+  const bundle = buildAdapterBundle({ manifest, graph, state, target, profile });
+  const result = buildAdapterResult(manifest, bundle, []);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatAdapterPlan(result));
+  return result;
+}
+
+export async function adapterApplyCommand({ root, json, target = "all", profile = "standard" }) {
+  const manifest = await scanRepo(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const state = await buildControlState(root, { manifest, graph });
+  const previousManifest = await readPreviousAdaptersManifest(root);
+  const bundle = buildAdapterBundle({ manifest, graph, state, target, profile, previousManifest });
+  const writes = [];
+
+  for (const file of bundle.files) {
+    const result = await writeManagedFile(root, file.path, file.content);
+    writes.push({ path: file.path, changed: result.changed, mode: file.mode, target: file.target });
+  }
+
+  const manifestResult = await writeJsonIfChanged(path.join(root, ADAPTERS_MANIFEST_PATH), bundle.manifest);
+  writes.push({ path: ADAPTERS_MANIFEST_PATH, changed: manifestResult.changed, mode: "managed-json", target: "adapter-manifest" });
+
+  const result = buildAdapterResult(manifest, bundle, writes);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatAdapterApply(result));
+  return result;
+}
+
+export async function handoffCommand({ root, json }) {
+  const manifest = await scanRepo(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const state = assumePostHandoffState(await buildControlState(root, { manifest, graph }));
+  const file = buildHandoffFile(manifest, graph, state);
+  const write = await writeManagedFile(root, file.path, file.content);
+  const result = {
+    repo: manifest.repo,
+    handoff: {
+      path: file.path,
+      fingerprint: state.handoff.fingerprint,
+      stale: false
+    },
+    writes: [{ path: file.path, changed: write.changed, mode: file.mode }]
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatHandoff(result));
+  return result;
+}
 function buildPlanProposal(manifest, bundle, metadata = {}) {
   return {
     repo: manifest.repo,
@@ -1022,6 +1103,9 @@ export async function checkCommand({ root, json }) {
     comparePackageWorkspaces(findings, previousManifest.discovery?.workspacePackages, current.discovery.workspacePackages, config);
   }
 
+  const state = await buildControlState(root, { manifest: current, graph: currentGraph });
+  appendAdapterCheckFindings(findings, config, state);
+
   const result = {
     ok: !hasErrors(findings),
     findings
@@ -1138,6 +1222,9 @@ async function runEvalScenarios(root, manifest, codeGraph) {
   const map = (await fileExists(mapPath)) ? await fs.readFile(mapPath, "utf8") : "";
   const testedBy = codeGraph.relationships?.find((item) => item.kind === "tested-by");
   const dependentEdge = codeGraph.edges?.[0];
+  const state = await buildControlState(root, { manifest, graph: codeGraph });
+  const adapterBundle = buildAdapterBundle({ manifest, graph: codeGraph, state, target: "all" });
+  const handoffFile = buildHandoffFile(manifest, codeGraph, assumePostHandoffState({ ...state, doctor: state.doctor, nextAction: state.nextAction }));
 
   return [
     scenario(
@@ -1184,6 +1271,16 @@ async function runEvalScenarios(root, manifest, codeGraph) {
       "produce graph-first reading list",
       graphFirstOrientationPasses(codeGraph, manifest),
       graphFirstOrientationEvidence(codeGraph, manifest)
+    ),
+    scenario(
+      "produce multi-agent adapter bundle",
+      adapterBundle.files.some((file) => file.path === "CLAUDE.md") && adapterBundle.files.some((file) => file.path === ".cursor/rules/codexmanager-workflow.mdc"),
+      `${adapterBundle.targets.join(", ")}; ${adapterBundle.files.length} files`
+    ),
+    scenario(
+      "produce resume handoff",
+      handoffFile.path === HANDOFF_PATH && handoffFile.content.includes("Handoff fingerprint:"),
+      handoffFile.path
     )
   ];
 }
@@ -1236,6 +1333,56 @@ function finalizeCodeGraph(graph, previousGraph) {
   };
 }
 
+
+async function readPreviousAdaptersManifest(root) {
+  try {
+    return await readJsonIfExists(path.join(root, ADAPTERS_MANIFEST_PATH));
+  } catch {
+    return undefined;
+  }
+}
+
+function buildAdapterResult(manifest, bundle, writes) {
+  return {
+    repo: manifest.repo,
+    targets: bundle.targets,
+    contextProfile: bundle.contextProfile,
+    sourceFingerprint: bundle.manifest.sourceFingerprint,
+    files: bundle.files.map((file) => ({
+      path: file.path,
+      target: file.target,
+      mode: file.mode,
+      reason: file.reason
+    })),
+    manifest: {
+      path: ADAPTERS_MANIFEST_PATH,
+      sourceFingerprint: bundle.manifest.sourceFingerprint,
+      contextProfile: bundle.manifest.contextProfile,
+      targets: bundle.manifest.targets.map((target) => ({
+        name: target.name,
+        surface: target.surface,
+        capabilities: target.capabilities,
+        files: target.files
+      }))
+    },
+    writes
+  };
+}
+
+function assumePostHandoffState(state) {
+  const next = {
+    ...state,
+    handoff: {
+      ...(state.handoff ?? {}),
+      exists: true,
+      stale: false,
+      fingerprint: state.handoff?.expectedFingerprint ?? ""
+    }
+  };
+  next.doctor = buildDoctorResult(next);
+  next.nextAction = selectNextAction(next);
+  return next;
+}
 async function readPreviousCodeGraph(root) {
   try {
     return await readCodeGraphIfExists(root);
@@ -1287,6 +1434,68 @@ function comparePackageWorkspaces(findings, previous = [], current = [], config 
   compareStringArrays(findings, "workspace-package", previous, current, config);
 }
 
+function appendAdapterCheckFindings(findings, config, state) {
+  if (state.adapters.invalid) {
+    pushFinding(findings, config, "invalid-adapters-json", { file: ADAPTERS_MANIFEST_PATH, message: state.adapters.error || "adapter manifest is invalid" });
+  } else if (state.adapters.exists) {
+    if (state.adapters.stale) {
+      pushFinding(findings, config, "adapter-source-stale", { file: ADAPTERS_MANIFEST_PATH, message: `${ADAPTERS_MANIFEST_PATH} is stale.` });
+    }
+    for (const file of state.adapters.generatedFiles.filter((item) => !item.exists)) {
+      pushFinding(findings, config, "missing-adapter-file", { file: file.path, message: `${file.path} is missing.` });
+    }
+  }
+
+  if (!state.handoff.exists) {
+    pushFinding(findings, config, "handoff-missing", { file: HANDOFF_PATH, message: `${HANDOFF_PATH} is missing.` });
+  } else if (state.handoff.stale) {
+    pushFinding(findings, config, "handoff-stale", { file: HANDOFF_PATH, message: `${HANDOFF_PATH} is stale.` });
+  }
+}
+
+
+function formatAdaptersList(result) {
+  return [
+    "codex-prep adapters",
+    "",
+    ...result.targets.map((target) => `- ${target.name}: ${target.surface}; repoRules=${target.capabilities.repoRules}; pathRules=${target.capabilities.pathRules}; promptPack=${target.capabilities.promptPack}; localApi=${target.capabilities.localApi}; modelRuntime=${target.capabilities.modelRuntime}`)
+  ].join("\n");
+}
+
+function formatAdapterPlan(result) {
+  return [
+    `codex-prep adapter-plan: ${result.repo.name}`,
+    "",
+    `Targets: ${result.targets.join(", ")}`,
+    `Context profile: ${result.contextProfile}`,
+    `Source fingerprint: ${result.sourceFingerprint}`,
+    "Proposed writes:",
+    ...result.files.map((file) => `- ${file.path} (${file.target}): ${file.reason}`),
+    `- ${ADAPTERS_MANIFEST_PATH} (adapter-manifest): Tracks generated adapter files and source fingerprints.`
+  ].join("\n");
+}
+
+function formatAdapterApply(result) {
+  return [
+    `codex-prep adapter-apply: ${result.repo.name}`,
+    "",
+    `Targets: ${result.targets.join(", ")}`,
+    `Context profile: ${result.contextProfile}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)} (${write.target || "adapter"})`)
+  ].join("\n");
+}
+
+function formatHandoff(result) {
+  return [
+    `codex-prep handoff: ${result.repo.name}`,
+    "",
+    `File: ${result.handoff.path}`,
+    `Fingerprint: ${result.handoff.fingerprint || "unknown"}`,
+    "Writes:",
+    ...result.writes.map((write) => `- ${write.changed ? "updated" : "unchanged"} ${relativePath(write.path)}`)
+  ].join("\n");
+}
 function formatGraph(graph, { source }) {
   return [
     `codex-prep graph: ${graph.repo.name}`,
@@ -1470,6 +1679,8 @@ function buildStatusResult(state) {
       dashboard: state.generated.dashboard,
       obsidian: state.generated.obsidian
     },
+    adapters: state.adapters,
+    handoff: state.handoff,
     validation: {
       exists: state.validation.exists,
       path: state.validation.path,
@@ -1493,6 +1704,8 @@ function formatStatus(result) {
     `Graph: ${result.graph.exists ? (result.graph.stale ? "stale" : "fresh") : "missing"}`,
     `Dashboard: ${result.generated.dashboard.exists ? "present" : "missing"}`,
     `Obsidian index: ${result.generated.obsidian.exists ? (result.generated.obsidian.stale ? "stale" : "present") : "missing"}`,
+    `Adapters: ${result.adapters.exists ? (result.adapters.stale ? "stale" : result.adapters.invalid ? "invalid" : `present (${result.adapters.targets.join(", ") || "none"})`) : "missing"}`,
+    `Handoff: ${result.handoff.exists ? (result.handoff.stale ? "stale" : "present") : "missing"}`,
     `Latest validation: ${result.validation.latest ? `${result.validation.latest.result} ${result.validation.latest.command}` : "none recorded"}`,
     `Doctor: ${result.doctor.ok ? "ok" : "needs attention"} (${result.doctor.findings.length} findings)`,
     "",

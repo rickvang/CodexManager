@@ -1,0 +1,14 @@
+<!-- codex-prep:begin -->
+---
+alwaysApply: false
+description: Use CodexManager validation memory and repo rules when reviewing or finishing changes.
+globs: "{src,test,tests,docs}/**/*"
+---
+
+# Review And Validation
+
+- Lead reviews with bugs, regressions, missing tests, unsafe assumptions, and stale guidance.
+- Run or name detected validation commands before claiming work is done.
+- Record meaningful validation with codex-prep validation-record.
+- Use codex-prep doctor when plan, branch, graph, handoff, or adapter state looks inconsistent.
+<!-- codex-prep:end -->

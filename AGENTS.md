@@ -39,14 +39,23 @@ Keep commit and push as separate explicit approvals.
 ## Local Code Graph
 
 - Graph file: `.codex-prep/codegraph.json`
-- Indexed files: 24
-- Import edges: 59
-- Symbols: 390
+- Indexed files: 26
+- Import edges: 65
+- Symbols: 438
 
 Before broad searching, run `codex-prep orient --task "<task>"` and inspect only the returned reading list. Use `codex-prep graph-query` for focused file or symbol follow-up. Read `.codex-prep/codegraph.json` directly only when the commands are unavailable.
 
 Use `codex-prep status` for current plan/branch/validation state and `codex-prep doctor` when the workflow looks inconsistent.
 If local CodexManager memory appears in git status, run `codex-prep local-ignore` to install repo-local exclude rules.
+
+## Multi-Agent Adapters And Handoff
+
+- Handoff file: `docs/AGENT_HANDOFF.md`
+- Adapter manifest: `.codex-prep/adapters.json`
+- Preview adapter writes with `codex-prep adapter-plan --target all`.
+- Generate Claude, Cursor, Jan, Ollama, and generic adapter files with `codex-prep adapter-apply --target all`.
+- Refresh resume state with `codex-prep handoff` after meaningful plan, branch, graph, validation, or adapter changes.
+- Treat adapter files and handoff docs as projections of CodexManager state, not separate sources of truth.
 
 ## Validation Commands
 

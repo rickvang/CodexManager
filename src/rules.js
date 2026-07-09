@@ -172,7 +172,38 @@ export const RULES = {
     defaultLevel: "error",
     description: "The code graph no longer matches the repo files/imports.",
     fix: "Run codex-prep refresh-graph or codex-prep apply, then review the graph changes."
-  },  "plan-missing": {
+  },
+  "invalid-adapters-json": {
+    id: "CP114",
+    defaultLevel: "error",
+    description: "The adapter manifest is not valid JSON.",
+    fix: "Fix the JSON syntax or regenerate adapters with codex-prep adapter-apply --target all."
+  },
+  "adapter-source-stale": {
+    id: "CP115",
+    defaultLevel: "error",
+    description: "Generated adapter output no longer matches the repo map or graph.",
+    fix: "Run codex-prep adapter-apply --target all, then review the generated adapter changes."
+  },
+  "missing-adapter-file": {
+    id: "CP116",
+    defaultLevel: "error",
+    description: "A file listed in the adapter manifest is missing.",
+    fix: "Run codex-prep adapter-apply --target all to recreate adapter files."
+  },
+  "handoff-missing": {
+    id: "CP117",
+    defaultLevel: "warning",
+    description: "The agent handoff file is missing.",
+    fix: "Run codex-prep handoff."
+  },
+  "handoff-stale": {
+    id: "CP118",
+    defaultLevel: "warning",
+    description: "The agent handoff file no longer matches current repo workflow state.",
+    fix: "Run codex-prep handoff."
+  },
+  "plan-missing": {
     id: "CP201",
     defaultLevel: "error",
     description: "No active saved plan exists.",
@@ -236,7 +267,7 @@ export const RULES = {
     id: "CP211",
     defaultLevel: "warning",
     description: "The plan does not name a target agent or editor surface.",
-    fix: "Add --target-agent codex, cursor, claude-code, or generic."
+    fix: "Add --target-agent codex, cursor, claude-code, jan, ollama, or generic."
   },
   "plan-validation-ignores-detected-commands": {
     id: "CP212",

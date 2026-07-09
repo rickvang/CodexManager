@@ -1,5 +1,8 @@
 import path from "node:path";
 import {
+  adapterApplyCommand,
+  adapterPlanCommand,
+  adaptersCommand,
   applyCommand,
   checkCommand,
   doctorCommand,
@@ -7,6 +10,7 @@ import {
   graphCommand,
   graphExportCommand,
   graphQueryCommand,
+  handoffCommand,
   lintCommand,
   localIgnoreCommand,
   orientCommand,
@@ -33,6 +37,10 @@ const COMMANDS = new Set([
   "plan-status",
   "status",
   "doctor",
+  "adapters",
+  "adapter-plan",
+  "adapter-apply",
+  "handoff",
   "local-ignore",
   "validation-record",
   "plan-attach",
@@ -116,6 +124,14 @@ export async function runCli(argv) {
     await statusCommand(common);
   } else if (command === "doctor") {
     await doctorCommand(common);
+  } else if (command === "adapters") {
+    await adaptersCommand(common);
+  } else if (command === "adapter-plan") {
+    await adapterPlanCommand({ ...common, target: options.target, profile: options.profile });
+  } else if (command === "adapter-apply") {
+    await adapterApplyCommand({ ...common, target: options.target, profile: options.profile });
+  } else if (command === "handoff") {
+    await handoffCommand(common);
   } else if (command === "local-ignore") {
     await localIgnoreCommand(common);
   } else if (command === "validation-record") {
@@ -187,6 +203,8 @@ function parseArgs(argv) {
     approvalBoundaries: [],
     riskLevel: undefined,
     targetAgent: undefined,
+    target: undefined,
+    profile: undefined,
     symbol: undefined,
     task: undefined,
     limit: undefined,
@@ -278,6 +296,12 @@ function parseArgs(argv) {
       i += 1;
     } else if (value === "--target-agent") {
       options.targetAgent = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--target") {
+      options.target = readOptionValue(argv, i, value);
+      i += 1;
+    } else if (value === "--profile") {
+      options.profile = readOptionValue(argv, i, value);
       i += 1;
     } else if (value === "--symbol") {
       options.symbol = readOptionValue(argv, i, value);
@@ -381,6 +405,12 @@ function validateOptions(command, options) {
   if (options.targetAgent && !planningCommands.includes(command)) {
     throw new Error("--target-agent is only supported for plan and plan-update");
   }
+  if (options.target && !["adapter-plan", "adapter-apply"].includes(command)) {
+    throw new Error("--target is only supported for adapter-plan and adapter-apply");
+  }
+  if (options.profile && !["adapter-plan", "adapter-apply"].includes(command)) {
+    throw new Error("--profile is only supported for adapter-plan and adapter-apply");
+  }
   if (options.symbol && command !== "graph-query") {
     throw new Error("--symbol is only supported for graph-query");
   }
@@ -439,6 +469,10 @@ Usage:
   codex-prep plan-status [--repo <path>] [--json]
   codex-prep status [--repo <path>] [--json]
   codex-prep doctor [--repo <path>] [--json]
+  codex-prep adapters [--json]
+  codex-prep adapter-plan [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
+  codex-prep adapter-apply [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
+  codex-prep handoff [--repo <path>] [--json]
   codex-prep local-ignore [--repo <path>] [--json]
   codex-prep validation-record [--repo <path>] --validation-command <command> --result <pass|fail> [--summary <text>] [--phase <name>] [--json]
   codex-prep plan-attach [--repo <path>] --note <text> [--json]
@@ -460,6 +494,11 @@ Commands:
   plan-status  Show the active saved plan.
   status       Show plan, branch, graph, dashboard, and validation state.
   doctor       Diagnose missing or stale workflow artifacts.
+  adapters     List supported agent adapter targets and their capabilities.
+  adapter-plan Preview Claude, Cursor, Jan, Ollama, and generic adapter outputs.
+  adapter-apply
+               Write selected multi-agent adapter outputs and adapter manifest.
+  handoff      Write docs/AGENT_HANDOFF.md for reconnect and resume state.
   local-ignore Install repo-local git exclude rules for codex-prep local state.
   validation-record
                Record an explicit validation result in local JSONL memory.
@@ -505,7 +544,9 @@ Planning options:
                   Append an approval boundary.
   --risk TEXT     Set plan risk: low, medium, or high.
   --target-agent TEXT
-                  Set target agent: codex, cursor, claude-code, or generic.
+                  Set target agent: codex, cursor, claude-code, jan, ollama, or generic.
+  --target TEXT  Adapter target for adapter-plan or adapter-apply: all, claude-code, cursor, jan, ollama, or generic.
+  --profile TEXT Adapter context profile: short, standard, or deep.
   --symbol TEXT   Symbol name for graph-query.
   --task TEXT     Task description for orient.
   --limit N       Limit orient or graph-query output. orient defaults to 8.
@@ -522,7 +563,7 @@ Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access unless plan-start --sync-base is used.
   local-ignore writes only .git/info/exclude and does not edit repo-tracked files.
-  scan, check, eval, lint, orient, graph-query, plan-review, and plan-lint do not edit repo-tracked files.
+  scan, adapters, adapter-plan, check, eval, lint, orient, graph-query, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);
 }

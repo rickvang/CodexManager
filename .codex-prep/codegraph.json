@@ -1,20 +1,20 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-09T13:44:22.414Z",
-  "fingerprint": "161bdd627755e322777c3ebe2cd4956e5cf3e416f9ea0b4a95e79f12a3a909f9",
+  "generatedAt": "2026-07-09T14:59:11.217Z",
+  "fingerprint": "1320283d603a204bce0657271bb38cf8855f9496f90bb6457309e5689411a69b",
   "repo": {
     "root": ".",
     "name": "CodexManager"
   },
   "summary": {
-    "fileCount": 24,
-    "edgeCount": 59,
-    "symbolCount": 390,
+    "fileCount": 26,
+    "edgeCount": 65,
+    "symbolCount": 438,
     "languages": [
       "JavaScript"
     ],
     "entrypointCount": 1,
-    "testRelationshipCount": 30
+    "testRelationshipCount": 32
   },
   "files": [
     {
@@ -35,9 +35,225 @@
       "relatedTests": []
     },
     {
+      "path": "src/adapters.js",
+      "language": "JavaScript",
+      "size": 19665,
+      "role": "source",
+      "confidence": "medium",
+      "imports": [
+        {
+          "specifier": "./generate.js",
+          "resolved": "src/generate.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:crypto",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [
+        {
+          "name": "ADAPTER_CAPABILITIES",
+          "kind": "variable",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "ADAPTER_TARGETS",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "ADAPTERS_MANIFEST_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "adapterSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildAdapterBundle",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildAdaptersManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildAdapterSourceFingerprint",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildClaudeFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildCursorFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildGenericFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildHandoffFile",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildHandoffMarkdown",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildHandoffSourceFingerprint",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "buildJanFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildOllamaFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildTargetFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "CONTEXT_PROFILES",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "contextProfileNotes",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "fingerprint",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "HANDOFF_PATH",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "handoffDirtyFiles",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "inline",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "internals",
+          "kind": "variable",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "listAdapters",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "listOrNone",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "managedFile",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "normalizeAdapterTargets",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "sameList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "sharedPrompt",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "shortSha",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "validateContextProfile",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        }
+      ],
+      "relatedTests": [
+        {
+          "path": "test/adapters.test.js",
+          "confidence": "medium",
+          "reason": "Source and test file names match."
+        }
+      ]
+    },
+    {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 20261,
+      "size": 22279,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -578,10 +794,16 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 56468,
+      "size": 64389,
       "role": "source",
       "confidence": "medium",
       "imports": [
+        {
+          "specifier": "./adapters.js",
+          "resolved": "src/adapters.js",
+          "kind": "local",
+          "confidence": "high"
+        },
         {
           "specifier": "./codegraph.js",
           "resolved": "src/codegraph.js",
@@ -681,6 +903,30 @@
           "confidence": "medium"
         },
         {
+          "name": "adapterApplyCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "adapterPlanCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "adaptersCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "appendAdapterCheckFindings",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "appendUnique",
           "kind": "function",
           "exported": false,
@@ -700,6 +946,18 @@
         },
         {
           "name": "assumePostApplyState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "assumePostHandoffState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "buildAdapterResult",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -825,6 +1083,24 @@
           "confidence": "medium"
         },
         {
+          "name": "formatAdapterApply",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatAdapterPlan",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatAdaptersList",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "formatApply",
           "kind": "function",
           "exported": false,
@@ -874,6 +1150,12 @@
         },
         {
           "name": "formatGraphRefresh",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "formatHandoff",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -994,6 +1276,12 @@
         },
         {
           "name": "graphQueryCommand",
+          "kind": "function",
+          "exported": true,
+          "confidence": "high"
+        },
+        {
+          "name": "handoffCommand",
           "kind": "function",
           "exported": true,
           "confidence": "high"
@@ -1161,6 +1449,12 @@
           "confidence": "medium"
         },
         {
+          "name": "readPreviousAdaptersManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "readPreviousCodeGraph",
           "kind": "function",
           "exported": false,
@@ -1288,6 +1582,11 @@
         }
       ],
       "relatedTests": [
+        {
+          "path": "test/adapters.test.js",
+          "confidence": "high",
+          "reason": "Test file imports source file."
+        },
         {
           "path": "test/codegraph.test.js",
           "confidence": "high",
@@ -1503,7 +1802,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 13193,
+      "size": 14559,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1515,6 +1814,12 @@
         }
       ],
       "symbols": [
+        {
+          "name": "adapterStateSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
         {
           "name": "buildAgents",
           "kind": "function",
@@ -1576,6 +1881,12 @@
           "confidence": "medium"
         },
         {
+          "name": "handoffStateSummary",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "inlineValue",
           "kind": "function",
           "exported": false,
@@ -1611,10 +1922,16 @@
     {
       "path": "src/lint.js",
       "language": "JavaScript",
-      "size": 7964,
+      "size": 8970,
       "role": "source",
       "confidence": "medium",
       "imports": [
+        {
+          "specifier": "./adapters.js",
+          "resolved": "src/adapters.js",
+          "kind": "local",
+          "confidence": "high"
+        },
         {
           "specifier": "./config.js",
           "resolved": "src/config.js",
@@ -1682,6 +1999,12 @@
           "kind": "variable",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "lintAdaptersManifest",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "lintContentSafety",
@@ -2336,7 +2659,7 @@
     {
       "path": "src/rules.js",
       "language": "JavaScript",
-      "size": 11462,
+      "size": 12560,
       "role": "source",
       "confidence": "medium",
       "imports": [],
@@ -2604,10 +2927,16 @@
     {
       "path": "src/state.js",
       "language": "JavaScript",
-      "size": 14654,
+      "size": 19283,
       "role": "source",
       "confidence": "medium",
       "imports": [
+        {
+          "specifier": "./adapters.js",
+          "resolved": "src/adapters.js",
+          "kind": "local",
+          "confidence": "high"
+        },
         {
           "specifier": "./codegraph.js",
           "resolved": "src/codegraph.js",
@@ -2761,6 +3090,12 @@
           "confidence": "medium"
         },
         {
+          "name": "readAdapterState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "readGeneratedState",
           "kind": "function",
           "exported": false,
@@ -2771,6 +3106,12 @@
           "kind": "function",
           "exported": true,
           "confidence": "high"
+        },
+        {
+          "name": "readHandoffState",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
         },
         {
           "name": "readSavedGraphState",
@@ -2830,9 +3171,56 @@
       ]
     },
     {
+      "path": "test/adapters.test.js",
+      "language": "JavaScript",
+      "size": 4385,
+      "role": "test",
+      "confidence": "high",
+      "imports": [
+        {
+          "specifier": "../src/commands.js",
+          "resolved": "src/commands.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "./helpers.js",
+          "resolved": "test/helpers.js",
+          "kind": "local",
+          "confidence": "high"
+        },
+        {
+          "specifier": "node:assert/strict",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:fs/promises",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:path",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        },
+        {
+          "specifier": "node:test",
+          "resolved": null,
+          "kind": "external",
+          "confidence": "medium"
+        }
+      ],
+      "symbols": [],
+      "relatedTests": []
+    },
+    {
       "path": "test/cli.test.js",
       "language": "JavaScript",
-      "size": 3629,
+      "size": 4357,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -2986,7 +3374,7 @@
     {
       "path": "test/generate.test.js",
       "language": "JavaScript",
-      "size": 2050,
+      "size": 2207,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -3500,6 +3888,13 @@
       "confidence": "high"
     },
     {
+      "from": "src/adapters.js",
+      "to": "src/generate.js",
+      "kind": "imports",
+      "specifier": "./generate.js",
+      "confidence": "high"
+    },
+    {
       "from": "src/cli.js",
       "to": "src/commands.js",
       "kind": "imports",
@@ -3518,6 +3913,13 @@
       "to": "src/scan.js",
       "kind": "imports",
       "specifier": "./scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/commands.js",
+      "to": "src/adapters.js",
+      "kind": "imports",
+      "specifier": "./adapters.js",
       "confidence": "high"
     },
     {
@@ -3606,6 +4008,13 @@
     },
     {
       "from": "src/lint.js",
+      "to": "src/adapters.js",
+      "kind": "imports",
+      "specifier": "./adapters.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/lint.js",
       "to": "src/config.js",
       "kind": "imports",
       "specifier": "./config.js",
@@ -3662,6 +4071,13 @@
     },
     {
       "from": "src/state.js",
+      "to": "src/adapters.js",
+      "kind": "imports",
+      "specifier": "./adapters.js",
+      "confidence": "high"
+    },
+    {
+      "from": "src/state.js",
       "to": "src/codegraph.js",
       "kind": "imports",
       "specifier": "./codegraph.js",
@@ -3693,6 +4109,20 @@
       "to": "src/scan.js",
       "kind": "imports",
       "specifier": "./scan.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/adapters.test.js",
+      "to": "src/commands.js",
+      "kind": "imports",
+      "specifier": "../src/commands.js",
+      "confidence": "high"
+    },
+    {
+      "from": "test/adapters.test.js",
+      "to": "test/helpers.js",
+      "kind": "imports",
+      "specifier": "./helpers.js",
       "confidence": "high"
     },
     {
@@ -3907,6 +4337,223 @@
     }
   ],
   "symbols": [
+    {
+      "name": "ADAPTER_CAPABILITIES",
+      "kind": "variable",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "ADAPTER_TARGETS",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "ADAPTERS_MANIFEST_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "adapterSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildAdapterBundle",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildAdaptersManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildAdapterSourceFingerprint",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildClaudeFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildCursorFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildGenericFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildHandoffFile",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildHandoffMarkdown",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildHandoffSourceFingerprint",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildJanFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildOllamaFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "buildTargetFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "CONTEXT_PROFILES",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "contextProfileNotes",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "fingerprint",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "HANDOFF_PATH",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "handoffDirtyFiles",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "inline",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "internals",
+      "kind": "variable",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "listAdapters",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "listOrNone",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "managedFile",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "normalizeAdapterTargets",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "sameList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "sharedPrompt",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "shortSha",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/adapters.js"
+    },
+    {
+      "name": "validateContextProfile",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/adapters.js"
+    },
     {
       "name": "COMMANDS",
       "kind": "variable",
@@ -4433,6 +5080,34 @@
       "file": "src/commands.js"
     },
     {
+      "name": "adapterApplyCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "adapterPlanCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "adaptersCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "appendAdapterCheckFindings",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "appendUnique",
       "kind": "function",
       "exported": false,
@@ -4455,6 +5130,20 @@
     },
     {
       "name": "assumePostApplyState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "assumePostHandoffState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "buildAdapterResult",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4601,6 +5290,27 @@
       "file": "src/commands.js"
     },
     {
+      "name": "formatAdapterApply",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatAdapterPlan",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatAdaptersList",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "formatApply",
       "kind": "function",
       "exported": false,
@@ -4658,6 +5368,13 @@
     },
     {
       "name": "formatGraphRefresh",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "formatHandoff",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -4798,6 +5515,13 @@
     },
     {
       "name": "graphQueryCommand",
+      "kind": "function",
+      "exported": true,
+      "confidence": "high",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "handoffCommand",
       "kind": "function",
       "exported": true,
       "confidence": "high",
@@ -4987,6 +5711,13 @@
     },
     {
       "name": "readCodeGraphForCheck",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "readPreviousAdaptersManifest",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -5280,6 +6011,13 @@
       "file": "src/fs-utils.js"
     },
     {
+      "name": "adapterStateSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
       "name": "buildAgents",
       "kind": "function",
       "exported": false,
@@ -5350,6 +6088,13 @@
       "file": "src/generate.js"
     },
     {
+      "name": "handoffStateSummary",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/generate.js"
+    },
+    {
       "name": "inlineValue",
       "kind": "function",
       "exported": false,
@@ -5410,6 +6155,13 @@
       "kind": "variable",
       "exported": true,
       "confidence": "high",
+      "file": "src/lint.js"
+    },
+    {
+      "name": "lintAdaptersManifest",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/lint.js"
     },
     {
@@ -6428,6 +7180,13 @@
       "file": "src/state.js"
     },
     {
+      "name": "readAdapterState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/state.js"
+    },
+    {
       "name": "readGeneratedState",
       "kind": "function",
       "exported": false,
@@ -6439,6 +7198,13 @@
       "kind": "function",
       "exported": true,
       "confidence": "high",
+      "file": "src/state.js"
+    },
+    {
+      "name": "readHandoffState",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
       "file": "src/state.js"
     },
     {
@@ -6647,6 +7413,13 @@
     },
     {
       "kind": "tested-by",
+      "source": "src/adapters.js",
+      "test": "test/adapters.test.js",
+      "confidence": "medium",
+      "reason": "Source and test file names match."
+    },
+    {
+      "kind": "tested-by",
       "source": "src/cli.js",
       "test": "test/cli.test.js",
       "confidence": "high",
@@ -6705,6 +7478,13 @@
       "kind": "tested-by",
       "source": "src/codegraph.js",
       "test": "test/obsidian-export.test.js",
+      "confidence": "high",
+      "reason": "Test file imports source file."
+    },
+    {
+      "kind": "tested-by",
+      "source": "src/commands.js",
+      "test": "test/adapters.test.js",
       "confidence": "high",
       "reason": "Test file imports source file."
     },
@@ -6859,17 +7639,17 @@
   "evidence": [
     {
       "confidence": "high",
-      "fact": "Indexed 24 code files",
+      "fact": "Indexed 26 code files",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 59 local import edges",
+      "fact": "Detected 65 local import edges",
       "source": ".codex-prep/codegraph.json"
     },
     {
       "confidence": "medium",
-      "fact": "Detected 390 symbols",
+      "fact": "Detected 438 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

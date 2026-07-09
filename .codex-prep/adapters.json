@@ -1,0 +1,163 @@
+{
+  "schemaVersion": 1,
+  "kind": "codex-prep-adapters",
+  "generatedAt": "2026-07-09T14:59:23.048Z",
+  "sourceFingerprint": "554d7bb9e9cb6162876afee242ef63ec423c5c36b80872ff1936f9aab9f0d243",
+  "contextProfile": "standard",
+  "targets": [
+    {
+      "name": "claude-code",
+      "label": "Claude Code",
+      "surface": "repo memory and rules",
+      "capabilities": {
+        "repoRules": true,
+        "pathRules": true,
+        "promptPack": false,
+        "mcpReady": false,
+        "localApi": false,
+        "modelRuntime": false
+      },
+      "files": [
+        "CLAUDE.md",
+        ".claude/rules/codexmanager-workflow.md"
+      ]
+    },
+    {
+      "name": "cursor",
+      "label": "Cursor",
+      "surface": "project rules",
+      "capabilities": {
+        "repoRules": true,
+        "pathRules": true,
+        "promptPack": false,
+        "mcpReady": false,
+        "localApi": false,
+        "modelRuntime": false
+      },
+      "files": [
+        ".cursor/rules/codexmanager-workflow.mdc",
+        ".cursor/rules/graph-first-orientation.mdc",
+        ".cursor/rules/review-validation.mdc"
+      ]
+    },
+    {
+      "name": "jan",
+      "label": "Jan",
+      "surface": "local assistant prompt pack",
+      "capabilities": {
+        "repoRules": false,
+        "pathRules": false,
+        "promptPack": true,
+        "mcpReady": true,
+        "localApi": true,
+        "modelRuntime": true
+      },
+      "files": [
+        "docs/agent-adapters/jan/README.md",
+        "docs/agent-adapters/jan/system-prompt.md"
+      ]
+    },
+    {
+      "name": "ollama",
+      "label": "Ollama",
+      "surface": "local model prompt pack",
+      "capabilities": {
+        "repoRules": false,
+        "pathRules": false,
+        "promptPack": true,
+        "mcpReady": false,
+        "localApi": true,
+        "modelRuntime": true
+      },
+      "files": [
+        "docs/agent-adapters/ollama/system-prompt.md",
+        "docs/agent-adapters/ollama/Modelfile"
+      ]
+    },
+    {
+      "name": "generic",
+      "label": "Generic agent",
+      "surface": "portable markdown prompt pack",
+      "capabilities": {
+        "repoRules": false,
+        "pathRules": false,
+        "promptPack": true,
+        "mcpReady": false,
+        "localApi": false,
+        "modelRuntime": false
+      },
+      "files": [
+        "docs/agent-adapters/generic/README.md",
+        "docs/agent-adapters/generic/system-prompt.md"
+      ]
+    }
+  ],
+  "generatedFiles": [
+    {
+      "path": "CLAUDE.md",
+      "target": "claude-code",
+      "managed": true,
+      "fingerprint": "873257aaaff815797ac1580d25b5ec48022a2151b6592572deeb977119d2baf8"
+    },
+    {
+      "path": ".claude/rules/codexmanager-workflow.md",
+      "target": "claude-code",
+      "managed": true,
+      "fingerprint": "fe97c7d67d1f8c3c17e0cb43297f05b5bac2d5e33b8e29c9a8ec3677af9545aa"
+    },
+    {
+      "path": ".cursor/rules/codexmanager-workflow.mdc",
+      "target": "cursor",
+      "managed": true,
+      "fingerprint": "44dbabc29bca8e33dadcef1766b1ad6e3539ddb4632787bed1c1931391740ca8"
+    },
+    {
+      "path": ".cursor/rules/graph-first-orientation.mdc",
+      "target": "cursor",
+      "managed": true,
+      "fingerprint": "58a937a92d59e8aeb90f4446b897afae0b035e5032c57d83950678a216894c9b"
+    },
+    {
+      "path": ".cursor/rules/review-validation.mdc",
+      "target": "cursor",
+      "managed": true,
+      "fingerprint": "26ae073be9d944be380e692479dd2c0014b2adba59b92b89f0e26d3bd63fe5e0"
+    },
+    {
+      "path": "docs/agent-adapters/jan/README.md",
+      "target": "jan",
+      "managed": true,
+      "fingerprint": "0b754b6aa5e119e5687fad5fc9c5e1ce688e3d3f2240af044b6c6995063939e8"
+    },
+    {
+      "path": "docs/agent-adapters/jan/system-prompt.md",
+      "target": "jan",
+      "managed": true,
+      "fingerprint": "6dfeef466337cf43662ec88634d300ecadbea671ffc352c2bca9f07e6f0e006c"
+    },
+    {
+      "path": "docs/agent-adapters/ollama/system-prompt.md",
+      "target": "ollama",
+      "managed": true,
+      "fingerprint": "3a74496063345faa9f86ec1ad10d6be5ec9d0cece26e78562a23ce73070d3b0f"
+    },
+    {
+      "path": "docs/agent-adapters/ollama/Modelfile",
+      "target": "ollama",
+      "managed": true,
+      "fingerprint": "e6176cd8666b13d8d8647de2b78b4c6a442d7cdb69edb67dee97f1de7b69a004"
+    },
+    {
+      "path": "docs/agent-adapters/generic/README.md",
+      "target": "generic",
+      "managed": true,
+      "fingerprint": "4ff72add340c1b93e9825596402dea0167d1fccafc1cd884363633615609d38e"
+    },
+    {
+      "path": "docs/agent-adapters/generic/system-prompt.md",
+      "target": "generic",
+      "managed": true,
+      "fingerprint": "417cf968e7b5e7a8561e271e1031086b109096f1b516476aa8de2ce7185c2b82"
+    }
+  ]
+}

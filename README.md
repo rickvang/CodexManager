@@ -19,6 +19,10 @@ node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
 node ./bin/codex-prep.js status
 node ./bin/codex-prep.js doctor
+node ./bin/codex-prep.js adapters
+node ./bin/codex-prep.js adapter-plan --target all
+node ./bin/codex-prep.js adapter-apply --target all
+node ./bin/codex-prep.js handoff
 node ./bin/codex-prep.js local-ignore
 node ./bin/codex-prep.js validation-record --validation-command "npm run verify" --result pass --summary "verify passed"
 node ./bin/codex-prep.js plan-attach --note "Attached current branch to active plan"
@@ -52,6 +56,10 @@ From this repo, run:
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
 .\codex-prep.cmd status --repo D:\path\to\repo
 .\codex-prep.cmd doctor --repo D:\path\to\repo
+.\codex-prep.cmd adapters
+.\codex-prep.cmd adapter-plan --repo D:\path\to\repo --target all
+.\codex-prep.cmd adapter-apply --repo D:\path\to\repo --target all
+.\codex-prep.cmd handoff --repo D:\path\to\repo
 .\codex-prep.cmd local-ignore --repo D:\path\to\repo
 .\codex-prep.cmd validation-record --repo D:\path\to\repo --validation-command "npm run verify" --result pass --summary "verify passed"
 .\codex-prep.cmd plan-attach --repo D:\path\to\repo --note "Attached current branch to active plan"
@@ -85,6 +93,29 @@ npm.cmd link
 codex-prep scan --repo D:\path\to\repo
 ```
 
+
+## Multi-Agent Adapters
+
+CodexManager can project its repo knowledge into other agent surfaces without making those surfaces the source of truth.
+
+```powershell
+D:\codexmanager\codex-prep.cmd adapters
+D:\codexmanager\codex-prep.cmd adapter-plan --repo D:\path\to\repo --target all
+D:\codexmanager\codex-prep.cmd adapter-apply --repo D:\path\to\repo --target all
+D:\codexmanager\codex-prep.cmd handoff --repo D:\path\to\repo
+```
+
+`adapter-plan` is read-only. `adapter-apply` writes target-specific adapter files and `.codex-prep/adapters.json`. `handoff` writes `docs/AGENT_HANDOFF.md` so a fresh agent can reconnect, see the active plan/branch/validation state, and know the next safe command.
+
+Supported adapter targets:
+
+- `claude-code`: `CLAUDE.md` plus `.claude/rules/` workflow guidance.
+- `cursor`: `.cursor/rules/*.mdc` project rules.
+- `jan`: Markdown prompt pack under `docs/agent-adapters/jan/`.
+- `ollama`: Markdown prompt pack plus a template `Modelfile` under `docs/agent-adapters/ollama/`.
+- `generic`: portable Markdown prompt pack for tools that can consume text but have no native repo-rule format.
+
+Use `--profile short`, `--profile standard`, or `--profile deep` to control how much repo context the generated adapter prompt includes. Adapter files are projections of `AGENTS.md`, `docs/CODEBASE_MAP.md`, the local code graph, and CodexManager state; when those inputs change, run `codex-prep check` and refresh stale adapters or handoff files.
 ## Development Loop
 
 Before committing local changes, run the finite verification gate:

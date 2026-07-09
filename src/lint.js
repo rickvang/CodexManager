@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { ADAPTERS_MANIFEST_PATH } from "./adapters.js";
 import { compilePatterns, CONFIG_PATH, readConfig } from "./config.js";
 import { MANAGED_BEGIN, MANAGED_END, fileExists } from "./fs-utils.js";
 import { MANAGED_FILES } from "./generate.js";
@@ -33,6 +34,7 @@ export async function lintRepo(root) {
   }
 
   await lintManifest(root, findings, config, stalePathPatterns, secretPatterns);
+  await lintAdaptersManifest(root, findings, config, stalePathPatterns, secretPatterns);
   await lintSkill(root, ".agents/skills/repo-onboarding/SKILL.md", findings, config);
   await lintSkill(root, ".agents/skills/code-review/SKILL.md", findings, config);
 
@@ -117,6 +119,32 @@ async function lintManifest(root, findings, config, stalePathPatterns, secretPat
   lintContentSafety(filePath, JSON.stringify(manifest), findings, config, stalePathPatterns, secretPatterns);
 }
 
+
+async function lintAdaptersManifest(root, findings, config, stalePathPatterns, secretPatterns) {
+  const absolutePath = path.join(root, ADAPTERS_MANIFEST_PATH);
+  if (!(await fileExists(absolutePath))) {
+    return;
+  }
+
+  let manifest;
+  try {
+    manifest = JSON.parse(await fs.readFile(absolutePath, "utf8"));
+  } catch (error) {
+    pushFinding(findings, config, "invalid-adapters-json", {
+      file: ADAPTERS_MANIFEST_PATH,
+      message: "adapter manifest JSON is invalid: " + error.message
+    });
+    return;
+  }
+
+  for (const file of manifest.generatedFiles ?? []) {
+    if (file?.path && file.managed === true) {
+      await lintManagedFile(root, file.path, findings, config, stalePathPatterns, secretPatterns);
+    }
+  }
+
+  lintContentSafety(ADAPTERS_MANIFEST_PATH, JSON.stringify(manifest), findings, config, stalePathPatterns, secretPatterns);
+}
 async function readManifest(absolutePath, findings, config, filePath) {
   if (!(await fileExists(absolutePath))) {
     pushFinding(findings, config, "missing-manifest", { file: filePath, message: "manifest is missing" });
