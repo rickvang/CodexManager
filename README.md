@@ -19,7 +19,7 @@ node ./bin/codex-prep.js plan-update --note "User clarified the scope"
 node ./bin/codex-prep.js plan-status
 node ./bin/codex-prep.js status
 node ./bin/codex-prep.js doctor
-node ./bin/codex-prep.js prepare --target all
+node ./bin/codex-prep.js prepare
 node ./bin/codex-prep.js refresh
 node ./bin/codex-prep.js refresh --auto
 node ./bin/codex-prep.js preflight
@@ -55,7 +55,7 @@ Use `--repo <path>` to target another repository and `--json` for machine-readab
 CodexManager now keeps the Cursor-like loop in the CLI instead of a VS Code extension:
 
 ```powershell
-codex-prep prepare --repo D:\path\to\repo --target all
+codex-prep prepare --repo D:\path\to\repo
 codex-prep status --repo D:\path\to\repo
 codex-prep orient --repo D:\path\to\repo --task "change login validation" --profile standard
 codex-prep preflight --repo D:\path\to\repo
@@ -63,7 +63,7 @@ codex-prep refresh --repo D:\path\to\repo
 codex-prep refresh --repo D:\path\to\repo --auto
 ```
 
-`prepare`/`bootstrap` performs first-time setup: local ignore rules, `apply`, Obsidian graph export, multi-agent adapters, and handoff. `refresh` is read-only and previews stale generated state; `refresh --auto` applies those updates after edits are authorized. `preflight` is read-only and connects changed files to likely tests, validation freshness, stale generated state, and next actions.
+`prepare`/`bootstrap` performs first-time core setup: local ignore rules, `apply`, Obsidian graph export, and handoff. It does not generate external agent adapters unless `--target` is supplied. `refresh` is read-only and previews stale generated state; `refresh --auto` applies those updates after edits are authorized. `refresh` only proposes adapter updates when adapter files already exist or `--target` is supplied. `preflight` is read-only and connects changed files to likely tests, validation freshness, stale generated state, and next actions.
 
 ## Windows Usage
 
@@ -75,7 +75,7 @@ From this repo, run:
 .\codex-prep.cmd plan-status --repo D:\path\to\repo
 .\codex-prep.cmd status --repo D:\path\to\repo
 .\codex-prep.cmd doctor --repo D:\path\to\repo
-.\codex-prep.cmd prepare --repo D:\path\to\repo --target all
+.\codex-prep.cmd prepare --repo D:\path\to\repo
 .\codex-prep.cmd refresh --repo D:\path\to\repo
 .\codex-prep.cmd refresh --repo D:\path\to\repo --auto
 .\codex-prep.cmd preflight --repo D:\path\to\repo
@@ -138,7 +138,8 @@ Supported adapter targets:
 - `ollama`: Markdown prompt pack plus a template `Modelfile` under `docs/agent-adapters/ollama/`.
 - `generic`: portable Markdown prompt pack for tools that can consume text but have no native repo-rule format.
 
-Use `--profile short`, `--profile standard`, or `--profile deep` to control how much repo context the generated adapter prompt includes. Cursor output is split into scoped `.cursor/rules/*.mdc` files for workflow safety, graph-first orientation, review/validation, and generated state. Adapter files are projections of `AGENTS.md`, `docs/CODEBASE_MAP.md`, the local code graph, and CodexManager state; when those inputs change, run `codex-prep refresh` to preview updates or `codex-prep refresh --auto` after file changes are authorized.
+Use `--profile short`, `--profile standard`, or `--profile deep` to control how much repo context the generated adapter prompt includes. Cursor output is split into scoped `.cursor/rules/*.mdc` files for workflow safety, graph-first orientation, review/validation, and generated state. Adapter files are opt-in projections of `AGENTS.md`, `docs/CODEBASE_MAP.md`, the local code graph, and CodexManager state. To include adapters during setup, run `codex-prep prepare --target all`; otherwise run `codex-prep adapter-apply --target all` later. When adapter inputs change, run `codex-prep refresh --target all` to preview updates or `codex-prep refresh --auto --target all` after file changes are authorized.
+
 ## Development Loop
 
 Before committing local changes, run the finite verification gate:

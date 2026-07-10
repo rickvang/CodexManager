@@ -669,8 +669,9 @@ async function writeHandoffResult(root) {
     writes: [{ path: file.path, changed: write.changed, mode: file.mode }]
   };
 }
-export async function prepareCommand({ root, json, target = "all", profile = "standard" }) {
-  const contextProfile = validateContextProfile(profile);
+export async function prepareCommand({ root, json, target, profile = "standard" }) {
+  const adapterTarget = normalizeOptionalAdapterTarget(target);
+  const contextProfile = adapterTarget ? validateContextProfile(profile) : "core";
   const operations = [];
 
   const localIgnore = await ensureLocalStateIgnored(root);
@@ -682,13 +683,15 @@ export async function prepareCommand({ root, json, target = "all", profile = "st
   });
   operations.push(await runLifecycleOperation("apply", "codex-prep apply", "Write the base CodexManager onboarding bundle, manifest, dashboard, and code graph.", () => writeApplyResult(root)));
   operations.push(await runLifecycleOperation("graph-export", "codex-prep graph-export --format obsidian", "Write the Obsidian workflow/code graph adapter from the current graph.", () => writeGraphExportResult(root, { format: "obsidian", includeSymbols: false })));
-  operations.push(await runLifecycleOperation("adapter-apply", `codex-prep adapter-apply --target ${target} --profile ${contextProfile}`, "Write selected multi-agent adapter files.", () => writeAdapterApplyResult(root, { target, profile: contextProfile })));
+  if (adapterTarget) {
+    operations.push(await runLifecycleOperation("adapter-apply", `codex-prep adapter-apply --target ${adapterTarget} --profile ${contextProfile}`, "Write selected multi-agent adapter files.", () => writeAdapterApplyResult(root, { target: adapterTarget, profile: contextProfile })));
+  }
   operations.push(await runLifecycleOperation("handoff", "codex-prep handoff", "Write a reconnect/resume packet after generated state is current.", () => writeHandoffResult(root)));
 
   const state = await buildControlState(root);
   const result = {
     repo: state.repo,
-    target,
+    target: adapterTarget || "core",
     profile: contextProfile,
     operations,
     status: buildStatusResult(state),
@@ -704,15 +707,16 @@ export async function prepareCommand({ root, json, target = "all", profile = "st
   return result;
 }
 
-export async function refreshCommand({ root, json, auto = false, target = "all", profile = "standard" }) {
-  const contextProfile = validateContextProfile(profile);
+export async function refreshCommand({ root, json, auto = false, target, profile = "standard" }) {
+  const requestedTarget = normalizeOptionalAdapterTarget(target);
   const state = await buildControlState(root);
-  const proposed = buildRefreshPlan(state, { target, profile: contextProfile });
+  const adapterOptions = resolveRefreshAdapterOptions(state, { target: requestedTarget, profile });
+  const proposed = buildRefreshPlan(state, adapterOptions);
   const operations = [];
 
   if (auto) {
     for (const item of proposed.operations) {
-      operations.push(await runRefreshOperation(root, item, { target, profile: contextProfile }));
+      operations.push(await runRefreshOperation(root, item, adapterOptions));
     }
   }
 
@@ -748,6 +752,32 @@ export async function preflightCommand({ root, json }) {
 
   console.log(formatPreflight(result));
   return result;
+}
+
+function normalizeOptionalAdapterTarget(target) {
+  if (target === undefined || target === null || String(target).trim() === "") {
+    return "";
+  }
+  return String(target).trim();
+}
+
+function resolveRefreshAdapterOptions(state, { target, profile = "standard" } = {}) {
+  if (target) {
+    return { target, profile: validateContextProfile(profile) };
+  }
+  if (!state.adapters?.exists) {
+    return { target: "", profile: "core" };
+  }
+
+  const existingTarget = state.adapters.targets?.length > 0 ? state.adapters.targets.join(",") : "all";
+  let existingProfile = state.adapters.contextProfile || "standard";
+  try {
+    existingProfile = validateContextProfile(existingProfile);
+  } catch {
+    existingProfile = validateContextProfile(profile);
+  }
+
+  return { target: existingTarget, profile: existingProfile };
 }
 
 async function runLifecycleOperation(id, command, reason, callback) {
@@ -788,14 +818,15 @@ async function runRefreshOperation(root, item, options) {
   throw new Error(`unknown refresh operation ${item.id}`);
 }
 
-function buildRefreshPlan(state, { target = "all", profile = "standard" } = {}) {
+function buildRefreshPlan(state, { target, profile = "standard" } = {}) {
   const missingManaged = state.generated.files.filter((file) => !file.exists).map((file) => file.path);
   const adapterFilesMissing = (state.adapters.generatedFiles ?? []).filter((file) => !file.exists).map((file) => file.path);
   const applyNeeded = !state.manifest.exists || state.manifest.stale || missingManaged.length > 0 || !state.generated.dashboard.exists;
   const graphNeeded = !applyNeeded && (!state.graph.exists || state.graph.invalid || state.graph.stale);
   const graphWillChange = applyNeeded || graphNeeded;
   const obsidianNeeded = !state.generated.obsidian.exists || state.generated.obsidian.stale || graphWillChange;
-  const adapterNeeded = !state.adapters.exists || state.adapters.invalid || state.adapters.stale || adapterFilesMissing.length > 0 || graphWillChange;
+  const adapterOptIn = Boolean(target) || state.adapters.exists;
+  const adapterNeeded = adapterOptIn && (!state.adapters.exists || state.adapters.invalid || state.adapters.stale || adapterFilesMissing.length > 0 || graphWillChange);
   const handoffNeeded = !state.handoff.exists || state.handoff.stale || graphWillChange || adapterNeeded;
   const operations = [];
 
@@ -825,7 +856,7 @@ function buildRefreshPlan(state, { target = "all", profile = "standard" } = {}) 
     ])));
   }
   if (adapterNeeded) {
-    operations.push(refreshOperation("adapter-apply", `codex-prep adapter-apply --target ${target} --profile ${profile}`, refreshReason([
+    operations.push(refreshOperation("adapter-apply", `codex-prep adapter-apply --target ${target || "all"} --profile ${profile}`, refreshReason([
       !state.adapters.exists && "adapter manifest missing",
       state.adapters.invalid && "adapter manifest invalid",
       state.adapters.stale && "adapter output stale",

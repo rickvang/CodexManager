@@ -337,19 +337,41 @@ test("eval passes after apply for a conventional repo", async () => {
   process.exitCode = originalExitCode;
 });
 
-test("prepare writes the local-first lifecycle bundle without vscode files", async () => {
+test("prepare writes the core lifecycle bundle without external adapter files by default", async () => {
   const root = await createTempRepo(jsRepoFiles());
 
-  await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "short" }));
+  const result = await withMutedConsole(() => prepareCommand({ root, json: true }));
   const tree = await readTree(root);
 
+  assert.equal(result.target, "core");
+  assert.equal(result.operations.some((operation) => operation.id === "adapter-apply"), false);
   assert.equal(Boolean(tree["AGENTS.md"]), true);
   assert.equal(Boolean(tree["docs/codexmanager-dashboard.md"]), true);
   assert.equal(Boolean(tree[".codex-prep/codegraph.json"]), true);
   assert.equal(Boolean(tree["docs/obsidian-codegraph/Index.md"]), true);
+  assert.equal(Boolean(tree["docs/AGENT_HANDOFF.md"]), true);
+  assert.equal(Boolean(tree[".codex-prep/adapters.json"]), false);
+  assert.equal(Boolean(tree[".cursor/rules/codexmanager-workflow.mdc"]), false);
+  assert.equal(Boolean(tree[".cursor/rules/generated-state.mdc"]), false);
+  assert.equal(Boolean(tree[".vscode/tasks.json"]), false);
+  assert.equal(Boolean(tree[".vscode/extensions.json"]), false);
+});
+
+test("prepare writes external adapter files only when a target is supplied", async () => {
+  const root = await createTempRepo(jsRepoFiles());
+
+  const result = await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "short" }));
+  const tree = await readTree(root);
+
+  assert.equal(result.target, "cursor");
+  const adapterOperation = result.operations.find((operation) => operation.id === "adapter-apply");
+  assert.equal(Boolean(adapterOperation), true);
+  assert.equal(adapterOperation.command.includes("--target cursor"), true);
+  assert.equal(adapterOperation.command.includes("--profile short"), true);
+  assert.equal(Boolean(tree["AGENTS.md"]), true);
+  assert.equal(Boolean(tree[".codex-prep/adapters.json"]), true);
   assert.equal(Boolean(tree[".cursor/rules/codexmanager-workflow.mdc"]), true);
   assert.equal(Boolean(tree[".cursor/rules/generated-state.mdc"]), true);
-  assert.equal(Boolean(tree["docs/AGENT_HANDOFF.md"]), true);
   assert.equal(Boolean(tree[".vscode/tasks.json"]), false);
   assert.equal(Boolean(tree[".vscode/extensions.json"]), false);
 });
@@ -364,21 +386,25 @@ test("refresh previews stale generated state without writing", async () => {
   assert.deepEqual(omitGitInternal(after), omitGitInternal(before));
   assert.equal(result.auto, false);
   assert.equal(result.proposed.some((operation) => operation.id === "apply"), true);
+  assert.equal(result.proposed.some((operation) => operation.id === "adapter-apply"), false);
   assert.equal(result.operations.length, 0);
 });
 
-test("refresh --auto updates stale graph-backed artifacts", async () => {
+test("refresh --auto updates stale graph-backed artifacts and reuses existing adapter settings", async () => {
   const root = await createTempRepo(jsRepoFiles());
 
-  await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "standard" }));
+  await withMutedConsole(() => prepareCommand({ root, json: true, target: "cursor", profile: "short" }));
   await fs.writeFile(path.join(root, "src", "index.ts"), "export const answer = 43;\n", "utf8");
 
-  const result = await withMutedConsole(() => refreshCommand({ root, json: true, auto: true, target: "cursor", profile: "standard" }));
+  const result = await withMutedConsole(() => refreshCommand({ root, json: true, auto: true }));
   const tree = await readTree(root);
 
   assert.equal(result.operations.some((operation) => ["apply", "refresh-graph"].includes(operation.id)), true);
   assert.equal(result.operations.some((operation) => operation.id === "graph-export"), true);
-  assert.equal(result.operations.some((operation) => operation.id === "adapter-apply"), true);
+  const adapterOperation = result.operations.find((operation) => operation.id === "adapter-apply");
+  assert.equal(Boolean(adapterOperation), true);
+  assert.equal(adapterOperation.command.includes("--target cursor"), true);
+  assert.equal(adapterOperation.command.includes("--profile short"), true);
   assert.equal(result.operations.some((operation) => operation.id === "handoff"), true);
   assert.equal(JSON.parse(tree[".codex-prep/codegraph.json"]).repo.root, ".");
 });

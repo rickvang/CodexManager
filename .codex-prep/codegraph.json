@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-09T23:38:32.536Z",
-  "fingerprint": "b0708ac96cff1ce317321def79667c3dcf34b9b3772aba30ab87b29e021eaaef",
+  "generatedAt": "2026-07-10T00:01:07.638Z",
+  "fingerprint": "e7bf0ca3de5c3151c9cb59581a352bcf6696a384a47487717d250908a505e8bb",
   "repo": {
     "root": ".",
     "name": "CodexManager"
@@ -9,7 +9,7 @@
   "summary": {
     "fileCount": 26,
     "edgeCount": 65,
-    "symbolCount": 471,
+    "symbolCount": 473,
     "languages": [
       "JavaScript"
     ],
@@ -37,7 +37,7 @@
     {
       "path": "src/adapters.js",
       "language": "JavaScript",
-      "size": 21277,
+      "size": 21336,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -253,7 +253,7 @@
     {
       "path": "src/cli.js",
       "language": "JavaScript",
-      "size": 24198,
+      "size": 24395,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -812,7 +812,7 @@
     {
       "path": "src/commands.js",
       "language": "JavaScript",
-      "size": 80230,
+      "size": 81349,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -1401,6 +1401,12 @@
           "confidence": "high"
         },
         {
+          "name": "normalizeOptionalAdapterTarget",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
           "name": "normalizePlan",
           "kind": "function",
           "exported": false,
@@ -1582,6 +1588,12 @@
         },
         {
           "name": "refreshReason",
+          "kind": "function",
+          "exported": false,
+          "confidence": "medium"
+        },
+        {
+          "name": "resolveRefreshAdapterOptions",
           "kind": "function",
           "exported": false,
           "confidence": "medium"
@@ -1970,7 +1982,7 @@
     {
       "path": "src/generate.js",
       "language": "JavaScript",
-      "size": 15306,
+      "size": 15397,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -3095,7 +3107,7 @@
     {
       "path": "src/state.js",
       "language": "JavaScript",
-      "size": 21393,
+      "size": 21278,
       "role": "source",
       "confidence": "medium",
       "imports": [
@@ -3519,7 +3531,7 @@
     {
       "path": "test/commands.test.js",
       "language": "JavaScript",
-      "size": 16384,
+      "size": 17928,
       "role": "test",
       "confidence": "high",
       "imports": [
@@ -5860,6 +5872,13 @@
       "file": "src/commands.js"
     },
     {
+      "name": "normalizeOptionalAdapterTarget",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
       "name": "normalizePlan",
       "kind": "function",
       "exported": false,
@@ -6071,6 +6090,13 @@
     },
     {
       "name": "refreshReason",
+      "kind": "function",
+      "exported": false,
+      "confidence": "medium",
+      "file": "src/commands.js"
+    },
+    {
+      "name": "resolveRefreshAdapterOptions",
       "kind": "function",
       "exported": false,
       "confidence": "medium",
@@ -8079,7 +8105,7 @@
     },
     {
       "confidence": "medium",
-      "fact": "Detected 471 symbols",
+      "fact": "Detected 473 symbols",
       "source": ".codex-prep/codegraph.json"
     }
   ],

@@ -287,7 +287,7 @@ export function buildDoctorResult(state) {
     add("warn", "CM016", "No verify command was detected.", "Document a repo verification command or use the detected test/lint commands.");
   }
   if (!adapters.exists) {
-    add("warn", "CM017", "No multi-agent adapter manifest was found.", "Run codex-prep adapter-apply --target all when this repo should work in other agent surfaces.", ADAPTERS_MANIFEST_PATH);
+    // Adapter output is opt-in; missing adapters are not a workflow problem.
   } else if (adapters.invalid) {
     add("error", "CM018", ".codex-prep/adapters.json could not be parsed.", "Regenerate it with codex-prep adapter-apply --target all.", ADAPTERS_MANIFEST_PATH);
   } else if (adapters.stale) {

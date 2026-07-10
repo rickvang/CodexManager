@@ -519,7 +519,7 @@ Commands:
   plan-status  Show the active saved plan.
   status       Show plan, branch, graph, dashboard, and validation state.
   doctor       Diagnose missing or stale workflow artifacts.
-  prepare      Run first-time repo setup: local ignore, apply, graph export, adapters, and handoff.
+  prepare      Run first-time core repo setup: local ignore, apply, graph export, and handoff.
   bootstrap    Alias for prepare.
   refresh      Preview stale generated state, or update it with --auto.
   preflight    Show changed files, likely tests, stale state, validation freshness, and next actions.
@@ -575,8 +575,8 @@ Planning options:
   --risk TEXT     Set plan risk: low, medium, or high.
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, jan, ollama, or generic.
-  --target TEXT  Adapter target for adapter-plan, adapter-apply, prepare, or refresh: all, claude-code, cursor, jan, ollama, or generic.
-  --profile TEXT Context profile for adapters, prepare, refresh, or orient: short, standard, or deep.
+  --target TEXT  Adapter target for adapter-plan, adapter-apply, or opt-in prepare/refresh: all, claude-code, cursor, jan, ollama, or generic.
+  --profile TEXT Context profile for adapters, opt-in prepare/refresh adapters, or orient: short, standard, or deep.
   --symbol TEXT   Symbol name for graph-query.
   --task TEXT     Task description for orient.
   --limit N       Limit orient or graph-query output. orient defaults by profile: short 4, standard 8, deep 14.
@@ -594,6 +594,8 @@ Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access unless plan-start --sync-base is used.
   local-ignore writes only .git/info/exclude and does not edit repo-tracked files.
+  prepare does not write external agent adapter files unless --target is supplied.
+  refresh only proposes adapter updates when adapter files already exist or --target is supplied.
   scan, adapters, adapter-plan, check, eval, lint, orient, graph-query, refresh without --auto, preflight, review-diff, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "codex-prep-adapters",
-  "generatedAt": "2026-07-09T23:38:32.767Z",
-  "sourceFingerprint": "c988a47920dd92c613287f5a38bdc4a066697beb452c1bd78d044c9fa1833e40",
+  "generatedAt": "2026-07-10T00:01:07.876Z",
+  "sourceFingerprint": "79a192343cb79b760e9de710d75f4a3581682ad03a6df8ce88f3ece758d470df",
   "contextProfile": "standard",
   "targets": [
     {
@@ -98,7 +98,7 @@
       "path": "CLAUDE.md",
       "target": "claude-code",
       "managed": true,
-      "fingerprint": "675ecec0710db62e3aa53fb5cc18ff4466d59d38c491d7b3308a7758762e5e8f"
+      "fingerprint": "f00a3a389e808da23ab491866f881b477cfeeb98f323d55848192f2cc02efc8b"
     },
     {
       "path": ".claude/rules/codexmanager-workflow.md",
@@ -110,7 +110,7 @@
       "path": ".cursor/rules/codexmanager-workflow.mdc",
       "target": "cursor",
       "managed": true,
-      "fingerprint": "f8d1e2941cf9d8dd4f39a1b3cb4f2c6d72002dd53d5e16de5e0c03679bf111b7"
+      "fingerprint": "f47d4dbe33d6ed525c5635c709a28ab22207cd5e8406e8ddaa7a4bf51574dc86"
     },
     {
       "path": ".cursor/rules/graph-first-orientation.mdc",
@@ -140,19 +140,19 @@
       "path": "docs/agent-adapters/jan/system-prompt.md",
       "target": "jan",
       "managed": true,
-      "fingerprint": "bc3954a95c0bc2f367599e25c94376275ce9f31a8189f5d197494dca26a69ee6"
+      "fingerprint": "6f59b0602bb6e7f4d0a83d05ad6abe99600245e24d1d8dcd0545437264fbc153"
     },
     {
       "path": "docs/agent-adapters/ollama/system-prompt.md",
       "target": "ollama",
       "managed": true,
-      "fingerprint": "de35014b2810035fb051273fb6ddc5edab5c7a664ceb0f715637f7560556297b"
+      "fingerprint": "01f5a50c84c20ec562cc5bd404b56e23de0d0bdf50694d7feabf0a074bfdbbc8"
     },
     {
       "path": "docs/agent-adapters/ollama/Modelfile",
       "target": "ollama",
       "managed": true,
-      "fingerprint": "c5bde0e258aeb7eab711a3f9881e2d5047d19b33ca0ddee50fd62fe06c6f5ac0"
+      "fingerprint": "99934a83475c8c26611cb38fd3c0feab496b6890b6f9f4b68b1e5b6be18a48df"
     },
     {
       "path": "docs/agent-adapters/generic/README.md",
@@ -164,7 +164,7 @@
       "path": "docs/agent-adapters/generic/system-prompt.md",
       "target": "generic",
       "managed": true,
-      "fingerprint": "f0943880dfe5afe0c749cfabc77c4abc2c7b4d9bc4f24a3e6170e49d99db4025"
+      "fingerprint": "7392954eac322b275f9e102b92bfa9f90d319bd953703151ffda06cb3d1e6cb5"
     }
   ]
 }
