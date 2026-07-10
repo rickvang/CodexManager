@@ -1,0 +1,14 @@
+<!-- codex-prep:begin -->
+---
+alwaysApply: false
+description: Keep CodexManager generated state reviewable and refreshed when docs or generated artifacts change.
+globs: "{docs,.codex-prep,.agents,.cursor,.claude}/**/*"
+---
+
+# Generated State
+
+- Generated docs, adapter files, graph export, and handoff are projections of repo evidence.
+- Preview stale updates with codex-prep refresh.
+- Apply stale updates with codex-prep refresh --auto only when file changes are authorized.
+- Do not hand-edit managed sections unless the user explicitly asks for that local change.
+<!-- codex-prep:end -->

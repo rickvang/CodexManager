@@ -1,13 +1,14 @@
 <!-- codex-prep:begin -->
 ---
 alwaysApply: false
-description: Use graph-first orientation when locating files, symbols, entrypoints, or related tests.
-globs: "**/*"
+description: Use graph-first orientation when locating source files, symbols, imports, dependents, entrypoints, or related tests.
+globs: "{src,lib,app,packages,bin}/**/*"
 ---
 
 # Graph-First Orientation
 
 - Start with codex-prep orient --task "<task>".
+- Use --profile short for small fixes, standard for normal work, and deep for architecture or cross-cutting changes.
 - Follow the returned reading list before opening unrelated files.
 - Use codex-prep graph-query --file <path> for imports, dependents, symbols, and nearby tests.
 - Use codex-prep graph-query --symbol <name> when the task starts from an identifier.

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "kind": "codex-prep-adapters",
-  "generatedAt": "2026-07-09T14:59:23.048Z",
-  "sourceFingerprint": "554d7bb9e9cb6162876afee242ef63ec423c5c36b80872ff1936f9aab9f0d243",
+  "generatedAt": "2026-07-10T00:16:12.947Z",
+  "sourceFingerprint": "848ad6b5bebd7dc8a03a0efc090c8fa71dc443913d9a62c485d93bdf6f52f7a3",
   "contextProfile": "standard",
   "targets": [
     {
@@ -37,7 +37,8 @@
       "files": [
         ".cursor/rules/codexmanager-workflow.mdc",
         ".cursor/rules/graph-first-orientation.mdc",
-        ".cursor/rules/review-validation.mdc"
+        ".cursor/rules/review-validation.mdc",
+        ".cursor/rules/generated-state.mdc"
       ]
     },
     {
@@ -97,7 +98,7 @@
       "path": "CLAUDE.md",
       "target": "claude-code",
       "managed": true,
-      "fingerprint": "873257aaaff815797ac1580d25b5ec48022a2151b6592572deeb977119d2baf8"
+      "fingerprint": "f00a3a389e808da23ab491866f881b477cfeeb98f323d55848192f2cc02efc8b"
     },
     {
       "path": ".claude/rules/codexmanager-workflow.md",
@@ -109,19 +110,25 @@
       "path": ".cursor/rules/codexmanager-workflow.mdc",
       "target": "cursor",
       "managed": true,
-      "fingerprint": "44dbabc29bca8e33dadcef1766b1ad6e3539ddb4632787bed1c1931391740ca8"
+      "fingerprint": "f47d4dbe33d6ed525c5635c709a28ab22207cd5e8406e8ddaa7a4bf51574dc86"
     },
     {
       "path": ".cursor/rules/graph-first-orientation.mdc",
       "target": "cursor",
       "managed": true,
-      "fingerprint": "58a937a92d59e8aeb90f4446b897afae0b035e5032c57d83950678a216894c9b"
+      "fingerprint": "ad0f6fc5505acb6534347f83bd53f8d9202d14712229d290022ffed02a8545aa"
     },
     {
       "path": ".cursor/rules/review-validation.mdc",
       "target": "cursor",
       "managed": true,
-      "fingerprint": "26ae073be9d944be380e692479dd2c0014b2adba59b92b89f0e26d3bd63fe5e0"
+      "fingerprint": "89cb49224d5d827c841a696ff55ba5bec49577bd053da27f758bc5afcf2573fe"
+    },
+    {
+      "path": ".cursor/rules/generated-state.mdc",
+      "target": "cursor",
+      "managed": true,
+      "fingerprint": "30319dcc820e7ac03c09b6f99e957e3ccc8280575f774bcafb436d4d53ba63ec"
     },
     {
       "path": "docs/agent-adapters/jan/README.md",
@@ -133,19 +140,19 @@
       "path": "docs/agent-adapters/jan/system-prompt.md",
       "target": "jan",
       "managed": true,
-      "fingerprint": "6dfeef466337cf43662ec88634d300ecadbea671ffc352c2bca9f07e6f0e006c"
+      "fingerprint": "6f59b0602bb6e7f4d0a83d05ad6abe99600245e24d1d8dcd0545437264fbc153"
     },
     {
       "path": "docs/agent-adapters/ollama/system-prompt.md",
       "target": "ollama",
       "managed": true,
-      "fingerprint": "3a74496063345faa9f86ec1ad10d6be5ec9d0cece26e78562a23ce73070d3b0f"
+      "fingerprint": "01f5a50c84c20ec562cc5bd404b56e23de0d0bdf50694d7feabf0a074bfdbbc8"
     },
     {
       "path": "docs/agent-adapters/ollama/Modelfile",
       "target": "ollama",
       "managed": true,
-      "fingerprint": "e6176cd8666b13d8d8647de2b78b4c6a442d7cdb69edb67dee97f1de7b69a004"
+      "fingerprint": "99934a83475c8c26611cb38fd3c0feab496b6890b6f9f4b68b1e5b6be18a48df"
     },
     {
       "path": "docs/agent-adapters/generic/README.md",
@@ -157,7 +164,7 @@
       "path": "docs/agent-adapters/generic/system-prompt.md",
       "target": "generic",
       "managed": true,
-      "fingerprint": "417cf968e7b5e7a8561e271e1031086b109096f1b516476aa8de2ce7185c2b82"
+      "fingerprint": "7392954eac322b275f9e102b92bfa9f90d319bd953703151ffda06cb3d1e6cb5"
     }
   ]
 }

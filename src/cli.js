@@ -14,6 +14,8 @@ import {
   lintCommand,
   localIgnoreCommand,
   orientCommand,
+  preflightCommand,
+  prepareCommand,
   planApproveCommand,
   planAttachCommand,
   planCloseCommand,
@@ -24,6 +26,7 @@ import {
   planStatusCommand,
   planUpdateCommand,
   refreshGraphCommand,
+  refreshCommand,
   refreshMapCommand,
   scanCommand,
   statusCommand,
@@ -37,6 +40,8 @@ const COMMANDS = new Set([
   "plan-status",
   "status",
   "doctor",
+  "prepare",
+  "bootstrap",
   "adapters",
   "adapter-plan",
   "adapter-apply",
@@ -51,12 +56,15 @@ const COMMANDS = new Set([
   "plan-close",
   "apply",
   "check",
+  "preflight",
+  "review-diff",
   "eval",
   "graph",
   "orient",
   "graph-export",
   "graph-query",
   "lint",
+  "refresh",
   "refresh-graph",
   "refresh-map"
 ]);
@@ -124,6 +132,8 @@ export async function runCli(argv) {
     await statusCommand(common);
   } else if (command === "doctor") {
     await doctorCommand(common);
+  } else if (command === "prepare" || command === "bootstrap") {
+    await prepareCommand({ ...common, target: options.target, profile: options.profile });
   } else if (command === "adapters") {
     await adaptersCommand(common);
   } else if (command === "adapter-plan") {
@@ -158,18 +168,22 @@ export async function runCli(argv) {
     await applyCommand(common);
   } else if (command === "check") {
     await checkCommand(common);
+  } else if (command === "preflight" || command === "review-diff") {
+    await preflightCommand(common);
   } else if (command === "eval") {
     await evalCommand(common);
   } else if (command === "graph") {
     await graphCommand(common);
   } else if (command === "orient") {
-    await orientCommand({ ...common, task: options.task, limit: options.limit });
+    await orientCommand({ ...common, task: options.task, limit: options.limit, profile: options.profile });
   } else if (command === "graph-export") {
     await graphExportCommand({ ...common, format: options.format, includeSymbols: options.includeSymbols });
   } else if (command === "graph-query") {
     await graphQueryCommand({ ...common, file: options.files[0], symbol: options.symbol, limit: options.limit, depth: options.depth });
   } else if (command === "lint") {
     await lintCommand(common);
+  } else if (command === "refresh") {
+    await refreshCommand({ ...common, auto: options.auto, target: options.target, profile: options.profile });
   } else if (command === "refresh-graph") {
     await refreshGraphCommand(common);
   } else if (command === "refresh-map") {
@@ -212,6 +226,7 @@ function parseArgs(argv) {
     branch: undefined,
     base: undefined,
     syncBase: false,
+    auto: false,
     format: undefined,
     includeSymbols: false
   };
@@ -235,6 +250,8 @@ function parseArgs(argv) {
       options.help = true;
     } else if (value === "--sync-base") {
       options.syncBase = true;
+    } else if (value === "--auto") {
+      options.auto = true;
     } else if (value === "--include-symbols") {
       options.includeSymbols = true;
     } else if (value === "--repo") {
@@ -405,11 +422,11 @@ function validateOptions(command, options) {
   if (options.targetAgent && !planningCommands.includes(command)) {
     throw new Error("--target-agent is only supported for plan and plan-update");
   }
-  if (options.target && !["adapter-plan", "adapter-apply"].includes(command)) {
-    throw new Error("--target is only supported for adapter-plan and adapter-apply");
+  if (options.target && !["adapter-plan", "adapter-apply", "prepare", "bootstrap", "refresh"].includes(command)) {
+    throw new Error("--target is only supported for adapter-plan, adapter-apply, prepare, bootstrap, and refresh");
   }
-  if (options.profile && !["adapter-plan", "adapter-apply"].includes(command)) {
-    throw new Error("--profile is only supported for adapter-plan and adapter-apply");
+  if (options.profile && !["adapter-plan", "adapter-apply", "prepare", "bootstrap", "refresh", "orient"].includes(command)) {
+    throw new Error("--profile is only supported for adapter-plan, adapter-apply, prepare, bootstrap, refresh, and orient");
   }
   if (options.symbol && command !== "graph-query") {
     throw new Error("--symbol is only supported for graph-query");
@@ -453,6 +470,9 @@ function validateOptions(command, options) {
   if (options.syncBase && command !== "plan-start") {
     throw new Error("--sync-base is only supported for plan-start");
   }
+  if (options.auto && command !== "refresh") {
+    throw new Error("--auto is only supported for refresh");
+  }
 }
 
 function hasAny(values) {
@@ -469,6 +489,11 @@ Usage:
   codex-prep plan-status [--repo <path>] [--json]
   codex-prep status [--repo <path>] [--json]
   codex-prep doctor [--repo <path>] [--json]
+  codex-prep prepare [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
+  codex-prep bootstrap [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
+  codex-prep refresh [--repo <path>] [--auto] [--target <name|all>] [--profile short|standard|deep] [--json]
+  codex-prep preflight [--repo <path>] [--json]
+  codex-prep review-diff [--repo <path>] [--json]
   codex-prep adapters [--json]
   codex-prep adapter-plan [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
   codex-prep adapter-apply [--repo <path>] [--target <name|all>] [--profile short|standard|deep] [--json]
@@ -482,7 +507,7 @@ Usage:
   codex-prep plan-start [--repo <path>] --branch <name> [--base main] [--sync-base]
   codex-prep plan-close [--repo <path>] --status <implemented|superseded|rejected>
   codex-prep graph [--repo <path>] [--json]
-  codex-prep orient [--repo <path>] --task <text> [--limit <n>] [--json]
+  codex-prep orient [--repo <path>] --task <text> [--profile short|standard|deep] [--limit <n>] [--json]
   codex-prep graph-export [--repo <path>] --format obsidian [--include-symbols] [--json]
   codex-prep graph-query [--repo <path>] (--file <path>|--symbol <name>) [--limit <n>] [--depth <n>] [--json]
   codex-prep refresh-graph [--repo <path>] [--json]
@@ -494,6 +519,11 @@ Commands:
   plan-status  Show the active saved plan.
   status       Show plan, branch, graph, dashboard, and validation state.
   doctor       Diagnose missing or stale workflow artifacts.
+  prepare      Run first-time core repo setup: local ignore, apply, graph export, and handoff.
+  bootstrap    Alias for prepare.
+  refresh      Preview stale generated state, or update it with --auto.
+  preflight    Show changed files, likely tests, stale state, validation freshness, and next actions.
+  review-diff  Alias for preflight.
   adapters     List supported agent adapter targets and their capabilities.
   adapter-plan Preview Claude, Cursor, Jan, Ollama, and generic adapter outputs.
   adapter-apply
@@ -545,11 +575,11 @@ Planning options:
   --risk TEXT     Set plan risk: low, medium, or high.
   --target-agent TEXT
                   Set target agent: codex, cursor, claude-code, jan, ollama, or generic.
-  --target TEXT  Adapter target for adapter-plan or adapter-apply: all, claude-code, cursor, jan, ollama, or generic.
-  --profile TEXT Adapter context profile: short, standard, or deep.
+  --target TEXT  Adapter target for adapter-plan, adapter-apply, or opt-in prepare/refresh: all, claude-code, cursor, jan, ollama, or generic.
+  --profile TEXT Context profile for adapters, opt-in prepare/refresh adapters, or orient: short, standard, or deep.
   --symbol TEXT   Symbol name for graph-query.
   --task TEXT     Task description for orient.
-  --limit N       Limit orient or graph-query output. orient defaults to 8.
+  --limit N       Limit orient or graph-query output. orient defaults by profile: short 4, standard 8, deep 14.
   --depth N       Neighbor traversal depth for graph-query --file. Defaults to 1.
   --format TEXT   Export format for graph-export. Currently: obsidian.
   --include-symbols
@@ -557,13 +587,16 @@ Planning options:
   --branch TEXT   Branch name for plan-start.
   --base TEXT     Base branch for plan-start. Defaults to main.
   --sync-base     With plan-start, fetch and fast-forward pull the base first.
+  --auto          With refresh, apply the proposed stale generated-state updates.
   --status TEXT   Set plan status with plan-update or plan-close.
 
 Defaults:
   The current working directory is used when --repo is omitted.
   No command uses network access unless plan-start --sync-base is used.
   local-ignore writes only .git/info/exclude and does not edit repo-tracked files.
-  scan, adapters, adapter-plan, check, eval, lint, orient, graph-query, plan-review, and plan-lint do not edit repo-tracked files.
+  prepare does not write external agent adapter files unless --target is supplied.
+  refresh only proposes adapter updates when adapter files already exist or --target is supplied.
+  scan, adapters, adapter-plan, check, eval, lint, orient, graph-query, refresh without --auto, preflight, review-diff, plan-review, and plan-lint do not edit repo-tracked files.
   plan autosaves reviewable planning files, but it never approves implementation.
 `);
 }

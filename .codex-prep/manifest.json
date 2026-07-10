@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-08T14:36:36.384Z",
-  "fingerprint": "7aa48b4a3fe231a680cfed0955a9640e7d8c4202604046c44d80398926ba404b",
+  "generatedAt": "2026-07-09T23:36:32.056Z",
+  "fingerprint": "eb793eeba4a7c608d44471146e4134e1b2b4e9b7669f77493dbbb41a8e3924d9",
   "repo": {
     "root": ".",
     "name": "CodexManager",
@@ -10,11 +10,15 @@
   "summary": "Detected JavaScript repo with 4 command(s); source roots: src.",
   "discovery": {
     "topLevel": [
+      ".claude",
+      ".cursor",
       ".gitattributes",
       ".github",
+      "CLAUDE.md",
       "README.md",
       "bin",
       "codex-prep.cmd",
+      "docs",
       "package.json",
       "src",
       "test"
@@ -62,13 +66,23 @@
       "bin/codex-prep.js"
     ],
     "docs": [
-      "README.md"
+      "README.md",
+      "docs/AGENT_HANDOFF.md",
+      "docs/agent-adapters/generic/README.md",
+      "docs/agent-adapters/generic/system-prompt.md",
+      "docs/agent-adapters/jan/README.md",
+      "docs/agent-adapters/jan/system-prompt.md",
+      "docs/agent-adapters/ollama/system-prompt.md"
     ],
     "ci": [
       ".github/workflows/verify.yml"
     ],
     "workspacePackages": [],
-    "architectureDocs": [],
+    "architectureDocs": [
+      "docs/agent-adapters/generic/system-prompt.md",
+      "docs/agent-adapters/jan/system-prompt.md",
+      "docs/agent-adapters/ollama/system-prompt.md"
+    ],
     "importantFiles": [
       "README.md",
       "package.json"

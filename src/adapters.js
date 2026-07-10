@@ -265,29 +265,35 @@ function buildCursorFiles(manifest, graph, state, profile) {
     managedFile({
       path: ".cursor/rules/codexmanager-workflow.mdc",
       target: "cursor",
-      reason: "Always-on Cursor rule for CodexManager planning, approval, and resume boundaries.",
+      reason: "Always-on Cursor rule for CodexManager safety boundaries and lifecycle state.",
       content: `---
 alwaysApply: true
-description: Follow CodexManager repo workflow, approval boundaries, and handoff state.
+description: Follow CodexManager approval boundaries and repo lifecycle state.
 ---
 
 # CodexManager Workflow
+
+- Run codex-prep status before implementation work.
+- Treat plans, branch creation, file edits, commits, pushes, installs, migrations, deployments, and destructive actions as separate permissions.
+- Use codex-prep doctor when plan, branch, graph, validation, adapter, or handoff state looks inconsistent.
+- Prefer codex-prep preflight before commit or merge discussions.
 
 ${prompt}`
     }),
     managedFile({
       path: ".cursor/rules/graph-first-orientation.mdc",
       target: "cursor",
-      reason: "Cursor rule that prefers graph-backed orientation before broad file reads.",
+      reason: "Scoped Cursor rule that prefers graph-backed orientation for source work.",
       content: `---
 alwaysApply: false
-description: Use graph-first orientation when locating files, symbols, entrypoints, or related tests.
-globs: "**/*"
+description: Use graph-first orientation when locating source files, symbols, imports, dependents, entrypoints, or related tests.
+globs: "{src,lib,app,packages,bin}/**/*"
 ---
 
 # Graph-First Orientation
 
 - Start with codex-prep orient --task "<task>".
+- Use --profile short for small fixes, standard for normal work, and deep for architecture or cross-cutting changes.
 - Follow the returned reading list before opening unrelated files.
 - Use codex-prep graph-query --file <path> for imports, dependents, symbols, and nearby tests.
 - Use codex-prep graph-query --symbol <name> when the task starts from an identifier.`
@@ -295,11 +301,11 @@ globs: "**/*"
     managedFile({
       path: ".cursor/rules/review-validation.mdc",
       target: "cursor",
-      reason: "Cursor rule for repo-aware reviews and validation memory.",
+      reason: "Scoped Cursor rule for tests, review, and validation memory.",
       content: `---
 alwaysApply: false
-description: Use CodexManager validation memory and repo rules when reviewing or finishing changes.
-globs: "{src,test,tests,docs}/**/*"
+description: Use CodexManager validation memory and repo rules when reviewing, testing, or finishing changes.
+globs: "{test,tests,spec,e2e,src,lib,app,packages}/**/*"
 ---
 
 # Review And Validation
@@ -307,7 +313,24 @@ globs: "{src,test,tests,docs}/**/*"
 - Lead reviews with bugs, regressions, missing tests, unsafe assumptions, and stale guidance.
 - Run or name detected validation commands before claiming work is done.
 - Record meaningful validation with codex-prep validation-record.
-- Use codex-prep doctor when plan, branch, graph, handoff, or adapter state looks inconsistent.`
+- Use codex-prep preflight to connect changed files, likely tests, stale generated state, and validation freshness.`
+    }),
+    managedFile({
+      path: ".cursor/rules/generated-state.mdc",
+      target: "cursor",
+      reason: "Scoped Cursor rule for CodexManager generated docs and state artifacts.",
+      content: `---
+alwaysApply: false
+description: Keep CodexManager generated state reviewable and refreshed when docs or generated artifacts change.
+globs: "{docs,.codex-prep,.agents,.cursor,.claude}/**/*"
+---
+
+# Generated State
+
+- Generated docs, adapter files, graph export, and handoff are projections of repo evidence.
+- Preview stale updates with codex-prep refresh.
+- Apply stale updates with codex-prep refresh --auto only when file changes are authorized.
+- Do not hand-edit managed sections unless the user explicitly asks for that local change.`
     })
   ];
 }
@@ -405,9 +428,14 @@ function sharedPrompt(manifest, graph, state, profile) {
     `- Context profile: ${profile}`,
     `- First read: AGENTS.md, then ${handoffPath}, then docs/CODEBASE_MAP.md.`,
     "- First command for live state: codex-prep status.",
+    "- First command for new repo setup: codex-prep prepare.",
+    "- Optional adapter setup: codex-prep adapter-apply --target all.",
     "- First command for locating files: codex-prep orient --task \"<task>\".",
     "- Focused follow-up: codex-prep graph-query --file <path> or --symbol <name>.",
     "- Troubleshooting command: codex-prep doctor.",
+    "- Stale generated-state preview: codex-prep refresh.",
+    "- Authorized stale generated-state update: codex-prep refresh --auto.",
+    "- Pre-commit/pre-merge readiness check: codex-prep preflight.",
     "- Validation memory command: codex-prep validation-record --validation-command \"<command>\" --result <pass|fail> --summary \"<summary>\".",
     "- Editing, committing, pushing, dependency installs, migrations, deployments, and destructive actions require separate explicit approval.",
     `- Detected validation commands: ${commands.length > 0 ? commands.map((command) => command.command).join("; ") : "none detected"}.`,

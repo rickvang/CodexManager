@@ -2,8 +2,8 @@ import { execFile } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
-import { ADAPTERS_MANIFEST_PATH, HANDOFF_PATH, buildAdapterBundle, buildHandoffFile, listAdapters } from "./adapters.js";
-import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, orientCodeGraph, queryCodeGraph, readCodeGraphIfExists } from "./codegraph.js";
+import { ADAPTERS_MANIFEST_PATH, HANDOFF_PATH, buildAdapterBundle, buildHandoffFile, listAdapters, validateContextProfile } from "./adapters.js";
+import { CODEGRAPH_PATH, buildCodeGraph, loadOrBuildCodeGraph, orientCodeGraph, queryCodeGraph, readCodeGraphIfExists, validateOrientProfile } from "./codegraph.js";
 import { CONFIG_PATH, loadConfig, writeDefaultConfigIfMissing } from "./config.js";
 import { buildBundle, buildManagedSection, MANAGED_FILES } from "./generate.js";
 import {
@@ -54,6 +54,7 @@ const DEFAULT_APPROVAL_BOUNDARIES = [
   "File edit approval does not authorize commit or push.",
   "Dependency installs, migrations, deployments, and destructive commands require separate explicit approval."
 ];
+const VALIDATION_COMMAND_PATTERN = /\b(test|verify|lint|check|build|eval|typecheck|e2e|playwright)\b/i;
 
 export async function scanCommand({ root, json }) {
   const manifest = await scanRepo(root);
@@ -234,13 +235,19 @@ export async function validationRecordCommand({ root, json, validationCommand, v
     throw new Error("validation-record --result must be pass or fail");
   }
 
+  const git = await readGitState(root);
   const entry = {
     schemaVersion: 1,
     recordedAt: (now ?? new Date()).toISOString(),
     command: validationCommand,
     result: resultValue,
     phase: phase || "validation",
-    summary: summary || `${validationCommand} ${resultValue}`
+    summary: summary || `${validationCommand} ${resultValue}`,
+    git: git.isGitRepo ? {
+      branchName: git.branchName,
+      headCommit: git.headCommit,
+      dirtyFiles: git.dirtyFiles
+    } : { isGitRepo: false }
   };
   const write = await appendValidationResult(root, entry);
   const memory = await readValidationMemory(root);
@@ -489,15 +496,7 @@ export async function graphCommand({ root, json }) {
 }
 
 export async function refreshGraphCommand({ root, json }) {
-  const manifest = await scanRepo(root);
-  const previousGraph = await readPreviousCodeGraph(root);
-  const graph = await buildCodeGraph(root, { manifest });
-  const graphResult = await writeJsonIfChanged(path.join(root, CODEGRAPH_PATH), finalizeCodeGraph(graph, previousGraph));
-  const result = {
-    repo: graph.repo,
-    graph: graph.summary,
-    writes: [{ path: CODEGRAPH_PATH, changed: graphResult.changed, mode: "managed-json" }]
-  };
+  const result = await writeRefreshGraphResult(root);
 
   if (json) {
     printJson(result);
@@ -508,12 +507,25 @@ export async function refreshGraphCommand({ root, json }) {
   return result;
 }
 
-export async function orientCommand({ root, json, task, limit }) {
+async function writeRefreshGraphResult(root) {
+  const manifest = await scanRepo(root);
+  const previousGraph = await readPreviousCodeGraph(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const graphResult = await writeJsonIfChanged(path.join(root, CODEGRAPH_PATH), finalizeCodeGraph(graph, previousGraph));
+  return {
+    repo: graph.repo,
+    graph: graph.summary,
+    writes: [{ path: CODEGRAPH_PATH, changed: graphResult.changed, mode: "managed-json" }]
+  };
+}
+
+export async function orientCommand({ root, json, task, limit, profile }) {
   const manifest = await scanRepo(root);
   const { graph, source } = await loadOrBuildCodeGraph(root, { manifest });
   const result = orientCodeGraph(graph, {
     task,
     limit,
+    profile,
     source,
     commands: manifest.discovery.commands
   });
@@ -541,20 +553,7 @@ export async function graphQueryCommand({ root, json, file, symbol, limit, depth
 }
 
 export async function graphExportCommand({ root, json, format = "obsidian", includeSymbols = false }) {
-  if (format !== "obsidian") {
-    throw new Error("graph-export currently supports --format obsidian");
-  }
-
-  const { graph, source } = await loadOrBuildCodeGraph(root);
-  const manifest = (await readJsonIfExists(path.join(root, '.codex-prep', 'manifest.json'))) ?? await scanRepo(root);
-  const activePlan = await readJsonIfExists(path.join(root, ACTIVE_PLAN_PATH));
-  const validationState = await readValidationMemory(root);
-  const exportResult = await exportObsidianGraph(root, graph, { includeSymbols, manifest, activePlan, validationState });
-  const result = {
-    repo: graph.repo,
-    source,
-    ...exportResult
-  };
+  const result = await writeGraphExportResult(root, { format, includeSymbols });
 
   if (json) {
     printJson(result);
@@ -563,6 +562,23 @@ export async function graphExportCommand({ root, json, format = "obsidian", incl
 
   console.log(formatGraphExport(result));
   return result;
+}
+
+async function writeGraphExportResult(root, { format = "obsidian", includeSymbols = false } = {}) {
+  if (format !== "obsidian") {
+    throw new Error("graph-export currently supports --format obsidian");
+  }
+
+  const { graph, source } = await loadOrBuildCodeGraph(root);
+  const manifest = (await readJsonIfExists(path.join(root, ".codex-prep", "manifest.json"))) ?? await scanRepo(root);
+  const activePlan = await readJsonIfExists(path.join(root, ACTIVE_PLAN_PATH));
+  const validationState = await readValidationMemory(root);
+  const exportResult = await exportObsidianGraph(root, graph, { includeSymbols, manifest, activePlan, validationState });
+  return {
+    repo: graph.repo,
+    source,
+    ...exportResult
+  };
 }
 
 
@@ -595,6 +611,18 @@ export async function adapterPlanCommand({ root, json, target = "all", profile =
 }
 
 export async function adapterApplyCommand({ root, json, target = "all", profile = "standard" }) {
+  const result = await writeAdapterApplyResult(root, { target, profile });
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatAdapterApply(result));
+  return result;
+}
+
+async function writeAdapterApplyResult(root, { target = "all", profile = "standard" } = {}) {
   const manifest = await scanRepo(root);
   const graph = await buildCodeGraph(root, { manifest });
   const state = await buildControlState(root, { manifest, graph });
@@ -610,32 +638,11 @@ export async function adapterApplyCommand({ root, json, target = "all", profile 
   const manifestResult = await writeJsonIfChanged(path.join(root, ADAPTERS_MANIFEST_PATH), bundle.manifest);
   writes.push({ path: ADAPTERS_MANIFEST_PATH, changed: manifestResult.changed, mode: "managed-json", target: "adapter-manifest" });
 
-  const result = buildAdapterResult(manifest, bundle, writes);
-
-  if (json) {
-    printJson(result);
-    return result;
-  }
-
-  console.log(formatAdapterApply(result));
-  return result;
+  return buildAdapterResult(manifest, bundle, writes);
 }
 
 export async function handoffCommand({ root, json }) {
-  const manifest = await scanRepo(root);
-  const graph = await buildCodeGraph(root, { manifest });
-  const state = assumePostHandoffState(await buildControlState(root, { manifest, graph }));
-  const file = buildHandoffFile(manifest, graph, state);
-  const write = await writeManagedFile(root, file.path, file.content);
-  const result = {
-    repo: manifest.repo,
-    handoff: {
-      path: file.path,
-      fingerprint: state.handoff.fingerprint,
-      stale: false
-    },
-    writes: [{ path: file.path, changed: write.changed, mode: file.mode }]
-  };
+  const result = await writeHandoffResult(root);
 
   if (json) {
     printJson(result);
@@ -644,6 +651,343 @@ export async function handoffCommand({ root, json }) {
 
   console.log(formatHandoff(result));
   return result;
+}
+
+async function writeHandoffResult(root) {
+  const manifest = await scanRepo(root);
+  const graph = await buildCodeGraph(root, { manifest });
+  const state = assumePostHandoffState(await buildControlState(root, { manifest, graph }));
+  const file = buildHandoffFile(manifest, graph, state);
+  const write = await writeManagedFile(root, file.path, file.content);
+  return {
+    repo: manifest.repo,
+    handoff: {
+      path: file.path,
+      fingerprint: state.handoff.fingerprint,
+      stale: false
+    },
+    writes: [{ path: file.path, changed: write.changed, mode: file.mode }]
+  };
+}
+export async function prepareCommand({ root, json, target, profile = "standard" }) {
+  const adapterTarget = normalizeOptionalAdapterTarget(target);
+  const contextProfile = adapterTarget ? validateContextProfile(profile) : "core";
+  const operations = [];
+
+  const localIgnore = await ensureLocalStateIgnored(root);
+  operations.push({
+    id: "local-ignore",
+    command: "codex-prep local-ignore",
+    reason: "Keep local CodexManager plan and validation memory out of git status.",
+    writes: [{ path: localIgnore.path, changed: localIgnore.changed, mode: "local-git-exclude" }]
+  });
+  operations.push(await runLifecycleOperation("apply", "codex-prep apply", "Write the base CodexManager onboarding bundle, manifest, dashboard, and code graph.", () => writeApplyResult(root)));
+  operations.push(await runLifecycleOperation("graph-export", "codex-prep graph-export --format obsidian", "Write the Obsidian workflow/code graph adapter from the current graph.", () => writeGraphExportResult(root, { format: "obsidian", includeSymbols: false })));
+  if (adapterTarget) {
+    operations.push(await runLifecycleOperation("adapter-apply", `codex-prep adapter-apply --target ${adapterTarget} --profile ${contextProfile}`, "Write selected multi-agent adapter files.", () => writeAdapterApplyResult(root, { target: adapterTarget, profile: contextProfile })));
+  }
+  operations.push(await runLifecycleOperation("handoff", "codex-prep handoff", "Write a reconnect/resume packet after generated state is current.", () => writeHandoffResult(root)));
+
+  const state = await buildControlState(root);
+  const result = {
+    repo: state.repo,
+    target: adapterTarget || "core",
+    profile: contextProfile,
+    operations,
+    status: buildStatusResult(state),
+    nextAction: state.nextAction
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPrepare(result));
+  return result;
+}
+
+export async function refreshCommand({ root, json, auto = false, target, profile = "standard" }) {
+  const requestedTarget = normalizeOptionalAdapterTarget(target);
+  const state = await buildControlState(root);
+  const adapterOptions = resolveRefreshAdapterOptions(state, { target: requestedTarget, profile });
+  const proposed = buildRefreshPlan(state, adapterOptions);
+  const operations = [];
+
+  if (auto) {
+    for (const item of proposed.operations) {
+      operations.push(await runRefreshOperation(root, item, adapterOptions));
+    }
+  }
+
+  const finalState = auto ? await buildControlState(root) : state;
+  const result = {
+    repo: state.repo,
+    auto,
+    proposed: proposed.operations,
+    operations,
+    status: buildStatusResult(finalState),
+    nextAction: finalState.nextAction
+  };
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatRefresh(result));
+  return result;
+}
+
+export async function preflightCommand({ root, json }) {
+  const manifest = await scanRepo(root);
+  const { graph, source } = await loadOrBuildCodeGraph(root, { manifest });
+  const state = await buildControlState(root, { manifest, graph });
+  const result = buildPreflightResult(state, graph, source, manifest);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatPreflight(result));
+  return result;
+}
+
+function normalizeOptionalAdapterTarget(target) {
+  if (target === undefined || target === null || String(target).trim() === "") {
+    return "";
+  }
+  return String(target).trim();
+}
+
+function resolveRefreshAdapterOptions(state, { target, profile = "standard" } = {}) {
+  if (target) {
+    return { target, profile: validateContextProfile(profile) };
+  }
+  if (!state.adapters?.exists) {
+    return { target: "", profile: "core" };
+  }
+
+  const existingTarget = state.adapters.targets?.length > 0 ? state.adapters.targets.join(",") : "all";
+  let existingProfile = state.adapters.contextProfile || "standard";
+  try {
+    existingProfile = validateContextProfile(existingProfile);
+  } catch {
+    existingProfile = validateContextProfile(profile);
+  }
+
+  return { target: existingTarget, profile: existingProfile };
+}
+
+async function runLifecycleOperation(id, command, reason, callback) {
+  const result = await callback();
+  return {
+    id,
+    command,
+    reason,
+    writes: result.writes ?? [],
+    result: summarizeOperationResult(result)
+  };
+}
+
+async function runRefreshOperation(root, item, options) {
+  if (item.id === "local-ignore") {
+    const result = await ensureLocalStateIgnored(root);
+    return {
+      ...item,
+      writes: [{ path: result.path, changed: result.changed, mode: "local-git-exclude" }],
+      result: { changed: result.changed }
+    };
+  }
+  if (item.id === "apply") {
+    return runLifecycleOperation(item.id, item.command, item.reason, () => writeApplyResult(root));
+  }
+  if (item.id === "refresh-graph") {
+    return runLifecycleOperation(item.id, item.command, item.reason, () => writeRefreshGraphResult(root));
+  }
+  if (item.id === "graph-export") {
+    return runLifecycleOperation(item.id, item.command, item.reason, () => writeGraphExportResult(root, { format: "obsidian", includeSymbols: false }));
+  }
+  if (item.id === "adapter-apply") {
+    return runLifecycleOperation(item.id, item.command, item.reason, () => writeAdapterApplyResult(root, { target: options.target, profile: options.profile }));
+  }
+  if (item.id === "handoff") {
+    return runLifecycleOperation(item.id, item.command, item.reason, () => writeHandoffResult(root));
+  }
+  throw new Error(`unknown refresh operation ${item.id}`);
+}
+
+function buildRefreshPlan(state, { target, profile = "standard" } = {}) {
+  const missingManaged = state.generated.files.filter((file) => !file.exists).map((file) => file.path);
+  const adapterFilesMissing = (state.adapters.generatedFiles ?? []).filter((file) => !file.exists).map((file) => file.path);
+  const applyNeeded = !state.manifest.exists || state.manifest.stale || missingManaged.length > 0 || !state.generated.dashboard.exists;
+  const graphNeeded = !applyNeeded && (!state.graph.exists || state.graph.invalid || state.graph.stale);
+  const graphWillChange = applyNeeded || graphNeeded;
+  const obsidianNeeded = !state.generated.obsidian.exists || state.generated.obsidian.stale || graphWillChange;
+  const adapterOptIn = Boolean(target) || state.adapters.exists;
+  const adapterNeeded = adapterOptIn && (!state.adapters.exists || state.adapters.invalid || state.adapters.stale || adapterFilesMissing.length > 0 || graphWillChange);
+  const handoffNeeded = !state.handoff.exists || state.handoff.stale || graphWillChange || adapterNeeded;
+  const operations = [];
+
+  if (state.git.localStateFiles.length > 0) {
+    operations.push(refreshOperation("local-ignore", "codex-prep local-ignore", "Local CodexManager state is visible in git status."));
+  }
+  if (applyNeeded) {
+    operations.push(refreshOperation("apply", "codex-prep apply", refreshReason([
+      !state.manifest.exists && "manifest missing",
+      state.manifest.stale && "manifest stale",
+      missingManaged.length > 0 && `managed files missing: ${missingManaged.join(", ")}`,
+      !state.generated.dashboard.exists && "dashboard missing"
+    ])));
+  }
+  if (graphNeeded) {
+    operations.push(refreshOperation("refresh-graph", "codex-prep refresh-graph", refreshReason([
+      !state.graph.exists && "code graph missing",
+      state.graph.invalid && "code graph invalid",
+      state.graph.stale && "code graph stale"
+    ])));
+  }
+  if (obsidianNeeded) {
+    operations.push(refreshOperation("graph-export", "codex-prep graph-export --format obsidian", refreshReason([
+      !state.generated.obsidian.exists && "Obsidian index missing",
+      state.generated.obsidian.stale && "Obsidian index stale",
+      graphWillChange && "graph-backed adapter should follow refreshed graph"
+    ])));
+  }
+  if (adapterNeeded) {
+    operations.push(refreshOperation("adapter-apply", `codex-prep adapter-apply --target ${target || "all"} --profile ${profile}`, refreshReason([
+      !state.adapters.exists && "adapter manifest missing",
+      state.adapters.invalid && "adapter manifest invalid",
+      state.adapters.stale && "adapter output stale",
+      adapterFilesMissing.length > 0 && `adapter files missing: ${adapterFilesMissing.join(", ")}`,
+      graphWillChange && "adapter context should follow refreshed graph"
+    ])));
+  }
+  if (handoffNeeded) {
+    operations.push(refreshOperation("handoff", "codex-prep handoff", refreshReason([
+      !state.handoff.exists && "handoff missing",
+      state.handoff.stale && "handoff stale",
+      graphWillChange && "handoff should follow refreshed graph",
+      adapterNeeded && "handoff should follow refreshed adapters"
+    ])));
+  }
+
+  return { operations };
+}
+
+function refreshOperation(id, command, reason) {
+  return { id, command, reason };
+}
+
+function refreshReason(reasons) {
+  return reasons.filter(Boolean).join("; ") || "Generated state is stale.";
+}
+
+function buildPreflightResult(state, graph, source, manifest) {
+  const dirtyFiles = state.git.dirtyFiles ?? [];
+  const graphFilesByPath = new Map((graph.files ?? []).map((file) => [file.path, file]));
+  const likelyTests = collectLikelyTests(dirtyFiles, graphFilesByPath);
+  const validationCommands = detectedValidationCommands(manifest.discovery.commands);
+  const staleState = {
+    manifest: state.manifest.stale,
+    graph: state.graph.stale || state.graph.invalid || !state.graph.exists,
+    dashboard: !state.generated.dashboard.exists,
+    obsidian: !state.generated.obsidian.exists || state.generated.obsidian.stale,
+    adapters: !state.adapters.exists || state.adapters.invalid || state.adapters.stale,
+    handoff: !state.handoff.exists || state.handoff.stale,
+    validation: Boolean(state.validation.stale)
+  };
+  const riskAreas = buildPreflightRiskAreas(state, dirtyFiles, staleState);
+  const nextActions = buildPreflightNextActions({ state, dirtyFiles, likelyTests, validationCommands, staleState });
+
+  return {
+    repo: state.repo,
+    branch: state.git.branchName || "",
+    graphSource: source,
+    dirtyFiles,
+    localStateFiles: state.git.localStateFiles ?? [],
+    likelyTests,
+    validationCommands,
+    latestValidation: state.validation.latest ?? null,
+    validationFreshness: state.validation.freshness,
+    staleState,
+    riskAreas,
+    nextActions
+  };
+}
+
+function collectLikelyTests(dirtyFiles, graphFilesByPath) {
+  const tests = new Set();
+  for (const filePath of dirtyFiles) {
+    const file = graphFilesByPath.get(filePath);
+    if (!file) {
+      continue;
+    }
+    if (file.role === "test") {
+      tests.add(file.path);
+    }
+    for (const testRef of file.relatedTests ?? []) {
+      tests.add(testRef.path);
+    }
+  }
+  return [...tests].sort();
+}
+
+function detectedValidationCommands(commands = []) {
+  return commands
+    .filter((command) => VALIDATION_COMMAND_PATTERN.test(command.name ?? "") || VALIDATION_COMMAND_PATTERN.test(command.command ?? ""))
+    .map((command) => ({ name: command.name, command: command.command, source: command.source ?? "detected" }));
+}
+
+function buildPreflightRiskAreas(state, dirtyFiles, staleState) {
+  const risks = [];
+  if (dirtyFiles.length > 0) {
+    risks.push({ code: "PF001", level: "info", message: `${dirtyFiles.length} working-tree file(s) changed.` });
+  }
+  if (dirtyFiles.some((file) => /(^|\/)(package-lock\.json|pnpm-lock\.yaml|yarn\.lock|package\.json|pyproject\.toml|requirements.*\.txt|poetry\.lock)$/i.test(file))) {
+    risks.push({ code: "PF002", level: "warn", message: "Dependency, package, or command metadata changed." });
+  }
+  if (dirtyFiles.some((file) => file.startsWith(".github/workflows/") || /(^|\/)(deploy|deployment|migration|migrations|db|database)(\/|$)/i.test(file))) {
+    risks.push({ code: "PF003", level: "warn", message: "CI, deployment, migration, or database-adjacent files changed." });
+  }
+  if (Object.values(staleState).some(Boolean)) {
+    risks.push({ code: "PF004", level: "warn", message: "One or more generated workflow artifacts or validation records are stale." });
+  }
+  if ((state.doctor.findings ?? []).some((finding) => finding.level === "error")) {
+    risks.push({ code: "PF005", level: "error", message: "Doctor has blocking findings that should be fixed before commit or merge." });
+  }
+  return risks;
+}
+
+function buildPreflightNextActions({ state, dirtyFiles, likelyTests, validationCommands, staleState }) {
+  const actions = [];
+  if (staleState.graph) {
+    actions.push("Run codex-prep refresh --auto or codex-prep refresh-graph before relying on graph results.");
+  }
+  if (staleState.adapters || staleState.handoff || staleState.obsidian || staleState.dashboard || staleState.manifest) {
+    actions.push("Run codex-prep refresh --auto to update generated workflow artifacts.");
+  }
+  if (dirtyFiles.length > 0 && likelyTests.length > 0) {
+    actions.push(`Run likely related tests: ${likelyTests.join(", ")}.`);
+  }
+  if (validationCommands.length > 0 && (dirtyFiles.length > 0 || state.validation.stale || !state.validation.latest)) {
+    actions.push(`Run validation: ${validationCommands.map((item) => item.command).join("; ")}.`);
+  }
+  if (!state.validation.latest || state.validation.stale) {
+    actions.push("Record the validation result with codex-prep validation-record.");
+  }
+  if (actions.length === 0) {
+    actions.push("No obvious preflight action is missing; review the diff and proceed with the normal approval boundary.");
+  }
+  return [...new Set(actions)];
+}
+
+function summarizeOperationResult(result) {
+  return {
+    writeCount: result.writes?.length ?? 0,
+    changedCount: (result.writes ?? []).filter((write) => write.changed).length
+  };
 }
 function buildPlanProposal(manifest, bundle, metadata = {}) {
   return {
@@ -1033,6 +1377,18 @@ async function runGit(root, args) {
 }
 
 export async function applyCommand({ root, json }) {
+  const result = await writeApplyResult(root);
+
+  if (json) {
+    printJson(result);
+    return result;
+  }
+
+  console.log(formatApply(result));
+  return result;
+}
+
+async function writeApplyResult(root) {
   const previousManifest = await readJsonIfExists(path.join(root, ".codex-prep", "manifest.json"));
   const previousGraph = await readPreviousCodeGraph(root);
   const manifest = await scanRepo(root, { previousManifest });
@@ -1060,13 +1416,7 @@ export async function applyCommand({ root, json }) {
   writes.push(configWrite);
   writes.push({ path: ".codex-prep/manifest.json", changed: manifestResult.changed, mode: "managed-json" });
 
-  const result = { repo: manifest.repo, writes };
-  if (json) {
-    printJson(result);
-    return;
-  }
-
-  console.log(formatApply(result));
+  return { repo: manifest.repo, writes };
 }
 
 export async function checkCommand({ root, json }) {
@@ -1486,6 +1836,61 @@ function formatAdapterApply(result) {
   ].join("\n");
 }
 
+function formatPrepare(result) {
+  return [
+    `codex-prep prepare: ${result.repo.name}`,
+    "",
+    `Target: ${result.target}`,
+    `Profile: ${result.profile}`,
+    "Operations:",
+    ...result.operations.map(formatOperationLine),
+    "",
+    `Next action: ${result.nextAction}`
+  ].join("\n");
+}
+
+function formatRefresh(result) {
+  const title = result.auto ? "codex-prep refresh --auto" : "codex-prep refresh";
+  const lines = [
+    `${title}: ${result.repo.name}`,
+    "",
+    result.auto ? "Applied operations:" : "Proposed operations:",
+    ...(result.auto ? result.operations : result.proposed).map(formatOperationLine),
+    "",
+    `Next action: ${result.nextAction}`
+  ];
+  if (!result.auto && result.proposed.length > 0) {
+    lines.push("", "Run codex-prep refresh --auto to apply these updates.");
+  }
+  return lines.join("\n");
+}
+
+function formatPreflight(result) {
+  return [
+    `codex-prep preflight: ${result.repo.name}`,
+    "",
+    `Branch: ${result.branch || "none"}`,
+    `Graph source: ${result.graphSource}`,
+    "Changed files:",
+    ...formatList(result.dirtyFiles),
+    "Likely related tests:",
+    ...formatList(result.likelyTests),
+    "Validation commands:",
+    ...formatList(result.validationCommands.map((item) => `${item.command} (${item.source})`)),
+    `Validation freshness: ${result.validationFreshness?.current ? "current" : "stale"} - ${result.validationFreshness?.reason || "unknown"}`,
+    "Risk areas:",
+    ...formatList(result.riskAreas.map((item) => `[${item.level}] ${item.code}: ${item.message}`)),
+    "Next actions:",
+    ...formatList(result.nextActions)
+  ].join("\n");
+}
+
+function formatOperationLine(operation) {
+  const writes = operation.writes ?? [];
+  const changed = writes.filter((write) => write.changed).length;
+  const suffix = writes.length > 0 ? ` (${changed}/${writes.length} changed)` : "";
+  return `- ${operation.command}: ${operation.reason}${suffix}`;
+}
 function formatHandoff(result) {
   return [
     `codex-prep handoff: ${result.repo.name}`,
@@ -1525,6 +1930,7 @@ function formatOrient(result) {
     `codex-prep orient: ${result.task}`,
     "",
     `Source: ${result.source}`,
+    `Profile: ${result.profile || "standard"}`,
     `Context estimate: ${result.contextEstimate.selectedFiles}/${result.contextEstimate.totalGraphFiles} files, ${result.contextEstimate.estimatedSelectedTokens}/${result.contextEstimate.estimatedGraphTokens} est. tokens, ${result.contextEstimate.estimatedReductionPercent}% smaller than all indexed code`,
     "Reading list:",
     ...formatList(result.readingList.map((item) => `${item.path} [${item.confidence}] ${item.reasons.join("; ")}`)),
@@ -1685,7 +2091,10 @@ function buildStatusResult(state) {
       exists: state.validation.exists,
       path: state.validation.path,
       count: state.validation.entries.length,
-      latest: state.validation.latest
+      latest: state.validation.latest,
+      current: state.validation.current,
+      stale: state.validation.stale,
+      freshness: state.validation.freshness
     },
     doctor: state.doctor,
     nextAction: state.nextAction
@@ -1706,13 +2115,20 @@ function formatStatus(result) {
     `Obsidian index: ${result.generated.obsidian.exists ? (result.generated.obsidian.stale ? "stale" : "present") : "missing"}`,
     `Adapters: ${result.adapters.exists ? (result.adapters.stale ? "stale" : result.adapters.invalid ? "invalid" : `present (${result.adapters.targets.join(", ") || "none"})`) : "missing"}`,
     `Handoff: ${result.handoff.exists ? (result.handoff.stale ? "stale" : "present") : "missing"}`,
-    `Latest validation: ${result.validation.latest ? `${result.validation.latest.result} ${result.validation.latest.command}` : "none recorded"}`,
+    `Latest validation: ${formatValidationStatusLine(result.validation)}`,
     `Doctor: ${result.doctor.ok ? "ok" : "needs attention"} (${result.doctor.findings.length} findings)`,
     "",
     `Next action: ${result.nextAction}`
   ].join("\n");
 }
 
+function formatValidationStatusLine(validation) {
+  if (!validation.latest) {
+    return "none recorded";
+  }
+  const freshness = validation.stale ? `stale: ${validation.freshness?.reason || "unknown"}` : "current";
+  return `${validation.latest.result} ${validation.latest.command} (${freshness})`;
+}
 function formatDoctor(result) {
   return [
     `codex-prep doctor: ${result.ok ? "ok" : "needs attention"}`,
